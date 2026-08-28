@@ -96,6 +96,10 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
     builder.Services.AddSingleton<IIdentityVerifier, FakeIdentityVerifier>();
+
+    // Development only: lets the Expo web preview call the API from the Metro dev server.
+    // The mobile client is not a browser and never needs this.
+    builder.Services.AddCors(o => o.AddPolicy("dev", p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 }
 else
 {
@@ -125,6 +129,8 @@ app.Use(async (context, next) =>
 
 // No UseStaticFiles: photos are served by PhotosController so the per-host visibility rule
 // cannot be bypassed with a bare URL. See ADR-0006.
+if (app.Environment.IsDevelopment()) app.UseCors("dev");
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter(); // after authentication, so the partition can be keyed by user
