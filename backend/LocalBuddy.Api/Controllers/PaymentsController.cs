@@ -1,4 +1,5 @@
 using LocalBuddy.Api.Data;
+using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -7,37 +8,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LocalBuddy.Api.Controllers;
 
-public record SubscribeRequest(string PlanType); // monthly / yearly
-
 // GUIDELINES §2, non-negotiable: the platform only ever charges to unlock a contact.
 // Nothing here may ever take a cut of, or price, the exchange between two people.
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1")]
 [Authorize]
-public class PaymentsController(LocalBuddyDbContext db, IPaymentGateway gateway) : ControllerBase
+[Produces("application/json")]
+public class PaymentsController(
+    LocalBuddyDbContext db,
+    IPaymentGateway gateway,
+    ConversationService conversations) : ControllerBase
 {
-    const decimal UnlockPrice = 4.99m;
-    const int UnlockCreditCost = 1;
-
     /// Skip the mutual-match wait and open a chat directly — paid, or with earned credits.
-    [HttpPost("unlock/{targetId}")]
+    /// 201 when this call opened the conversation, 200 when it was already open and nothing
+    /// was charged.
+    [HttpPost("users/{targetId:guid}/unlock")]
+    [RequiresVerifiedIdentity]
+    [ProducesResponseType<UnlockResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<UnlockResult>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Unlock(Guid targetId)
     {
         var me = User.Id();
-        if (me == targetId) return BadRequest("Cannot unlock yourself");
+        if (me == targetId) return this.Invalid("self_target", "You cannot unlock yourself.");
 
         var user = await db.Users.FindAsync(me);
         if (user is null) return NotFound();
-        if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound("Target not found");
+        if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound();
+        if (await db.IsBlockedBetweenAsync(me, targetId))
+            return this.Invalid("blocked", "This member is not reachable.");
 
-        if (await db.Blocks.AnyAsync(b =>
-            (b.BlockerId == me && b.BlockedId == targetId) ||
-            (b.BlockerId == targetId && b.BlockedId == me)))
-            return BadRequest("Blocked");
-
-        var existing = await db.Conversations.FirstOrDefaultAsync(c =>
-            (c.UserAId == me && c.UserBId == targetId) || (c.UserAId == targetId && c.UserBId == me));
-        if (existing is not null) return Ok(new { conversationId = existing.Id, charged = "already open" });
+        // Never charge for a chat that is already open — a mutual match may have opened it free.
+        var (conversation, created) = await conversations.OpenAsync(me, targetId, unlockedByPayment: true);
+        if (!created) return Ok(new UnlockResult(conversation.Id, "none"));
 
         var subscribed = await db.Subscriptions.AnyAsync(s =>
             s.UserId == me && s.Status == "active" && s.ExpiresAt > DateTime.UtcNow);
@@ -47,69 +51,66 @@ public class PaymentsController(LocalBuddyDbContext db, IPaymentGateway gateway)
         {
             charged = "subscription";
         }
-        else if (user.CreditsBalance >= UnlockCreditCost)
+        else if (user.CreditsBalance >= Pricing.UnlockCreditCost)
         {
             // GUIDELINES §4: credits earned by hosting, spent instead of cash.
-            user.CreditsBalance -= UnlockCreditCost;
+            user.CreditsBalance -= Pricing.UnlockCreditCost;
             charged = "credits";
         }
         else
         {
-            var stripeId = await gateway.ChargeOneTimeAsync(me, UnlockPrice);
+            var stripeId = await gateway.ChargeOneTimeAsync(me, Pricing.Unlock);
             db.Payments.Add(new Payment
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.CreateVersion7(),
                 UserId = me,
                 Type = PaymentType.OneTimeUnlock,
-                Amount = UnlockPrice,
+                Amount = Pricing.Unlock,
                 UnlockedUserId = targetId,
                 StripeId = stripeId
             });
             charged = "one-time";
         }
 
-        var conversation = new Conversation
-        {
-            Id = Guid.NewGuid(),
-            UserAId = me,
-            UserBId = targetId,
-            UnlockedByPayment = true
-        };
-        db.Conversations.Add(conversation);
-
         await db.SaveChangesAsync();
-        return Ok(new { conversationId = conversation.Id, charged });
+        return Created($"/api/v1/conversations/{conversation.Id}/messages",
+                       new UnlockResult(conversation.Id, charged));
     }
 
-    [HttpPost("subscribe")]
+    /// No Location header: there is no endpoint yet that serves a single subscription.
+    [HttpPost("subscriptions")]
+    [ProducesResponseType<SubscriptionDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Subscribe(SubscribeRequest req)
     {
-        if (req.PlanType is not ("monthly" or "yearly")) return BadRequest("Plan must be monthly or yearly");
+        if (req.PlanType is not ("monthly" or "yearly"))
+            return this.Invalid("unknown_plan", "Plan must be monthly or yearly.");
+        var monthly = req.PlanType == "monthly";
 
         var me = User.Id();
         var stripeId = await gateway.StartSubscriptionAsync(me, req.PlanType);
 
         var subscription = new Subscription
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             UserId = me,
             PlanType = req.PlanType,
             Status = "active",
-            ExpiresAt = DateTime.UtcNow.AddMonths(req.PlanType == "monthly" ? 1 : 12)
+            ExpiresAt = DateTime.UtcNow.AddMonths(monthly ? 1 : 12)
         };
 
         db.Subscriptions.Add(subscription);
         db.Payments.Add(new Payment
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             UserId = me,
             Type = PaymentType.Subscription,
-            Amount = req.PlanType == "monthly" ? 9.99m : 79.99m,
+            Amount = monthly ? Pricing.MonthlySubscription : Pricing.YearlySubscription,
             StripeId = stripeId
         });
 
         await db.SaveChangesAsync();
-        return Ok(subscription);
+        return StatusCode(StatusCodes.Status201Created, SubscriptionDto.From(subscription));
         // ponytail: no Stripe webhook yet — renewals and cancellations land here when
         // the real gateway replaces the stub.
     }

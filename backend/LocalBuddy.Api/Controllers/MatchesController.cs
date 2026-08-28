@@ -1,31 +1,40 @@
 using LocalBuddy.Api.Data;
+using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocalBuddy.Api.Controllers;
 
+/// Routed under users because interest and pass are things you do to a person, not a
+/// "matches" resource you create. Shares the prefix with UsersController; the templates
+/// do not overlap.
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/users")]
 [Authorize]
-public class MatchesController(LocalBuddyDbContext db) : ControllerBase
+[Produces("application/json")]
+public class MatchesController(LocalBuddyDbContext db, ConversationService conversations) : ControllerBase
 {
     /// Free path to a conversation: both sides express interest (GUIDELINES §3).
-    [HttpPost("interest/{targetId}")]
+    /// 201 with a Location when the interest was reciprocal and a chat opened, 200 otherwise.
+    [HttpPost("{targetId:guid}/interest")]
+    [RequiresVerifiedIdentity]
+    [ProducesResponseType<InterestResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<InterestResult>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Interest(Guid targetId)
     {
         var me = User.Id();
-        if (me == targetId) return BadRequest("Cannot match with yourself");
+        if (me == targetId) return this.Invalid("self_target", "You cannot express interest in yourself.");
         if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound();
-
-        if (await db.Blocks.AnyAsync(b =>
-            (b.BlockerId == me && b.BlockedId == targetId) ||
-            (b.BlockerId == targetId && b.BlockedId == me)))
-            return BadRequest("Blocked");
+        if (await db.IsBlockedBetweenAsync(me, targetId))
+            return this.Invalid("blocked", "This member is not reachable.");
 
         if (await db.Matches.AnyAsync(m => m.InitiatorId == me && m.TargetId == targetId))
-            return BadRequest("Already responded to this profile");
+            return this.Conflicted("already_responded", "You have already responded to this profile.");
 
         var theirs = await db.Matches.FirstOrDefaultAsync(m =>
             m.InitiatorId == targetId && m.TargetId == me && m.Status == MatchStatus.Pending);
@@ -33,7 +42,7 @@ public class MatchesController(LocalBuddyDbContext db) : ControllerBase
 
         db.Matches.Add(new Match
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             InitiatorId = me,
             TargetId = targetId,
             Status = matched ? MatchStatus.Matched : MatchStatus.Pending,
@@ -43,30 +52,41 @@ public class MatchesController(LocalBuddyDbContext db) : ControllerBase
         if (!matched)
         {
             await db.SaveChangesAsync();
-            return Ok(new { matched = false });
+            return Ok(new InterestResult(false, null));
         }
 
         // Reciprocal — open the chat.
         theirs!.Status = MatchStatus.Matched;
         theirs.MatchedAt = DateTime.UtcNow;
 
-        // ponytail: simultaneous mutual interest could race into two conversations.
-        // Vanishingly unlikely at MVP scale; add a unique index on the ordered pair if it bites.
-        var conversation = new Conversation { Id = Guid.NewGuid(), UserAId = me, UserBId = targetId };
-        db.Conversations.Add(conversation);
+        var (conversation, _) = await conversations.OpenAsync(me, targetId, unlockedByPayment: false);
 
         await db.SaveChangesAsync();
-        return Ok(new { matched = true, conversationId = conversation.Id });
+        return Created($"/api/v1/conversations/{conversation.Id}/messages",
+                       new InterestResult(true, conversation.Id));
     }
 
-    [HttpPost("pass/{targetId}")]
+    [HttpPost("{targetId:guid}/pass")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Pass(Guid targetId)
     {
         var me = User.Id();
+        if (me == targetId) return this.Invalid("self_target", "You cannot pass on yourself.");
+        // Without this the foreign key rejects the row and the caller gets a 500 instead of a 404.
+        if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound();
+
         if (await db.Matches.AnyAsync(m => m.InitiatorId == me && m.TargetId == targetId))
             return NoContent();
 
-        db.Matches.Add(new Match { Id = Guid.NewGuid(), InitiatorId = me, TargetId = targetId, Status = MatchStatus.Passed });
+        db.Matches.Add(new Match
+        {
+            Id = Guid.CreateVersion7(),
+            InitiatorId = me,
+            TargetId = targetId,
+            Status = MatchStatus.Passed
+        });
         await db.SaveChangesAsync();
         return NoContent();
     }

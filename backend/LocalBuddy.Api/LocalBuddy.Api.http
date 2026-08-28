@@ -1,6 +1,53 @@
-@LocalBuddy.Api_HostAddress = http://localhost:5200
+@host = http://localhost:5200/api/v1
 
-GET {{LocalBuddy.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register — 201, returns a token
+# @name register
+POST {{host}}/auth/register
+Content-Type: application/json
 
-###
+{ "email": "you@example.com", "password": "Passw0rd!", "name": "You", "city": "Milano", "role": "entrambi" }
+
+### Log in — 200
+# @name login
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{ "email": "you@example.com", "password": "Passw0rd!" }
+
+@token = {{login.response.body.token}}
+@me = {{login.response.body.userId}}
+
+### Your own profile — the only place email and credits appear
+GET {{host}}/users/me
+Authorization: Bearer {{token}}
+
+### Identity verification — required before contacting anybody (ADR-0007)
+POST {{host}}/users/me/verify
+Authorization: Bearer {{token}}
+
+### Discovery — paginated
+GET {{host}}/discovery?city=Milano&pageSize=20
+Authorization: Bearer {{token}}
+
+### Someone else public profile — readable anonymously only if they allowed it (ADR-0006)
+GET {{host}}/users/{{me}}
+Authorization: Bearer {{token}}
+
+### Express interest — 201 when it opens a chat, 200 when it does not
+POST {{host}}/users/{{me}}/interest
+Authorization: Bearer {{token}}
+
+### Block somebody — idempotent
+PUT {{host}}/users/{{me}}/block
+Authorization: Bearer {{token}}
+
+### Report somebody — 202, queued for a moderator
+POST {{host}}/reports
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "reportedId": "{{me}}", "reason": "why this account is a problem" }
+
+### Moderator queue — needs the moderator role
+GET {{host}}/moderation/reports?status=Open
+Authorization: Bearer {{token}}

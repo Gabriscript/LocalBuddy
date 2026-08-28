@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LocalBuddy.Api.Tests/LocalBuddy.Api.Tests.csproj" />
+  <Project Path="LocalBuddy.Api/LocalBuddy.Api.csproj" />
+</Solution>
