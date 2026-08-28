@@ -16,6 +16,7 @@ code; each one notes its original date.
 | [0006](0006-per-host-profile-visibility.md) | Per-host profile visibility, photos served through the API | accepted | 2026-08-28 |
 | [0007](0007-verified-identity-required-to-contact.md) | A verified identity is required to contact another member | accepted | 2026-08-28 |
 | [0008](0008-api-conventions.md) | API conventions: versioned paths, one error shape, paged collections | accepted | 2026-08-28 |
+| [0009](0009-frontend-expo-generated-client.md) | Front-end: Expo dev build, API client generated from OpenAPI | accepted | 2026-08-28 |
 
 ## Adding one
 
