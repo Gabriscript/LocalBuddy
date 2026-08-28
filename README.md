@@ -10,7 +10,7 @@ Inspired by long-standing reciprocal hospitality models like Servas Internationa
 
 ## Stack
 - Backend: C#, ASP.NET Core, EF Core, PostgreSQL
-- Mobile: React Native
+- Mobile: React Native on Expo (dev build), API client generated from the OpenAPI document
 
 Full product spec, legal constraints, and build plan: [GUIDELINES.md](GUIDELINES.md)
 
@@ -25,6 +25,43 @@ bash ../../smoke-test.sh                   # from the repo root
 ```
 
 Tests: `dotnet test` from `backend/`. They run against in-memory SQLite and need no Postgres.
+
+## Running the mobile app
+
+```bash
+cd mobile
+npm install
+npm start                 # then open the dev build on a device or simulator
+```
+
+The TypeScript API client is generated from the running backend, not written by hand:
+`npm run api:gen` with the API up on :5200. See [mobile/README.md](mobile/README.md).
+
+## Where the work stands
+
+The backend v1 is complete: every endpoint the product needs exists, and the reasoning behind
+the shape of it is recorded in [docs/adr](docs/adr/README.md).
+
+The mobile client covers the paths a member walks every day — sign in, register, the discovery
+feed, the expanded profile, interest and pass, the conversation list and a chat. What is left,
+in the order that keeps each piece on working foundations:
+
+1. **Onboarding steps 3 to 5** — guided prompts, photo upload, availability, and the TULPS /
+   Alloggiati Web acknowledgement before overnight hosting can be switched on.
+2. **The filter sheet.** The role chips work and write route params; city, time of day and the
+   three-state traits are not exposed yet.
+3. **Stripe Identity** in `/verify` — the first native module, and what forces the EAS dev build.
+4. **The paid unlock.** The control is already placed on the expanded profile, deliberately quiet
+   and apart from the free actions, and calls nothing.
+5. **Reviews, reports and blocking** — the endpoints exist, the screens do not.
+
+One deliberate loose end: the access token is a 30-day JWT with no refresh flow and no way to
+revoke it, so a lost device keeps its session past logout. The backend half and the client half
+of that are worth doing together.
+
+`Program.cs` carries a **Development-only CORS policy** so the Expo web target can reach the API
+during a browser preview. Nothing outside Development registers it; delete it the day the web
+preview stops being useful.
 
 ## Applying migrations on deploy
 
