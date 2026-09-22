@@ -21,10 +21,13 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
     {
         var me = User.Id();
         (page, pageSize) = Page<ConversationSummary>.Clamp(page, pageSize);
+        var blocked = db.BlockedIdsFor(me);
 
+        // A block ends the conversation for both sides, so it leaves both inboxes too.
         var rows = await db.Conversations
-            .Where(c => c.UserAId == me || c.UserBId == me)
-            .OrderByDescending(c => c.CreatedAt)
+            .Where(c => (c.UserAId == me && !blocked.Contains(c.UserBId)) ||
+                        (c.UserBId == me && !blocked.Contains(c.UserAId)))
+            .OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.Id)
             .Skip(page * pageSize)
             .Take(pageSize + 1) // one extra, to know whether another page exists
             .Select(c => new ConversationSummary(
@@ -52,7 +55,9 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
         var q = db.Messages.Where(m => m.ConversationId == id);
         if (since is not null) q = q.Where(m => m.SentAt > since); // client polls with the last timestamp it saw
 
-        var rows = await q.OrderBy(m => m.SentAt)
+        // Newest first: page 0 is what a chat screen opens on, and it is the order an inverted
+        // FlatList renders bottom-up. Oldest first left every message after the 20th unseen.
+        var rows = await q.OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                           .Skip(page * pageSize)
                           .Take(pageSize + 1)
                           .Select(m => MessageDto.From(m))
@@ -70,13 +75,24 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(req.Content))
             return this.Invalid("empty_message", "A message cannot be empty.");
-        if (!await IsParticipant(id)) return Forbid();
+
+        var me = User.Id();
+        var chat = await db.Conversations
+            .Where(c => c.Id == id && (c.UserAId == me || c.UserBId == me))
+            .Select(c => new { Other = c.UserAId == me ? c.UserBId : c.UserAId })
+            .FirstOrDefaultAsync();
+        if (chat is null) return Forbid();
+
+        // Blocking is the first safety tool a member reaches for: it has to stop the messages,
+        // whoever pressed the button.
+        if (await db.IsBlockedBetweenAsync(me, chat.Other))
+            return this.Invalid("blocked", "This member is not reachable.");
 
         var message = new Message
         {
             Id = Guid.CreateVersion7(),
             ConversationId = id,
-            SenderId = User.Id(),
+            SenderId = me,
             Content = req.Content
         };
 

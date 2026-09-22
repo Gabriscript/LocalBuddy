@@ -21,11 +21,15 @@ public class RequiresVerifiedIdentityAttribute : Attribute, IAsyncAuthorizationF
             await db.Users.AnyAsync(u => u.Id == id && u.IdentityVerified, context.HttpContext.RequestAborted))
             return;
 
-        context.Result = new ObjectResult(new
+        // The one error shape (ADR-0008), so the client can switch on the code and send the member
+        // to /verify rather than showing a generic refusal.
+        var problem = new ProblemDetails
         {
-            identityVerificationRequired = true,
-            detail = "Verify your identity before contacting other members."
-        })
-        { StatusCode = StatusCodes.Status403Forbidden };
+            Status = StatusCodes.Status403Forbidden,
+            Title = "Identity verification required",
+            Detail = "Verify your identity before contacting other members."
+        };
+        problem.Extensions["code"] = "identity_verification_required";
+        context.Result = new ObjectResult(problem) { StatusCode = StatusCodes.Status403Forbidden };
     }
 }

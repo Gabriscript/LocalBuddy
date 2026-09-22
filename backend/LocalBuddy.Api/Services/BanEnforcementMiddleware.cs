@@ -13,19 +13,33 @@ public class BanEnforcementMiddleware(RequestDelegate next)
     {
         if (context.User.Identity?.IsAuthenticated == true && context.User.TryGetId(out var id))
         {
-            var bannedAt = await db.Users.Where(u => u.Id == id)
-                                         .Select(u => u.BannedAt)
-                                         .FirstOrDefaultAsync(context.RequestAborted);
-            if (bannedAt is not null)
+            var account = await db.Users.Where(u => u.Id == id)
+                                        .Select(u => new { u.BannedAt })
+                                        .FirstOrDefaultAsync(context.RequestAborted);
+
+            // A deleted account's token stays cryptographically valid for its full 30 days. It
+            // must not keep counting as signed in — seeing every profile, filing reports.
+            if (account is null)
             {
-                await Results.Problem(
-                    title: "Account suspended",
-                    detail: "This account is not allowed to use LocalBuddy.",
-                    statusCode: StatusCodes.Status403Forbidden).ExecuteAsync(context);
+                await Problem(context, StatusCodes.Status401Unauthorized, "account_not_found",
+                              "Account not found", "This account no longer exists.");
+                return;
+            }
+
+            if (account.BannedAt is not null)
+            {
+                await Problem(context, StatusCodes.Status403Forbidden, "account_banned",
+                              "Account suspended", "This account is not allowed to use LocalBuddy.");
                 return;
             }
         }
 
         await next(context);
     }
+
+    // Same shape as ApiProblem (ADR-0008), which needs a controller and so cannot be used here.
+    static Task Problem(HttpContext context, int status, string code, string title, string detail) =>
+        Results.Problem(title: title, detail: detail, statusCode: status,
+                        extensions: new Dictionary<string, object?> { ["code"] = code })
+               .ExecuteAsync(context);
 }

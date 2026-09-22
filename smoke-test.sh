@@ -82,6 +82,12 @@ curl -s "$API/conversations/$CONV/messages" -H "Authorization: Bearer $A" | grep
   && pass "collections come back paginated" || fail "message list is not a page"
 
 echo "reviews"
+expect "review before the other side has replied is refused" 400 \
+  -X POST "$API/reviews" -H "Authorization: Bearer $B" -H 'Content-Type: application/json' \
+  -d "{\"subjectId\":\"$AID\",\"rating\":5,\"comment\":\"too soon\"}"
+expect "the other participant replies" 201 \
+  -X POST "$API/conversations/$CONV/messages" -H "Authorization: Bearer $B" \
+  -H 'Content-Type: application/json' -d '{"content":"ciao anche a te"}'
 expect "review without an exchange is refused" 400 \
   -X POST "$API/reviews" -H "Authorization: Bearer $C" -H 'Content-Type: application/json' \
   -d "{\"subjectId\":\"$AID\",\"rating\":5,\"comment\":\"nope\"}"
@@ -98,6 +104,9 @@ expect "block is idempotent" 204 -X PUT "$API/users/$BID/block" -H "Authorizatio
 expect "blocking twice is still fine" 204 -X PUT "$API/users/$BID/block" -H "Authorization: Bearer $A"
 curl -s "$API/discovery?city=Milano" -H "Authorization: Bearer $A" | grep -q "$BID" \
   && fail "blocked user still shows in discovery" || pass "blocked user hidden from discovery"
+expect "the blocked member can no longer write" 400 \
+  -X POST "$API/conversations/$CONV/messages" -H "Authorization: Bearer $B" \
+  -H 'Content-Type: application/json' -d '{"content":"sono ancora qui"}'
 
 echo "photos"
 expect "non-image upload refused" 400 \

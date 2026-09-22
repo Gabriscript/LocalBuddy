@@ -23,11 +23,19 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
         var me = User.Id();
         if (me == req.SubjectId) return this.Invalid("self_target", "You cannot review yourself.");
 
-        // Only people who actually got in touch can review each other.
-        var talked = await db.Conversations.AnyAsync(c =>
-            (c.UserAId == me && c.UserBId == req.SubjectId) ||
-            (c.UserAId == req.SubjectId && c.UserBId == me));
-        if (!talked) return this.Invalid("no_exchange", "You have not been in touch with this member.");
+        // Only people who actually got in touch can review each other, and an open chat is not
+        // enough: a paid unlock opens one that the other side may never have answered. Both have
+        // to have written, or anyone could buy the right to leave a one-star review — or farm
+        // host credits, and with them discovery ranking, from accounts of their own.
+        var exchanged = await db.Conversations.AnyAsync(c =>
+            ((c.UserAId == me && c.UserBId == req.SubjectId) || (c.UserAId == req.SubjectId && c.UserBId == me)) &&
+            db.Messages.Any(m => m.ConversationId == c.Id && m.SenderId == me) &&
+            db.Messages.Any(m => m.ConversationId == c.Id && m.SenderId == req.SubjectId));
+        if (!exchanged) return this.Invalid("no_exchange", "You have not been in touch with this member.");
+
+        // A review is a way of reaching somebody too; a block rules it out in both directions.
+        if (await db.IsBlockedBetweenAsync(me, req.SubjectId))
+            return this.Invalid("blocked", "This member is not reachable.");
 
         if (await db.Reviews.AnyAsync(r => r.AuthorId == me && r.SubjectId == req.SubjectId))
             return this.Conflicted("already_reviewed", "You have already reviewed this member.");
@@ -42,12 +50,15 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
         };
         db.Reviews.Add(review);
 
-        // GUIDELINES §4: reward hosting, never penalise non-reciprocity.
-        var subject = await db.Users.FindAsync(req.SubjectId);
-        if (subject is not null && await db.Listings.AnyAsync(l => l.UserId == req.SubjectId))
-            subject.CreditsBalance += Pricing.HostReviewReward;
-
+        await using var transaction = await db.Database.BeginTransactionAsync();
         await db.SaveChangesAsync();
+
+        // GUIDELINES §4: reward hosting, never penalise non-reciprocity. One atomic UPDATE, so two
+        // reviews landing together both count.
+        await db.Users.Where(u => u.Id == req.SubjectId && db.Listings.Any(l => l.UserId == u.Id))
+                      .ExecuteUpdateAsync(s => s.SetProperty(u => u.CreditsBalance, u => u.CreditsBalance + Pricing.HostReviewReward));
+
+        await transaction.CommitAsync();
         return Created($"/api/v1/users/{req.SubjectId}/reviews", ReviewDto.From(review));
     }
 

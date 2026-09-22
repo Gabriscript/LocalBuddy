@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API (:5200)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/backend/LocalBuddy.Api/LocalBuddy.Api.csproj"
+    }
+  ]
+}

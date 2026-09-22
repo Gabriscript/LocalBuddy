@@ -58,18 +58,27 @@ public class ModerationController(LocalBuddyDbContext db, ILogger<ModerationCont
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ban(Guid userId, BanRequest req)
     {
+        var me = User.Id();
         var user = await db.Users.FindAsync(userId);
         if (user is null) return NotFound();
-        if (user.Id == User.Id()) return this.Invalid("self_target", "You cannot ban yourself.");
+        if (user.Id == me) return this.Invalid("self_target", "You cannot ban yourself.");
 
-        user.BannedAt = DateTime.UtcNow;
-        user.BanReason = req.Reason;
-        await db.SaveChangesAsync();
+        // The ban follows the person, not the account (ADR-0005): every account verified with the
+        // same identity goes with it, including spares verified before the ban. The verification
+        // check alone only caught accounts verified after it.
+        var hash = user.IdentitySubjectHash;
+        var now = DateTime.UtcNow;
+        var banned = await db.Users
+            .Where(u => u.Id == userId || (hash != null && u.IdentitySubjectHash == hash && u.Id != me))
+            .ExecuteUpdateAsync(s => s.SetProperty(u => u.BannedAt, now).SetProperty(u => u.BanReason, req.Reason));
 
-        log.LogWarning("User {UserId} banned by {ModeratorId}: {Reason}", userId, User.Id(), req.Reason);
+        log.LogWarning("User {UserId} banned by {ModeratorId}, {Count} account(s) in all: {Reason}",
+                       userId, me, banned, req.Reason);
         return NoContent();
     }
 
+    /// Lifts the ban on this one account only. Other accounts of the same person that went down
+    /// with it stay banned until a moderator lifts them individually.
     [HttpPost("users/{userId:guid}/unban")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

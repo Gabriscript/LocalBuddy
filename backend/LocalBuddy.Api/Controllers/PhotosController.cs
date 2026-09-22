@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 
 namespace LocalBuddy.Api.Controllers;
 
@@ -17,6 +18,14 @@ namespace LocalBuddy.Api.Controllers;
 public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : ControllerBase
 {
     const long MaxBytes = 10 * 1024 * 1024;
+    const int MaxPhotosPerUser = 12;
+
+    /// A compressed file says nothing about its decoded size: a 200 KB PNG can decode to 183 MB.
+    /// The header is read first and anything past this is refused before a pixel is allocated.
+    const long MaxPixels = 50_000_000;
+
+    /// Longest side of what is stored. Plenty for a phone screen, a fraction of the disk and data.
+    const int MaxSide = 2048;
 
     /// Photos are not static files: every read passes through here so the host choice about
     /// anonymous visitors is actually enforced, instead of being bypassed by a bare URL.
@@ -31,7 +40,7 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
 
         var owner = await db.Users.FindAsync(photo.UserId);
         // NotFound rather than Forbid: a refusal should not confirm that the photo exists.
-        if (owner is null || !User.CanSeeProfileOf(owner)) return NotFound();
+        if (owner is null || owner.BannedAt is not null || !User.CanSeeProfileOf(owner)) return NotFound();
 
         var content = await storage.OpenReadAsync(photo.Url, HttpContext.RequestAborted);
         if (content is null) return NotFound();
@@ -50,6 +59,10 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
 
         var me = User.Id();
 
+        // Without a cap one account can fill the disk at 10 MB a request.
+        if (await db.Photos.CountAsync(p => p.UserId == me) >= MaxPhotosPerUser)
+            return this.Invalid("too_many_photos", $"At most {MaxPhotosPerUser} photos per member.");
+
         if (type == PhotoType.Home)
         {
             var listing = await db.Listings.FirstOrDefaultAsync(l => l.UserId == me);
@@ -61,17 +74,33 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         Image image;
         try
         {
+            IImageInfo? info;
+            await using (var header = file.OpenReadStream())
+                info = await Image.IdentifyAsync(header);
+            if (info is null) return NotAnImage();
+            if ((long)info.Width * info.Height > MaxPixels)
+                return this.Invalid("image_too_large", "That image has too many pixels. Photos from a phone camera are fine.");
+
             // Decoding is the real validation — a renamed .exe never gets this far.
             await using var incoming = file.OpenReadStream();
             image = await Image.LoadAsync(incoming);
         }
-        catch (UnknownImageFormatException)
+        catch (ImageFormatException) // unknown formats and corrupt data of a known format alike
         {
-            return this.Invalid("not_an_image", "That file is not a readable image.");
+            return NotAnImage();
         }
 
         using (image)
         {
+            var oversized = Math.Max(image.Width, image.Height) > MaxSide;
+            image.Mutate(x =>
+            {
+                // Phones store portrait shots sideways plus an EXIF rotation flag. The flag is
+                // about to be stripped, so the rotation has to be applied to the pixels first.
+                x.AutoOrient();
+                if (oversized) x.Resize(new ResizeOptions { Size = new Size(MaxSide, MaxSide), Mode = ResizeMode.Max });
+            });
+
             // GUIDELINES §9: strip EXIF before publishing — it carries the GPS coordinates
             // of where the shot was taken, i.e. the home address of the host.
             image.Metadata.ExifProfile = null;
@@ -105,9 +134,12 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         var photo = await db.Photos.FirstOrDefaultAsync(p => p.Id == id && p.UserId == User.Id());
         if (photo is null) return NotFound();
 
-        await storage.DeleteAsync(photo.Url);
+        // Row first: a failed delete must not leave a profile pointing at a missing file.
         db.Photos.Remove(photo);
         await db.SaveChangesAsync();
+        await storage.DeleteAsync(photo.Url);
         return NoContent();
     }
+
+    ObjectResult NotAnImage() => this.Invalid("not_an_image", "That file is not a readable image.");
 }

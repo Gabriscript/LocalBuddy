@@ -29,9 +29,15 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
     {
         var me = User.Id();
         if (me == targetId) return this.Invalid("self_target", "You cannot express interest in yourself.");
-        if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound();
+        // A banned account is gone as far as other members are concerned (ADR-0005).
+        if (!await db.Users.AnyAsync(u => u.Id == targetId && u.BannedAt == null)) return NotFound();
         if (await db.IsBlockedBetweenAsync(me, targetId))
             return this.Invalid("blocked", "This member is not reachable.");
+
+        // Both people tapping at the same moment would otherwise each miss the other's row and
+        // leave two pending interests that never become a match. The lock makes the second one
+        // find the first.
+        await using var transaction = await conversations.BeginPairAsync(me, targetId);
 
         if (await db.Matches.AnyAsync(m => m.InitiatorId == me && m.TargetId == targetId))
             return this.Conflicted("already_responded", "You have already responded to this profile.");
@@ -52,6 +58,7 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
         if (!matched)
         {
             await db.SaveChangesAsync();
+            await transaction.CommitAsync();
             return Ok(new InterestResult(false, null));
         }
 
@@ -62,6 +69,7 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
         var (conversation, _) = await conversations.OpenAsync(me, targetId, unlockedByPayment: false);
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return Created($"/api/v1/conversations/{conversation.Id}/messages",
                        new InterestResult(true, conversation.Id));
     }

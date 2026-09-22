@@ -10,9 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Must exist before the static-file middleware resolves the web root, or uploads never get served.
-Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads"));
-
 // No need to advertise the server software.
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 
@@ -26,7 +23,6 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
-builder.Services.AddHttpContextAccessor();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrWhiteSpace(connectionString))
@@ -173,7 +169,7 @@ static async Task SeedModeratorsAsync(WebApplication app)
             var user = await users.FindByEmailAsync(email);
             if (user is null)
             {
-                log.LogWarning("Configured moderator has no account yet: the role is granted once they register.");
+                log.LogWarning("Configured moderator has no account yet: the role is granted at the first start after they register.");
                 continue;
             }
 

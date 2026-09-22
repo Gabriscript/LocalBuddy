@@ -33,13 +33,20 @@ public class PaymentsController(
         var me = User.Id();
         if (me == targetId) return this.Invalid("self_target", "You cannot unlock yourself.");
 
-        var user = await db.Users.FindAsync(me);
-        if (user is null) return NotFound();
-        if (!await db.Users.AnyAsync(u => u.Id == targetId)) return NotFound();
+        // A banned account is gone as far as other members are concerned (ADR-0005).
+        var target = await db.Users.Where(u => u.Id == targetId && u.BannedAt == null)
+                                   .Select(u => new { u.IdentityVerified })
+                                   .FirstOrDefaultAsync();
+        if (target is null) return NotFound();
+        // Nobody pays to reach someone who cannot answer: sending requires verification (ADR-0007).
+        if (!target.IdentityVerified)
+            return this.Invalid("target_not_verified", "This member has not verified their identity yet.");
         if (await db.IsBlockedBetweenAsync(me, targetId))
             return this.Invalid("blocked", "This member is not reachable.");
 
-        // Never charge for a chat that is already open — a mutual match may have opened it free.
+        // Never charge for a chat that is already open — a mutual match may have opened it free,
+        // or a second tap on this same button. The pair lock makes the second tap see the first.
+        await using var transaction = await conversations.BeginPairAsync(me, targetId);
         var (conversation, created) = await conversations.OpenAsync(me, targetId, unlockedByPayment: true);
         if (!created) return Ok(new UnlockResult(conversation.Id, "none"));
 
@@ -51,14 +58,15 @@ public class PaymentsController(
         {
             charged = "subscription";
         }
-        else if (user.CreditsBalance >= Pricing.UnlockCreditCost)
+        else if (await SpendCreditAsync(me))
         {
             // GUIDELINES §4: credits earned by hosting, spent instead of cash.
-            user.CreditsBalance -= Pricing.UnlockCreditCost;
             charged = "credits";
         }
         else
         {
+            // ponytail: charged before the rows are saved. Harmless with the fake gateway; the
+            // Stripe integration needs an idempotency key and the unlock confirmed by webhook.
             var stripeId = await gateway.ChargeOneTimeAsync(me, Pricing.Unlock);
             db.Payments.Add(new Payment
             {
@@ -73,14 +81,22 @@ public class PaymentsController(
         }
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return Created($"/api/v1/conversations/{conversation.Id}/messages",
                        new UnlockResult(conversation.Id, charged));
     }
+
+    /// One atomic UPDATE, so two unlocks racing for the last credit cannot both spend it.
+    /// Runs inside the caller's transaction, so a failed unlock gives the credit back.
+    async Task<bool> SpendCreditAsync(Guid me) =>
+        await db.Users.Where(u => u.Id == me && u.CreditsBalance >= Pricing.UnlockCreditCost)
+                      .ExecuteUpdateAsync(s => s.SetProperty(u => u.CreditsBalance, u => u.CreditsBalance - Pricing.UnlockCreditCost)) == 1;
 
     /// No Location header: there is no endpoint yet that serves a single subscription.
     [HttpPost("subscriptions")]
     [ProducesResponseType<SubscriptionDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Subscribe(SubscribeRequest req)
     {
         if (req.PlanType is not ("monthly" or "yearly"))
@@ -88,6 +104,9 @@ public class PaymentsController(
         var monthly = req.PlanType == "monthly";
 
         var me = User.Id();
+        if (await db.Subscriptions.AnyAsync(s => s.UserId == me && s.Status == "active" && s.ExpiresAt > DateTime.UtcNow))
+            return this.Conflicted("already_subscribed", "You already have an active subscription.");
+
         var stripeId = await gateway.StartSubscriptionAsync(me, req.PlanType);
 
         var subscription = new Subscription

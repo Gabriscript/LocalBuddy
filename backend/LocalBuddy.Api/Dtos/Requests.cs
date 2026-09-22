@@ -7,12 +7,18 @@ namespace LocalBuddy.Api.Dtos;
 // surface. Every free-text field is bounded here and again in the database: without a limit
 // a caller can store half a megabyte in a profile, which we verified they could.
 
+static class DomainRoles
+{
+    /// Discovery filters on these exact values, so "Host" would make a member invisible.
+    public const string Pattern = "host|guest|entrambi";
+}
+
 public record RegisterRequest(
     [Required, EmailAddress, StringLength(Limits.Email)] string Email,
     [Required, StringLength(Limits.Password, MinimumLength = 8)] string Password,
     [Required, StringLength(Limits.Name)] string Name,
     [Required, StringLength(Limits.City)] string City,
-    [Required, StringLength(Limits.Role)] string Role);
+    [Required, StringLength(Limits.Role), RegularExpression(DomainRoles.Pattern)] string Role);
 
 public record LoginRequest(
     [Required, StringLength(Limits.Email)] string Email,
@@ -21,7 +27,7 @@ public record LoginRequest(
 public record ProfileUpdate(
     [Required, StringLength(Limits.Name)] string Name,
     [Required, StringLength(Limits.City)] string City,
-    [Required, StringLength(Limits.Role)] string Role,
+    [Required, StringLength(Limits.Role), RegularExpression(DomainRoles.Pattern)] string Role,
     [StringLength(Limits.Prompt)] string WhatWeWillDo,
     [StringLength(Limits.Prompt)] string WhyIHost,
     [StringLength(Limits.Languages)] string LanguagesSpoken,

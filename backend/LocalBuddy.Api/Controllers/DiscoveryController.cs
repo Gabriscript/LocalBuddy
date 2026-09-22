@@ -56,6 +56,7 @@ public class DiscoveryController(LocalBuddyDbContext db) : ControllerBase
         // through PublicProfile, so it stays defined in exactly one place.
         var rows = await q
             .OrderByDescending(u => u.CreditsBalance) // GUIDELINES §4: hosting earns visibility
+            .ThenBy(u => u.Id) // most members share a balance; without a tie-break pages overlap
             .Skip(page * pageSize)
             .Take(pageSize + 1) // one extra, to know whether another page exists
             .Select(u => new

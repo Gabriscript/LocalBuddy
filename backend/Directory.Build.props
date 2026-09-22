@@ -1,0 +1,12 @@
+<Project>
+  <!-- Shared by every project under backend/, so the two cannot drift apart. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- The build is at zero warnings; this keeps it there. A new possible-null or an obsolete
+         call fails the build instead of scrolling past. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
