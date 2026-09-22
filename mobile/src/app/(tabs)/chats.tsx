@@ -14,7 +14,9 @@ export default function Chats() {
 
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
-      <Text style={[type.display, styles.header, { color: c.text }]}>Chats</Text>
+      <Text role="heading" style={[type.display, styles.header, { color: c.text }]}>
+        Chats
+      </Text>
 
       <Screen
         loading={isPending}
@@ -28,7 +30,8 @@ export default function Chats() {
             <Pressable
               onPress={() => router.push({ pathname: '/chat/[id]', params: { id: item.id! } })}
               accessibilityRole="button"
-              accessibilityLabel="Open conversation"
+              // No fixed label: the row reads out its own last message, so each conversation
+              // sounds different instead of every row being "Open conversation".
               android_ripple={{ color: c.border }}
               style={({ pressed }) => [
                 styles.row,
@@ -42,7 +45,7 @@ export default function Chats() {
                   <Text style={[type.caption, { color: c.textMuted }]}>Unlocked</Text>
                 ) : null}
               </View>
-              <Ionicons name="chevron-forward" size={20} color={c.textMuted} />
+              <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
             </Pressable>
           )}
         />

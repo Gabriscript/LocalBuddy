@@ -25,7 +25,9 @@ export default function Me() {
               accessibilityLabel="Your profile photo"
             />
             <View style={styles.identityText}>
-              <Text style={[type.title, { color: c.text }]}>{data?.name}</Text>
+              <Text role="heading" style={[type.title, { color: c.text }]}>
+                {data?.name}
+              </Text>
               <Text style={[type.body, { color: c.textMuted }]}>{data?.city}</Text>
             </View>
           </View>

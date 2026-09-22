@@ -32,7 +32,12 @@ export function Toggle({
       accessibilityHint={hint}
       style={({ pressed }) => [styles.row, { backgroundColor: c.surfaceMuted, opacity: pressed ? 0.75 : 1 }]}>
       {as === 'checkbox' ? (
-        <Ionicons name={value ? 'checkbox' : 'square-outline'} size={24} color={value ? c.primary : c.textMuted} />
+        <Ionicons
+          name={value ? 'checkbox' : 'square-outline'}
+          size={24}
+          color={value ? c.primary : c.textMuted}
+          aria-hidden
+        />
       ) : null}
 
       <View style={styles.text}>

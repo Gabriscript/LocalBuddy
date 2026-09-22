@@ -52,7 +52,7 @@ export const ProfileCard = memo(function ProfileCard({
             </Text>
             {typeof card.rating === 'number' ? (
               <View style={styles.rating}>
-                <Ionicons name="star" size={14} color={c.text} />
+                <Ionicons name="star" size={14} color={c.text} aria-hidden />
                 {/* Tabular figures: a rating going from 4.9 to 5.0 must not nudge the row. */}
                 <Text style={[type.label, styles.figure, { color: c.text }]}>
                   {card.rating.toFixed(1)}

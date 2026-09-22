@@ -36,6 +36,16 @@ export default function Profile() {
   return (
     <Screen loading={isPending} error={error} onRetry={refetch}>
       <View style={[styles.page, { backgroundColor: c.background }]}>
+        {/* First in the tree, so a screen reader reaches it before the whole profile rather
+            than after it. zIndex keeps it drawn above the photo it floats on. */}
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
+          <Ionicons name="chevron-back" size={24} color={c.text} />
+        </Pressable>
+
         <ScrollView
           contentContainerStyle={{ paddingBottom: 140 }}
           showsVerticalScrollIndicator={false}>
@@ -63,7 +73,9 @@ export default function Profile() {
 
           <View style={styles.body}>
             <View>
-              <Text style={[type.display, { color: c.text }]}>{data?.name}</Text>
+              <Text role="heading" style={[type.display, { color: c.text }]}>
+                {data?.name}
+              </Text>
               <Text style={[type.body, { color: c.textMuted }]}>
                 {data?.city} · {data?.role}
               </Text>
@@ -87,14 +99,6 @@ export default function Profile() {
             <Section title="Languages" body={data?.languagesSpoken} />
           </View>
         </ScrollView>
-
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
-          <Ionicons name="chevron-back" size={24} color={c.text} />
-        </Pressable>
 
         <View
           style={[
@@ -133,7 +137,9 @@ function Section({ title, body }: { title: string; body?: string | null }) {
   if (!body) return null;
   return (
     <View style={styles.section}>
-      <Text style={[type.title, { color: c.text }]}>{title}</Text>
+      <Text role="heading" style={[type.title, { color: c.text }]}>
+        {title}
+      </Text>
       <Text style={[type.body, { color: c.text }]}>{body}</Text>
     </View>
   );
@@ -149,6 +155,7 @@ const styles = StyleSheet.create({
   section: { gap: space.sm },
   back: {
     position: 'absolute',
+    zIndex: 1,
     left: space.md,
     width: 44,
     height: 44,

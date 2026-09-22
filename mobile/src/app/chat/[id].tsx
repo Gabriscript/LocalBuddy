@@ -43,7 +43,9 @@ export default function Chat() {
           style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
         </Pressable>
-        <Text style={[type.label, { color: c.text }]}>Conversation</Text>
+        <Text role="heading" style={[type.label, { color: c.text }]}>
+          Conversation
+        </Text>
       </View>
 
       <KeyboardAvoidingView
@@ -82,7 +84,6 @@ export default function Chat() {
             disabled={!canSend}
             accessibilityRole="button"
             accessibilityLabel="Send message"
-            accessibilityState={{ disabled: !canSend }}
             style={({ pressed }) => [
               styles.send,
               { backgroundColor: c.primary, opacity: !canSend ? 0.45 : pressed ? 0.75 : 1 },

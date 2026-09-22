@@ -26,7 +26,7 @@ export default function TabsLayout() {
           title: 'Discover',
           // Filled marks the active tab, outline the rest: one distinction, applied everywhere.
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={26} color={color} />
+            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={26} color={color} aria-hidden />
           ),
         }}
       />
@@ -35,7 +35,7 @@ export default function TabsLayout() {
         options={{
           title: 'Chats',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={24} color={color} aria-hidden />
           ),
         }}
       />
@@ -44,7 +44,7 @@ export default function TabsLayout() {
         options={{
           title: 'Me',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} aria-hidden />
           ),
         }}
       />

@@ -45,7 +45,9 @@ export default function Register() {
     <SafeAreaView style={[styles.page, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.intro}>
-          <Text style={[type.display, { color: c.text }]}>Create account</Text>
+          <Text role="heading" style={[type.display, { color: c.text }]}>
+            Create account
+          </Text>
           <Text style={[type.body, { color: c.textMuted }]}>Step 1 of 5</Text>
         </View>
 
@@ -73,15 +75,15 @@ export default function Register() {
 
         <View style={styles.group}>
           <Text style={[type.label, { color: c.text }]}>I want to be</Text>
-          <View style={styles.roles}>
+          <View style={styles.roles} role="radiogroup" aria-label="I want to be">
             {ROLES.map((role) => {
               const active = form.role === role.value;
               return (
                 <Pressable
                   key={role.value}
                   onPress={() => set('role')(role.value)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: active }}
+                  role="radio"
+                  aria-checked={active}
                   style={({ pressed }) => [
                     styles.role,
                     {

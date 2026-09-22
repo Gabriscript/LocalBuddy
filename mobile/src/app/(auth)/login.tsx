@@ -39,7 +39,9 @@ export default function Login() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.form}>
         <View style={styles.brand}>
-          <Text style={[type.display, { color: c.text }]}>LocalBuddy</Text>
+          <Text role="heading" style={[type.display, { color: c.text }]}>
+            LocalBuddy
+          </Text>
           <Text style={[type.body, { color: c.textMuted }]}>Meet locals. Share cultures.</Text>
         </View>
 

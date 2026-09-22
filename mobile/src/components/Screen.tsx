@@ -35,7 +35,7 @@ export function Screen({
   if (error) {
     return (
       <Centered>
-        <Ionicons name="cloud-offline-outline" size={40} color={c.textMuted} />
+        <Ionicons name="cloud-offline-outline" size={40} color={c.textMuted} aria-hidden />
         <Text style={[type.body, styles.centeredText, { color: c.text }]}>{message(error)}</Text>
         {onRetry ? <Button title="Try again" variant="secondary" onPress={onRetry} /> : null}
       </Centered>
@@ -45,7 +45,7 @@ export function Screen({
   if (empty) {
     return (
       <Centered>
-        <Ionicons name="compass-outline" size={40} color={c.textMuted} />
+        <Ionicons name="compass-outline" size={40} color={c.textMuted} aria-hidden />
         <Text style={[type.body, styles.centeredText, { color: c.textMuted }]}>{empty}</Text>
       </Centered>
     );

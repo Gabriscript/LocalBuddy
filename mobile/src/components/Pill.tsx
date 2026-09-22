@@ -19,7 +19,7 @@ export function Pill({
 
   return (
     <View style={[styles.pill, { backgroundColor: c.surfaceMuted }]}>
-      <Ionicons name={icon} size={14} color={color} />
+      <Ionicons name={icon} size={14} color={color} aria-hidden />
       <Text style={[type.caption, { color }]}>{label}</Text>
     </View>
   );

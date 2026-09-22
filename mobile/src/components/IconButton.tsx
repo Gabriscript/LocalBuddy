@@ -25,7 +25,6 @@ export function IconButton({
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled: !!disabled }}
       android_ripple={{ color: c.border, borderless: true }}
       style={({ pressed }) => [
         styles.button,

@@ -37,22 +37,24 @@ export default function Discover() {
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
       <View style={styles.header}>
-        <Text style={[type.display, { color: c.text }]}>Discover</Text>
+        <Text role="heading" style={[type.display, { color: c.text }]}>
+          Discover
+        </Text>
         <Text style={[type.body, { color: c.textMuted }]}>
           People near you who want to show you their city.
         </Text>
       </View>
 
       {/* TODO: the full filter sheet (city, time of day, traits) writes the same route params. */}
-      <View style={styles.filters}>
+      <View style={styles.filters} role="radiogroup" aria-label="Who to show">
         {ROLES.map((role) => {
           const active = params.role === role.value;
           return (
             <Pressable
               key={role.label}
               onPress={() => router.setParams({ role: role.value })}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
+              role="radio"
+              aria-checked={active}
               style={({ pressed }) => [
                 styles.chip,
                 {

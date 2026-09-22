@@ -36,8 +36,13 @@ export function StepPage({
       <ScrollView contentContainerStyle={styles.body}>
         <View
           style={styles.dots}
-          accessibilityRole="progressbar"
-          accessibilityLabel={`Step ${step} of ${total}`}>
+          role="progressbar"
+          aria-label="Progress"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={step}
+          // Read out as words: "Step 3 of 5" is clearer than the "60%" a bare value becomes.
+          aria-valuetext={`Step ${step} of ${total}`}>
           {Array.from({ length: total }, (_, i) => (
             <View
               key={i}
@@ -47,7 +52,9 @@ export function StepPage({
         </View>
 
         <View style={styles.heading}>
-          <Text style={[type.display, { color: c.text }]}>{title}</Text>
+          <Text role="heading" style={[type.display, { color: c.text }]}>
+            {title}
+          </Text>
           {subtitle ? <Text style={[type.body, { color: c.textMuted }]}>{subtitle}</Text> : null}
         </View>
 

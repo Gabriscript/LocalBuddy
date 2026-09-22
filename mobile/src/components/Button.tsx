@@ -31,7 +31,9 @@ export function Button({
       onPress={onPress}
       disabled={off}
       accessibilityRole="button"
-      accessibilityState={{ disabled: !!off, busy: !!loading }}
+      // `disabled` already announces itself; busy needs aria-busy, since accessibilityState
+      // never reaches the DOM on the web.
+      aria-busy={!!loading}
       android_ripple={{ color: c.border }}
       style={({ pressed }) => [
         styles.base,
