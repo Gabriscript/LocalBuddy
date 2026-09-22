@@ -33,7 +33,13 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LocalBuddy uses your photo library so you can add a picture to your profile."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

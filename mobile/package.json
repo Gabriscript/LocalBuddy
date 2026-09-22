@@ -13,6 +13,7 @@
     "expo-font": "~57.0.2",
     "expo-glass-effect": "~57.0.1",
     "expo-image": "~57.0.3",
+    "expo-image-picker": "~57.0.19",
     "expo-linking": "~57.0.8",
     "expo-router": "~57.0.17",
     "expo-secure-store": "~57.0.2",
@@ -34,6 +35,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -42,7 +45,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "api:gen": "openapi-typescript http://localhost:5200/openapi/v1.json -o src/api/generated.ts",
+    "api:gen": "npx --yes openapi-typescript@7.13.0 http://localhost:5200/openapi/v1.json -o src/api/generated.ts",
     "typecheck": "tsc --noEmit"
   },
   "private": true

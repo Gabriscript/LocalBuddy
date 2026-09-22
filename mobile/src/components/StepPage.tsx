@@ -16,6 +16,7 @@ export function StepPage({
   cta,
   onNext,
   disabled,
+  loading,
   children,
 }: {
   step: number;
@@ -25,6 +26,7 @@ export function StepPage({
   cta: string;
   onNext: () => void;
   disabled?: boolean;
+  loading?: boolean;
   children?: ReactNode;
 }) {
   const c = useColors();
@@ -53,7 +55,7 @@ export function StepPage({
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button title={cta} onPress={onNext} disabled={disabled} />
+        <Button title={cta} onPress={onNext} disabled={disabled} loading={loading} />
       </View>
     </SafeAreaView>
   );

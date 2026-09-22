@@ -33,6 +33,7 @@ export function Field({
             styles.input,
             { borderColor: error ? c.danger : c.border, color: c.text, backgroundColor: c.surfaceMuted },
             secureTextEntry ? styles.inputWithAction : null,
+            rest.multiline ? styles.multiline : null,
           ]}
         />
         {secureTextEntry ? (
@@ -69,5 +70,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
   },
   inputWithAction: { paddingRight: space.xxl },
+  // Room for three lines, and text that starts at the top instead of floating mid-box.
+  multiline: { minHeight: 104, paddingTop: space.sm + 4, paddingBottom: space.sm + 4, textAlignVertical: 'top' },
   action: { position: 'absolute', right: space.md, height: 44, width: 44, alignItems: 'center', justifyContent: 'center' },
 });
