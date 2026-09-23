@@ -22,12 +22,16 @@ export default function Profile() {
   const { interest, pass } = useDecide();
   const busy = interest.isPending || pass.isPending;
 
+  // Reached by link or after a reload there is no screen to go back to, and router.back()
+  // would leave the member stuck on a profile they have just passed on.
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/discover'));
+
   async function showInterest() {
     const result = await interest.mutateAsync(id);
     if (result.matched && result.conversationId) {
       router.replace({ pathname: '/chat/[id]', params: { id: result.conversationId } });
     } else {
-      router.back();
+      goBack();
     }
   }
 
@@ -39,7 +43,7 @@ export default function Profile() {
         {/* First in the tree, so a screen reader reaches it before the whole profile rather
             than after it. zIndex keeps it drawn above the photo it floats on. */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={goBack}
           accessibilityRole="button"
           accessibilityLabel="Go back"
           style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
@@ -111,7 +115,7 @@ export default function Profile() {
                 title="Pass"
                 variant="secondary"
                 disabled={busy}
-                onPress={() => pass.mutateAsync(id).then(() => router.back())}
+                onPress={() => pass.mutateAsync(id).then(goBack)}
               />
             </View>
             <View style={styles.barItem}>

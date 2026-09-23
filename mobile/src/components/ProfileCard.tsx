@@ -32,12 +32,25 @@ export const ProfileCard = memo(function ProfileCard({
 }) {
   const c = useColors();
 
+  // A card is one control, so a screen reader hears its label and nothing else. The label
+  // therefore carries what the card shows — otherwise pass and interest are a blind choice.
+  const summary = [
+    card.name,
+    card.city,
+    card.role,
+    card.identityVerified ? 'verified' : null,
+    typeof card.rating === 'number' ? `rated ${card.rating.toFixed(1)}` : null,
+  ]
+    .filter((part): part is string => !!part)
+    .join(', ');
+
   return (
     <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
       <Pressable
         onPress={onOpen}
         accessibilityRole="button"
-        accessibilityLabel={`Open ${card.name}'s profile`}
+        accessibilityLabel={summary}
+        accessibilityHint="Opens the full profile"
         style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}>
         <AuthedImage
           path={card.photoUrl}
