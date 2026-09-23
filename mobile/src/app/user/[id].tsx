@@ -125,7 +125,7 @@ export default function Profile() {
           {/* Deliberately below the free actions and visually quieter: paying is a separate
               decision, not a third button of equal weight. */}
           <Button
-            title="Skip the match — unlock chat now"
+            title="Unlock the chat without a match"
             variant="quiet"
             disabled={busy}
             onPress={() => {}}
