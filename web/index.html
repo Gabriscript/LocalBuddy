@@ -42,7 +42,21 @@
     <main id="main">
       <section class="hero">
         <div class="hero-copy">
-          <h1>Meet someone who lives there.</h1>
+          <h1>
+            <span class="greeting">
+              <!-- One greeting for a screen reader; the cycling ones are decoration and would
+                   otherwise be read as five words in a row. -->
+              <span class="sr-only">Ciao.</span>
+              <span class="greeting-cycle" aria-hidden="true">
+                <span>Ciao.</span>
+                <span>Hello.</span>
+                <span>Hola.</span>
+                <span>Moi.</span>
+                <span>Merhaba.</span>
+              </span>
+            </span>
+            Meet someone who lives there.
+          </h1>
           <p class="lede">
             The bar with the password on the door. The wine poured through a hatch in the wall. A
             local shows you their afternoon, and nobody pays for it.
