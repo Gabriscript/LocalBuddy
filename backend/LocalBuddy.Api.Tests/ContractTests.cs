@@ -202,6 +202,66 @@ public class ErrorShapeTests
     }
 }
 
+/// The price a member is about to pay has one definition, in Pricing, and travels to the client
+/// from there. These are about who pays what, not about the numbers themselves.
+public class PaymentOptionsTests
+{
+    static PaymentsController Payments(TestDb t, Guid caller) =>
+        new PaymentsController(t.Db, new FakePaymentGateway(), new ConversationService(t.Db)).As(caller);
+
+    [Fact]
+    public async Task Without_credits_or_a_subscription_the_next_unlock_costs_money()
+    {
+        using var t = new TestDb();
+        var options = (await Payments(t, t.AddVerifiedUser("anna")).Options()).Value!;
+
+        Assert.False(options.Subscribed);
+        Assert.Equal(0, options.Credits);
+        Assert.Equal(Pricing.Unlock, options.UnlockPrice);
+        Assert.Equal("EUR", options.Currency);
+    }
+
+    [Fact]
+    public async Task Credits_and_an_active_subscription_are_both_reported()
+    {
+        using var t = new TestDb();
+        var anna = t.AddVerifiedUser("anna");
+        (await t.Db.Users.FindAsync(anna))!.CreditsBalance = 3;
+        t.Db.Subscriptions.Add(new Subscription
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = anna,
+            PlanType = "monthly",
+            Status = "active",
+            ExpiresAt = DateTime.UtcNow.AddDays(20)
+        });
+        await t.Db.SaveChangesAsync();
+
+        var options = (await Payments(t, anna).Options()).Value!;
+
+        Assert.True(options.Subscribed);
+        Assert.Equal(3, options.Credits);
+    }
+
+    [Fact]
+    public async Task An_expired_subscription_is_not_an_active_one()
+    {
+        using var t = new TestDb();
+        var anna = t.AddVerifiedUser("anna");
+        t.Db.Subscriptions.Add(new Subscription
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = anna,
+            PlanType = "monthly",
+            Status = "active",
+            ExpiresAt = DateTime.UtcNow.AddDays(-1)
+        });
+        await t.Db.SaveChangesAsync();
+
+        Assert.False((await Payments(t, anna).Options()).Value!.Subscribed);
+    }
+}
+
 file class NoPhotos : IPhotoStorage
 {
     public Task<string> SaveJpegAsync(Stream jpeg, CancellationToken ct = default) => Task.FromResult("");

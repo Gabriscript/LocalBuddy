@@ -50,8 +50,7 @@ public class PaymentsController(
         var (conversation, created) = await conversations.OpenAsync(me, targetId, unlockedByPayment: true);
         if (!created) return Ok(new UnlockResult(conversation.Id, "none"));
 
-        var subscribed = await db.Subscriptions.AnyAsync(s =>
-            s.UserId == me && s.Status == "active" && s.ExpiresAt > DateTime.UtcNow);
+        var subscribed = await HasActiveSubscriptionAsync(me);
 
         string charged;
         if (subscribed)
@@ -85,6 +84,31 @@ public class PaymentsController(
         return Created($"/api/v1/conversations/{conversation.Id}/messages",
                        new UnlockResult(conversation.Id, charged));
     }
+
+    /// What the next unlock costs this member. A payment screen has to name an amount, and the
+    /// amounts live in Pricing: a client that hardcodes them is a client that one day shows a
+    /// price the server does not charge.
+    [HttpGet("payments/options")]
+    [ProducesResponseType<PaymentOptions>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaymentOptions>> Options()
+    {
+        var me = User.Id();
+        var credits = await db.Users.Where(u => u.Id == me).Select(u => u.CreditsBalance).FirstOrDefaultAsync();
+
+        return new PaymentOptions(
+            "EUR",
+            Pricing.Unlock,
+            Pricing.MonthlySubscription,
+            Pricing.YearlySubscription,
+            credits,
+            Pricing.UnlockCreditCost,
+            await HasActiveSubscriptionAsync(me));
+    }
+
+    /// Active means paid and not expired. Both the unlock and the screen that explains it need
+    /// the same answer, and they used to ask in two places.
+    Task<bool> HasActiveSubscriptionAsync(Guid me) =>
+        db.Subscriptions.AnyAsync(s => s.UserId == me && s.Status == "active" && s.ExpiresAt > DateTime.UtcNow);
 
     /// One atomic UPDATE, so two unlocks racing for the last credit cannot both spend it.
     /// Runs inside the caller's transaction, so a failed unlock gives the credit back.

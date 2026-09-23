@@ -20,6 +20,7 @@ export const keys = {
   messages: (id: string) => ['messages', id] as const,
   reviews: (id: string) => ['reviews', id] as const,
   blocks: ['blocks'] as const,
+  paymentOptions: ['payment-options'] as const,
 };
 
 export function useMe() {
@@ -143,6 +144,34 @@ export function useDeletePhoto() {
   return useMeMutation(async (id: string) =>
     unwrap(await api.DELETE('/api/v1/photos/{id}', { params: { path: { id } } }))
   );
+}
+
+// ---- Paying to skip the match -------------------------------------------------------------
+
+/// What the next unlock will cost this member. Prices come from the server, never from a
+/// constant in here: two copies of a price is how an app shows one number and charges another.
+export function usePaymentOptions() {
+  return useQuery({
+    queryKey: keys.paymentOptions,
+    queryFn: async () => unwrap(await api.GET('/api/v1/payments/options')),
+  });
+}
+
+/// Opens a conversation without waiting for the other side. The result says what was actually
+/// charged: one-time, credits, subscription, or none when the chat was already open.
+export function useUnlock() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (targetId: string) =>
+      unwrap(await api.POST('/api/v1/users/{targetId}/unlock', { params: { path: { targetId } } })),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.conversations });
+      // Credits may have gone down, and they are shown on the member's own profile.
+      client.invalidateQueries({ queryKey: keys.me });
+      client.invalidateQueries({ queryKey: keys.paymentOptions });
+      client.invalidateQueries({ queryKey: ['discovery'] });
+    },
+  });
 }
 
 // ---- Safety and reviews -------------------------------------------------------------------

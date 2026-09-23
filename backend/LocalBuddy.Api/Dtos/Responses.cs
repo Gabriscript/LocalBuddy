@@ -61,3 +61,9 @@ public record UnlockResult(Guid ConversationId, string Charged);
 
 /// Verification verdict returned to the member.
 public record VerificationResult(bool IdentityVerified, bool AgeVerified);
+
+/// What the next unlock will cost this member, and what the alternatives are. The client must
+/// never carry its own copy of a price: the amounts live in Pricing and travel from here.
+public record PaymentOptions(
+    string Currency, decimal UnlockPrice, decimal MonthlyPrice, decimal YearlyPrice,
+    int Credits, int CreditCost, bool Subscribed);

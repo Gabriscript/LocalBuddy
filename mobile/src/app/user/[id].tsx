@@ -10,6 +10,7 @@ import { Button } from '@/components/Button';
 import { Pill } from '@/components/Pill';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
+import { UnlockSheet } from '@/components/UnlockSheet';
 import { radius, space, type, useColors } from '@/theme';
 
 /// The expanded profile, and the only place the paid unlock appears: keeping it off the
@@ -24,6 +25,7 @@ export default function Profile() {
   const { interest, pass } = useDecide();
   const busy = interest.isPending || pass.isPending;
   const [safety, setSafety] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   // Reached by link or after a reload there is no screen to go back to, and router.back()
   // would leave the member stuck on a profile they have just passed on.
@@ -146,10 +148,20 @@ export default function Profile() {
           <Button
             title="Unlock the chat without a match"
             variant="quiet"
-            disabled={busy}
-            onPress={() => {}}
+            disabled={busy || !data}
+            onPress={() => setUnlocking(true)}
           />
         </View>
+
+        {unlocking && data ? (
+          <UnlockSheet
+            user={{ id: data.id!, name: data.name! }}
+            onClose={() => setUnlocking(false)}
+            onUnlocked={(conversationId) =>
+              router.replace({ pathname: '/chat/[id]', params: { id: conversationId } })
+            }
+          />
+        ) : null}
 
         {safety && data ? (
           <SafetySheet

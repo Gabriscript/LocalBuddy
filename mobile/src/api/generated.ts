@@ -727,6 +727,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/payments/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PaymentOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions": {
         parameters: {
             query?: never;
@@ -1598,6 +1633,20 @@ export interface components {
             /** Format: int32 */
             pageSize: number | string;
             hasMore: boolean;
+        };
+        PaymentOptions: {
+            currency: string;
+            /** Format: double */
+            unlockPrice: number | string;
+            /** Format: double */
+            monthlyPrice: number | string;
+            /** Format: double */
+            yearlyPrice: number | string;
+            /** Format: int32 */
+            credits: number | string;
+            /** Format: int32 */
+            creditCost: number | string;
+            subscribed: boolean;
         };
         PhotoDto: {
             /** Format: uuid */
