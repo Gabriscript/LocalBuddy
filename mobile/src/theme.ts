@@ -18,6 +18,9 @@ const light = {
   success: '#0A7D22',
   danger: '#DC2626',
   scrim: 'rgba(0,0,0,0.5)',
+  // For the one screen that takes the whole display: a veil thin enough to remember where you
+  // were, thick enough that the photograph behind it stops competing.
+  scrimStrong: 'rgba(0,0,0,0.82)',
   overlay: 'rgba(0,0,0,0.45)',
   onOverlay: '#FFFFFF',
 };
@@ -36,6 +39,7 @@ const dark: typeof light = {
   success: '#5CD37B',
   danger: '#F87171',
   scrim: 'rgba(0,0,0,0.6)',
+  scrimStrong: 'rgba(0,0,0,0.86)',
   overlay: 'rgba(0,0,0,0.45)',
   onOverlay: '#FFFFFF',
 };

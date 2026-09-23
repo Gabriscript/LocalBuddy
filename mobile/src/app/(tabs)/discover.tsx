@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
 import { FilterSheet } from '@/components/FilterSheet';
+import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
 import { Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
@@ -27,6 +29,9 @@ type Params = {
   smokes?: string;
   hasPets?: string;
 };
+
+type Card = components['schemas']['ProfileCard'];
+type Match = { userId: string; name: string; photoUrl?: string | null; conversationId: string };
 
 const asBool = (value?: string) => (value === undefined ? undefined : value === 'true');
 const asParam = (value?: boolean) => (value === undefined ? undefined : String(value));
@@ -78,11 +83,19 @@ export default function Discover() {
   const { interest, pass } = useDecide();
   const busy = interest.isPending || pass.isPending;
 
-  async function showInterest(id: string) {
-    const result = await interest.mutateAsync(id);
-    // A reciprocal match opens the conversation straight away; otherwise the card just goes.
+  // A reciprocal match is the moment the whole product exists for, so it gets a moment of its
+  // own instead of a silent navigation. Anything else: the card simply goes.
+  const [match, setMatch] = useState<Match | null>(null);
+
+  async function showInterest(card: Card) {
+    const result = await interest.mutateAsync(card.id!);
     if (result.matched && result.conversationId) {
-      router.push({ pathname: '/chat/[id]', params: { id: result.conversationId } });
+      setMatch({
+        userId: card.id!,
+        name: card.name!,
+        photoUrl: card.photoUrl,
+        conversationId: result.conversationId,
+      });
     }
   }
 
@@ -155,7 +168,7 @@ export default function Discover() {
               busy={busy}
               onOpen={() => router.push({ pathname: '/user/[id]', params: { id: item.id! } })}
               onPass={() => pass.mutate(item.id!)}
-              onInterest={() => showInterest(item.id!)}
+              onInterest={() => showInterest(item)}
             />
           )}
         />
@@ -163,6 +176,22 @@ export default function Discover() {
 
       {filtering ? (
         <FilterSheet value={filters} onClose={() => setFiltering(false)} onApply={applyFilters} />
+      ) : null}
+
+      {match ? (
+        <MatchBurst
+          name={match.name}
+          photoPath={match.photoUrl}
+          onSayHello={() => {
+            setMatch(null);
+            router.push({ pathname: '/chat/[id]', params: { id: match.conversationId } });
+          }}
+          onSeeProfile={() => {
+            setMatch(null);
+            router.push({ pathname: '/user/[id]', params: { id: match.userId } });
+          }}
+          onClose={() => setMatch(null)}
+        />
       ) : null}
     </SafeAreaView>
   );

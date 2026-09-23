@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
+import { MatchBurst } from '@/components/MatchBurst';
 import { Pill } from '@/components/Pill';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
@@ -31,10 +32,13 @@ export default function Profile() {
   // would leave the member stuck on a profile they have just passed on.
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/discover'));
 
+  const [matched, setMatched] = useState<string | null>(null);
+
   async function showInterest() {
     const result = await interest.mutateAsync(id);
+    // A mutual yes gets its moment; a one-sided one just returns to the feed.
     if (result.matched && result.conversationId) {
-      router.replace({ pathname: '/chat/[id]', params: { id: result.conversationId } });
+      setMatched(result.conversationId);
     } else {
       goBack();
     }
@@ -152,6 +156,18 @@ export default function Profile() {
             onPress={() => setUnlocking(true)}
           />
         </View>
+
+        {matched && data ? (
+          <MatchBurst
+            name={data.name!}
+            photoPath={photos[0]?.url}
+            onSayHello={() =>
+              router.replace({ pathname: '/chat/[id]', params: { id: matched } })
+            }
+            // No "their profile" here: it is the screen behind the burst.
+            onClose={goBack}
+          />
+        ) : null}
 
         {unlocking && data ? (
           <UnlockSheet
