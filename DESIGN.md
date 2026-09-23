@@ -72,6 +72,13 @@ components:
     typography: "{typography.label}"
     rounded: "{rounded.pill}"
     height: "52px"
+  button-danger:
+    backgroundColor: "{colors.refusal}"
+    textColor: "#FFFFFF"
+    typography: "{typography.label}"
+    rounded: "{rounded.pill}"
+    padding: "0 24px"
+    height: "52px"
   chip:
     backgroundColor: "{colors.paper-sunk}"
     textColor: "{colors.text}"
@@ -189,6 +196,7 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Primary:** Ink fill, white label. One per screen.
 - **Secondary:** Sunk Paper fill, Text label. The companion action, such as "Pass" beside "Show interest".
 - **Quiet:** no fill, no border, Text label. For anything deliberately understated, such as signing out or the paid unlock.
+- **Danger:** Refusal fill, white label. Only for confirming something that takes away: blocking a member, and one day deleting an account. Never for an ordinary action that happens to feel serious.
 - **States:** pressed drops opacity to 0.75, disabled to 0.45, and neither moves the bounds, so nothing around the button jumps. A loading button shows a spinner beside its label and reports `aria-busy`.
 
 ### Chips
@@ -213,6 +221,15 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 
 ### Loading
 - Lists load into their own shape: the discovery feed shows cards down to the 4:3 block, the conversation list shows rows. One pulse, 0.65 to 1 opacity over 700ms each way, drives every block on a screen, and no pulse at all when the system asks for less movement. Screens without a known shape keep a centred spinner.
+
+### Sheets
+- Everything that asks a question without leaving the screen slides up from the bottom edge: the filters, the safety actions, the review, the paid unlock. One shell (`Sheet`), a title, a close button, and a footer that holds the one or two buttons that finish the job.
+- A sheet is mounted only while it is open, so it always starts from the current state. The cost is no slide-out animation, which nobody waits for.
+
+### The match moment
+- The one screen allowed to celebrate. The other person's photograph sits in the middle and the next actions come out of it like satellites, then wind back in when it is dismissed: the ring turns as it opens and unwinds as it closes, while each satellite turns the other way so its label stays upright.
+- Labels live under the circles, always visible. A phone has no hover, and an unlabelled circle is a guess.
+- It appears without any motion when the system asks for less, and it is a dialog with a name, not an effect.
 
 ### Named Rules
 
