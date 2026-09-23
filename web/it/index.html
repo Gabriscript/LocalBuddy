@@ -17,9 +17,21 @@
       content="Chi viaggia e chi abita, presentati. La giornata insieme non si paga mai."
     />
     <meta property="og:type" content="website" />
+    <!-- TODO: una fotografia vera, come tutte le altre. Senza og:image il link condiviso
+         compare come un rettangolo grigio. -->
+    <meta
+      property="og:image"
+      content="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/630"
+    />
+    <meta
+      property="og:image:alt"
+      content="Una via stretta di una città italiana nel tardo pomeriggio"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" hreflang="en" href="../index.html" />
     <link rel="alternate" hreflang="it" href="index.html" />
+    <link rel="alternate" hreflang="x-default" href="../index.html" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -74,6 +86,7 @@
             src="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/1500"
             width="1200"
             height="1500"
+            fetchpriority="high"
             alt="Una via stretta di una città italiana nel tardo pomeriggio"
           />
         </figure>
@@ -121,6 +134,8 @@
             src="https://picsum.photos/seed/localbuddy-market-morning-produce/1000/1200"
             width="1000"
             height="1200"
+            loading="lazy"
+            decoding="async"
             alt="Un banco del mercato al mattino, con frutta e verdura"
           />
         </figure>

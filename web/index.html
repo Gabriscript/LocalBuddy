@@ -17,9 +17,19 @@
       content="Travellers and locals, introduced. The day out is never paid for."
     />
     <meta property="og:type" content="website" />
+    <!-- TODO: a real photograph, like the rest of them. Without any og:image the link shows up
+         in a message as a bare grey box. -->
+    <meta
+      property="og:image"
+      content="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/630"
+    />
+    <meta property="og:image:alt" content="A narrow street in an Italian city in the late afternoon" />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" hreflang="en" href="index.html" />
     <link rel="alternate" hreflang="it" href="it/index.html" />
+    <!-- Neither language is the fallback for the rest of the world; English is. -->
+    <link rel="alternate" hreflang="x-default" href="index.html" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -76,6 +86,7 @@
             src="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/1500"
             width="1200"
             height="1500"
+            fetchpriority="high"
             alt="A narrow street in an Italian city in the late afternoon"
           />
         </figure>
@@ -122,6 +133,8 @@
             src="https://picsum.photos/seed/localbuddy-market-morning-produce/1000/1200"
             width="1000"
             height="1200"
+            loading="lazy"
+            decoding="async"
             alt="A morning market stall with fruit and vegetables"
           />
         </figure>
