@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LocalBuddy, meet someone who lives there</title>
+    <meta
+      name="description"
+      content="LocalBuddy introduces travellers to locals who want to show them their city. The day out is never paid for. The introduction is mutual, or it does not happen."
+    />
+    <meta name="theme-color" content="#F7F4F1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141212" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:title" content="LocalBuddy, meet someone who lives there" />
+    <meta
+      property="og:description"
+      content="Travellers and locals, introduced. The day out is never paid for."
+    />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Playfair+Display:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="site">
+      <a class="wordmark" href="#main">LocalBuddy</a>
+      <nav aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#who">Who it is for</a>
+        <a href="#safety">Safety</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>Meet someone who lives there.</h1>
+          <p class="lede">
+            The bar with the password on the door. The wine poured through a hatch in the wall. A
+            local shows you their afternoon, and nobody pays for it.
+          </p>
+          <p class="cta-row">
+            <!-- TODO: point this at a real address or a waitlist endpoint before publishing. -->
+            <a class="button" href="#waitlist">Ask for an invitation</a>
+            <a class="button quiet" href="#how">See how it works</a>
+          </p>
+        </div>
+        <figure class="hero-figure">
+          <img
+            src="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/1500"
+            width="1200"
+            height="1500"
+            alt="A narrow street in an Italian city in the late afternoon"
+          />
+        </figure>
+      </section>
+
+      <section id="how" class="doors">
+        <h2>Two ways a conversation opens</h2>
+        <div class="door-pair">
+          <article>
+            <h3>You both said yes</h3>
+            <p>
+              You show interest in someone. If they show interest back, the chat opens. Free, and
+              always the first route we offer.
+            </p>
+          </article>
+          <article>
+            <h3>You did not want to wait</h3>
+            <p>
+              Pay once and write to a single person without the match. That fee buys the
+              introduction and nothing else.
+            </p>
+          </article>
+        </div>
+        <p class="aside">
+          Profiles are public and free to read. Contact stays closed until one of the two routes
+          opens it, so nobody gets written to merely for being visible.
+        </p>
+      </section>
+
+      <section class="statement">
+        <p>
+          Nobody pays for the day itself. Not a fee, not a tip, not a gift that everyone knows is a
+          fee.
+        </p>
+        <p class="statement-note">
+          It is what separates a cultural exchange from guided tourism, and in Italy that line is
+          the law (L. 190/2023). A host who asks to be paid for their time is removed.
+        </p>
+      </section>
+
+      <section id="who" class="who">
+        <figure>
+          <img
+            src="https://picsum.photos/seed/localbuddy-market-morning-produce/1000/1200"
+            width="1000"
+            height="1200"
+            alt="A morning market stall with fruit and vegetables"
+          />
+        </figure>
+        <div class="who-copy">
+          <h2>Two roles, and you can hold both</h2>
+          <dl>
+            <dt>Hosting</dt>
+            <dd>
+              You live in an Italian city and you have an afternoon. You decide who, when, and
+              whether at all. Some hosts also offer a bed, which carries real obligations towards
+              the local Questura, spelled out before that option can be switched on.
+            </dd>
+            <dt>Visiting</dt>
+            <dd>
+              You are passing through, from anywhere. You read what someone actually proposes to do
+              with you, not a menu of tours, and you ask.
+            </dd>
+          </dl>
+          <p>
+            Nobody owes anybody a return visit. Being hosted puts you in no debt, and never hosting
+            locks you out of nothing.
+          </p>
+        </div>
+      </section>
+
+      <section id="safety" class="safety">
+        <h2>What stands behind a stranger</h2>
+        <ul>
+          <li>
+            <strong>An identity, checked.</strong> Every member verifies a document before they can
+            write to anyone. It also proves they are over eighteen.
+          </li>
+          <li>
+            <strong>A block that holds.</strong> Blocking closes the conversation in both
+            directions, takes it out of both inboxes, and hides each profile from the other.
+          </li>
+          <li>
+            <strong>Reviews from people who met.</strong> Only the two sides of an exchange that
+            actually happened can review each other.
+          </li>
+          <li>
+            <strong>A ban that follows the person.</strong> A removed member cannot return with a
+            second account on the same document.
+          </li>
+        </ul>
+      </section>
+
+      <section id="waitlist" class="waitlist">
+        <h2>Opening in Milan first</h2>
+        <p>
+          Hosts register in Italy, the one country whose rules we have checked. Travellers can come
+          from anywhere.
+        </p>
+        <!-- TODO: replace with the real contact address or a signup endpoint. -->
+        <p class="cta-row"><a class="button" href="#waitlist">Ask for an invitation</a></p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>LocalBuddy, a working name.</p>
+      <p>
+        An exchange between people, on the model of hospitality networks that have run since 1949.
+      </p>
+    </footer>
+  </body>
+</html>

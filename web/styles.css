@@ -1,0 +1,390 @@
+/* The tokens are the app's, from DESIGN.md: paper, ink, and the photographs carrying the
+   colour. The page is deliberately still. Motion here reports a hover and nothing else. */
+:root {
+  --paper: #f7f4f1;
+  --card: #fefdfc;
+  --paper-sunk: #efeae5;
+  --text: #1c1a19;
+  --text-muted: #6b6560;
+  --hairline: #e6e1dc;
+  --ink: #1e3a5c;
+  --on-ink: #ffffff;
+
+  --step-sm: 8px;
+  --step-md: 16px;
+  --step-lg: 24px;
+  --step-xl: 32px;
+  --step-xxl: 48px;
+
+  --measure: 62ch;
+  --shell: 1180px;
+
+  --display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141212;
+    --card: #1e1b1b;
+    --paper-sunk: #262222;
+    --text: #f5f2f0;
+    --text-muted: #a9a19b;
+    --hairline: #332e2e;
+    --ink: #a8c4ea;
+    --on-ink: #14243a;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+}
+
+h2 {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0;
+  max-width: var(--measure);
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: var(--step-md);
+  top: var(--step-md);
+  z-index: 2;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--on-ink);
+  text-decoration: none;
+}
+
+/* Header: one line, always. The section links shrink before they wrap. */
+.site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--step-lg);
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: var(--step-lg) var(--step-md);
+}
+
+.wordmark {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  text-decoration: none;
+}
+
+.site nav {
+  display: flex;
+  gap: var(--step-lg);
+  font-size: 0.95rem;
+}
+
+.site nav a {
+  text-decoration: none;
+  color: var(--text-muted);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.site nav a:hover,
+.site nav a:focus-visible {
+  color: var(--text);
+  border-bottom-color: var(--hairline);
+}
+
+main {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 var(--step-md);
+}
+
+section {
+  padding-block: clamp(var(--step-xxl), 9vw, 120px);
+}
+
+section + section {
+  border-top: 1px solid var(--hairline);
+}
+
+.button {
+  display: inline-block;
+  padding: 15px 28px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.12s;
+}
+
+.button:hover,
+.button:focus-visible {
+  opacity: 0.88;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button.quiet {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--hairline);
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-sm) var(--step-md);
+  margin-top: var(--step-lg);
+}
+
+/* Hero: text left, one photograph right, never centred. */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(var(--step-lg), 5vw, 72px);
+  align-items: center;
+  padding-top: clamp(var(--step-lg), 4vw, 64px);
+}
+
+.hero-copy {
+  display: grid;
+  gap: var(--step-lg);
+}
+
+.lede {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  max-width: 46ch;
+}
+
+.hero-figure {
+  margin: 0;
+}
+
+.hero-figure img {
+  border-radius: 20px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+/* Two routes, two columns. No cards: a rule above each one does the same work with less
+   furniture. */
+.doors {
+  display: grid;
+  gap: var(--step-xl);
+}
+
+.door-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--step-xl);
+}
+
+.door-pair article {
+  display: grid;
+  gap: var(--step-sm);
+  align-content: start;
+  padding-top: var(--step-lg);
+  border-top: 2px solid var(--ink);
+}
+
+.aside {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+/* The one loud moment on the page, and it belongs to the rule the product is built on. */
+.statement {
+  margin-inline: calc(var(--step-md) * -1);
+  padding-inline: clamp(var(--step-lg), 6vw, 80px);
+  background: var(--ink);
+  color: var(--on-ink);
+  display: grid;
+  gap: var(--step-lg);
+  border-top: 0;
+}
+
+.statement p:first-child {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  line-height: 1.25;
+  max-width: 24ch;
+}
+
+.statement-note {
+  opacity: 0.86;
+  max-width: 52ch;
+}
+
+.who {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(var(--step-lg), 5vw, 72px);
+  align-items: center;
+}
+
+.who figure {
+  margin: 0;
+}
+
+.who img {
+  border-radius: 20px;
+  aspect-ratio: 5 / 6;
+  object-fit: cover;
+}
+
+.who-copy {
+  display: grid;
+  gap: var(--step-lg);
+}
+
+.who dl {
+  display: grid;
+  gap: var(--step-lg);
+  margin: 0;
+}
+
+.who dt {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.who dd {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+/* Four promises, read as a list, separated by air rather than by boxes. */
+.safety {
+  display: grid;
+  gap: var(--step-xl);
+}
+
+.safety ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--step-xl) clamp(var(--step-lg), 5vw, 64px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.safety li {
+  color: var(--text-muted);
+  max-width: 44ch;
+}
+
+.safety strong {
+  display: block;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.waitlist {
+  display: grid;
+  gap: var(--step-md);
+}
+
+.site-footer {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: var(--step-xl) var(--step-md) var(--step-xxl);
+  border-top: 1px solid var(--hairline);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  display: grid;
+  gap: 4px;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .who,
+  .door-pair,
+  .safety ul {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    gap: var(--step-xl);
+  }
+
+  .who figure {
+    order: 2;
+  }
+
+  .hero-figure img,
+  .who img {
+    aspect-ratio: 4 / 3;
+  }
+
+  .site nav {
+    gap: var(--step-md);
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .site {
+    flex-wrap: wrap;
+    gap: var(--step-sm);
+  }
+
+  .button {
+    width: 100%;
+    text-align: center;
+  }
+}
