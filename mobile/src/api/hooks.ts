@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import type { ImagePickerAsset } from 'expo-image-picker';
 
 import { api, unwrap } from './client';
@@ -17,6 +18,7 @@ export const keys = {
   profile: (id: string) => ['profile', id] as const,
   discovery: (filters: DiscoveryFilters) => ['discovery', filters] as const,
   conversations: ['conversations'] as const,
+  conversation: (id: string) => ['conversation', id] as const,
   messages: (id: string) => ['messages', id] as const,
   reviews: (id: string) => ['reviews', id] as const,
   blocks: ['blocks'] as const,
@@ -35,13 +37,21 @@ function usePages<T>(queryKey: readonly unknown[], load: (page: number) => Promi
     queryKey,
     queryFn: ({ pageParam }) => load(pageParam),
     initialPageParam: 0,
-    getNextPageParam: (last, _pages, lastPage) => (last.hasMore ? lastPage + 1 : undefined),
+    getNextPageParam: (last, _pages, lastPageParam) =>
+      last.hasMore ? lastPageParam + 1 : undefined,
   });
+
+  // Memoised: a fresh array on every render is a fresh `data` prop for every FlatList, which
+  // then cannot skip a single row. The cost grew with how far somebody had scrolled.
+  const items = useMemo(
+    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    [query.data]
+  );
 
   return {
     ...query,
     /// Flattened, so a screen never has to know how many requests it took.
-    items: query.data?.pages.flatMap((page) => page.items) ?? [],
+    items,
     /// Safe to hand straight to onEndReached, which fires more than once per end of list.
     loadMore: () => {
       if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
@@ -79,6 +89,17 @@ export function useConversations() {
   );
 }
 
+/// The one conversation a chat screen is on. Asking for it directly rather than hunting for it
+/// in the paged inbox is what keeps the other member's name — and with it the report and block
+/// controls — available in a conversation that has fallen past the first page.
+export function useConversation(id: string) {
+  return useQuery({
+    queryKey: keys.conversation(id),
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/conversations/{id}', { params: { path: { id } } })),
+  });
+}
+
 /// Page 0 is the newest messages, which is why the list showing them is inverted: reaching the
 /// visual top is reaching the end of the data, and asks for the page before.
 export function useMessages(id: string) {
@@ -104,6 +125,8 @@ export function useSendMessage(id: string) {
     onSuccess: () => {
       client.invalidateQueries({ queryKey: keys.messages(id) });
       client.invalidateQueries({ queryKey: keys.conversations });
+      // The summary carries the last message, so it is stale the moment one is sent.
+      client.invalidateQueries({ queryKey: keys.conversation(id) });
     },
   });
 }
@@ -245,6 +268,8 @@ export function useBlock() {
   const forget = () => {
     client.invalidateQueries({ queryKey: ['discovery'] });
     client.invalidateQueries({ queryKey: keys.conversations });
+    // A block takes the conversation out of reach one by one as well as in the list.
+    client.invalidateQueries({ queryKey: ['conversation'] });
     client.invalidateQueries({ queryKey: keys.blocks });
   };
 

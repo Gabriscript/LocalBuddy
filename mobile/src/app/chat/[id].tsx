@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useConversations, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
+import { useConversation, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { ReviewSheet } from '@/components/ReviewSheet';
@@ -30,10 +30,12 @@ export default function Chat() {
   const [draft, setDraft] = useState('');
   const [sheet, setSheet] = useState<'none' | 'safety' | 'review'>('none');
 
-  // The conversation list is where the other member's id lives. It is cached by the time
-  // anyone taps through to here, and fetched once on a cold deep link.
-  const { items: conversations } = useConversations();
-  const otherId = conversations.find((conversation) => conversation.id === id)?.otherUserId;
+  // Asked for by id, not searched for in the inbox. Scanning the conversation list only ever
+  // saw the pages it had loaded, so past the first page the other member came back undefined
+  // and the report and block control stayed disabled — in the conversation most likely to
+  // need it.
+  const { data: conversation } = useConversation(id);
+  const otherId = conversation?.otherUserId;
   const { data: other } = useProfile(otherId);
   const { data: me } = useMe();
   const photo = other?.photos?.find((p) => p.type === 0)?.url;
@@ -128,11 +130,7 @@ export default function Chat() {
 
         {/* Above the composer, so it sits with the draft it refused to send rather than
             somewhere up in the conversation. The draft is never cleared on failure. */}
-        {send.error ? (
-          <View style={styles.note}>
-            <ActionError error={send.error} />
-          </View>
-        ) : null}
+        <ActionError error={send.error} style={styles.note} />
 
         <View style={[styles.composer, { borderTopColor: c.border, backgroundColor: c.surface }]}>
           <TextInput
@@ -194,7 +192,7 @@ const styles = StyleSheet.create({
   titleAvatar: { width: 32, height: 32, borderRadius: radius.pill },
   list: { padding: space.md, gap: space.sm },
   bubble: { maxWidth: '80%', padding: space.md, borderRadius: radius.lg },
-  note: { paddingHorizontal: space.sm, paddingBottom: space.sm },
+  note: { marginHorizontal: space.sm, marginBottom: space.sm },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

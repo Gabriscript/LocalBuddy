@@ -43,6 +43,40 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
         return Page<ConversationSummary>.From(rows, page, pageSize);
     }
 
+    /// The single conversation a chat screen is looking at. It is in the list above too, but
+    /// that list is paged: a screen that finds the other member by scanning the first page
+    /// loses them the moment the inbox grows past it — and loses the report and block controls
+    /// with them, because those are what need to know who the other member is.
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType<ConversationSummary>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ConversationSummary>> One(Guid id)
+    {
+        if (!await IsParticipant(id)) return Forbid();
+
+        var me = User.Id();
+        // A block ends the conversation for both sides, so it disappears here exactly as it
+        // disappears from the list.
+        var blocked = db.BlockedIdsFor(me);
+
+        var summary = await db.Conversations
+            .Where(c => c.Id == id &&
+                        ((c.UserAId == me && !blocked.Contains(c.UserBId)) ||
+                         (c.UserBId == me && !blocked.Contains(c.UserAId))))
+            .Select(c => new ConversationSummary(
+                c.Id,
+                c.UserAId == me ? c.UserBId : c.UserAId,
+                c.UnlockedByPayment,
+                c.CreatedAt,
+                db.Messages.Where(m => m.ConversationId == c.Id)
+                           .OrderByDescending(m => m.SentAt)
+                           .Select(m => m.Content).FirstOrDefault()))
+            .FirstOrDefaultAsync();
+
+        return summary is null ? NotFound() : summary;
+    }
+
     [HttpGet("{id:guid}/messages")]
     [ProducesResponseType<Page<MessageDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { useMe } from '@/api/hooks';
@@ -18,7 +18,10 @@ import { errorMessage } from './Screen';
 ///
 /// `identity_verification_required` is the one refusal that has a fix, so it carries the way
 /// out instead of only naming the problem (ADR-0007: nobody reaches another member unverified).
-export function ActionError({ error }: { error: unknown }) {
+/// `style` carries the caller's inset. It belongs here rather than on a wrapping View, because
+/// this component decides for itself whether there is anything to show — and a wrapper that
+/// outlives it leaves a band of padding with nothing in it.
+export function ActionError({ error, style }: { error: unknown; style?: StyleProp<ViewStyle> }) {
   const c = useColors();
   const router = useRouter();
   const verified = useMe().data?.identityVerified;
@@ -29,7 +32,7 @@ export function ActionError({ error }: { error: unknown }) {
   if (!error || (unverified && verified)) return null;
 
   return (
-    <View style={[styles.note, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}>
+    <View style={[styles.note, { backgroundColor: c.surfaceMuted, borderColor: c.border }, style]}>
       <View style={styles.line}>
         {/* The icon repeats what the words say: red alone is not a message (DESIGN.md). */}
         <Ionicons name="alert-circle-outline" size={20} color={c.danger} aria-hidden />

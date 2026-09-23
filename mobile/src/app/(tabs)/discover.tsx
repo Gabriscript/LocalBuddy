@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -94,20 +94,44 @@ export default function Discover() {
   /// `mutate`, not `mutateAsync`: a refusal from the server is a rejected promise nobody
   /// awaits, and an unverified member got a tick that silently did nothing. This way the
   /// refusal lands in `interest.error`, where the screen can say it out loud.
-  function showInterest(card: Card) {
-    interest.mutate(card.id!, {
-      onSuccess: (result) => {
-        if (result.matched && result.conversationId) {
-          setMatch({
-            userId: card.id!,
-            name: card.name!,
-            photoUrl: card.photoUrl,
-            conversationId: result.conversationId,
-          });
-        }
-      },
-    });
-  }
+  ///
+  /// These three are stable across renders so that the `memo` on ProfileCard can do its job.
+  const showInterest = useCallback(
+    (card: Card) =>
+      interest.mutate(card.id!, {
+        onSuccess: (result) => {
+          if (result.matched && result.conversationId) {
+            setMatch({
+              userId: card.id!,
+              name: card.name!,
+              photoUrl: card.photoUrl,
+              conversationId: result.conversationId,
+            });
+          }
+        },
+      }),
+    [interest]
+  );
+
+  const showProfile = useCallback(
+    (card: Card) => router.push({ pathname: '/user/[id]', params: { id: card.id! } }),
+    [router]
+  );
+
+  const passOn = useCallback((card: Card) => pass.mutate(card.id!), [pass]);
+
+  const renderCard = useCallback(
+    ({ item }: { item: Card }) => (
+      <ProfileCard
+        card={item}
+        busy={busy}
+        onOpen={showProfile}
+        onPass={passOn}
+        onInterest={showInterest}
+      />
+    ),
+    [busy, showProfile, passOn, showInterest]
+  );
 
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
@@ -149,12 +173,9 @@ export default function Discover() {
       </View>
 
       {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
-          own: the feed behind it is still fine. */}
-      {interest.error || pass.error ? (
-        <View style={styles.note}>
-          <ActionError error={interest.error ?? pass.error} />
-        </View>
-      ) : null}
+          own: the feed behind it is still fine. No wrapper — it carries its own inset and
+          disappears completely when there is nothing to say. */}
+      <ActionError error={interest.error ?? pass.error} style={styles.note} />
 
       <Screen
         loading={isPending}
@@ -188,15 +209,7 @@ export default function Discover() {
           onEndReached={loadMore}
           onEndReachedThreshold={0.6}
           ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
-          renderItem={({ item }) => (
-            <ProfileCard
-              card={item}
-              busy={busy}
-              onOpen={() => router.push({ pathname: '/user/[id]', params: { id: item.id! } })}
-              onPass={() => pass.mutate(item.id!)}
-              onInterest={() => showInterest(item)}
-            />
-          )}
+          renderItem={renderCard}
         />
       </Screen>
 
@@ -245,7 +258,7 @@ const styles = StyleSheet.create({
   // Wraps, because at the largest text size three chips no longer fit across a phone and a
   // row that does not wrap simply runs off the side of the screen.
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, padding: space.md },
-  note: { paddingHorizontal: space.md, paddingBottom: space.md },
+  note: { marginHorizontal: space.md, marginBottom: space.md },
   // The last card clears the tab bar instead of hiding behind it.
   list: { paddingHorizontal: space.md, paddingBottom: space.xxl * 2, gap: space.lg },
 });

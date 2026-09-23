@@ -7,9 +7,10 @@
 (() => {
   const panel = document.getElementById('menu');
   const burger = document.querySelector('.burger');
-  if (!panel || !burger) return;
-
-  const close = panel.querySelector('.menu-close');
+  const close = panel && panel.querySelector('.menu-close');
+  // All three or none. Bailing here leaves the header links in place, because the stylesheet
+  // only hides them once this file reaches its last line.
+  if (!panel || !burger || !close) return;
 
   panel.querySelectorAll('[data-letters]').forEach((link, row) => {
     // Its place in the list, so the rows arrive one after another rather than together.
@@ -34,7 +35,7 @@
 
   const isOpen = () => burger.getAttribute('aria-expanded') === 'true';
 
-  function setOpen(open) {
+  function setOpen(open, { restoreFocus = true } = {}) {
     burger.setAttribute('aria-expanded', String(open));
     panel.classList.toggle('is-open', open);
 
@@ -46,18 +47,26 @@
     // Focus the dialog, not the first control in it: a ring drawn around the close button is
     // the wrong thing to greet somebody with, and a screen reader should hear the menu first.
     if (open) panel.focus();
-    else burger.focus();
+    else if (restoreFocus) burger.focus();
   }
 
   burger.addEventListener('click', () => setOpen(!isOpen()));
   close.addEventListener('click', () => setOpen(false));
 
   // Every link in here points further down this same page, so the menu has done its job.
+  // Focus is left where the link sends it rather than dragged back to the button: somebody who
+  // just asked for Safety should carry on from Safety, not from the header they dismissed.
   panel.addEventListener('click', (event) => {
-    if (event.target.closest('a')) setOpen(false);
+    if (event.target.closest('a')) setOpen(false, { restoreFocus: false });
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isOpen()) setOpen(false);
   });
+
+  // Last, on purpose. The stylesheet hides the header links and shows the button only under
+  // this class, so the swap happens once the menu is proven to work rather than once the page
+  // is parsed. Scripting off, this file blocked, an exception above: in every one of those the
+  // class is absent and the four links are simply still there.
+  document.documentElement.classList.add('js');
 })();

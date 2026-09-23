@@ -17,8 +17,8 @@
       content="Chi viaggia e chi abita, presentati. La giornata insieme non si paga mai."
     />
     <meta property="og:type" content="website" />
-    <!-- TODO: una fotografia vera, come tutte le altre. Senza og:image il link condiviso
-         compare come un rettangolo grigio. -->
+    <!-- TODO: a real photograph, like the rest of them. Without any og:image the shared link
+         shows up as a bare grey box. -->
     <meta
       property="og:image"
       content="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/630"
@@ -40,24 +40,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../styles.css" />
-    <!-- L'unico script della pagina. Il menu è CSS; questo gli dà Escape, un focus che torna
-         da dove è partito, e un pulsante che dice se è aperto. -->
+    <!-- The only script on the page. The menu is CSS; this gives it Escape, a focus that goes
+         back where it came from, and a button that says whether it is open. -->
     <script src="../menu.js" defer></script>
-    <noscript>
-      <style>
-        /* Senza lo script il pulsante non apre niente, e sotto gli 860px è l'unica via alle
-           sezioni. Quindi senza, i link tornano e il pulsante sparisce. */
-        @media (max-width: 860px) {
-          .site nav.sections {
-            display: flex;
-            flex-wrap: wrap;
-          }
-          .burger {
-            display: none;
-          }
-        }
-      </style>
-    </noscript>
   </head>
 
   <body>
@@ -66,7 +51,7 @@
     <header class="site">
       <a class="wordmark" href="#main">LocalBuddy</a>
 
-      <!-- Sopra gli 860px questi quattro ci stanno, e restano dove si vedono. -->
+      <!-- Above 860px these four fit, so they stay where they can be seen. -->
       <nav class="sections" aria-label="Sezioni">
         <a href="#how">Come funziona</a>
         <a href="#who">Per chi è</a>
@@ -80,8 +65,8 @@
       </button>
     </header>
 
-    <!-- Figlio diretto di body apposta: menu.js rende inert i fratelli mentre è aperto, così
-         dietro un menu a schermo intero non resta niente raggiungibile con Tab. -->
+    <!-- A direct child of body on purpose: menu.js makes its siblings inert while it is open,
+         so nothing behind a full-screen menu is still reachable with Tab. -->
     <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" tabindex="-1">
       <button class="menu-close" type="button" aria-label="Chiudi il menu">&times;</button>
       <nav aria-label="Sezioni">
@@ -116,7 +101,7 @@
             Un locale ti mostra il suo pomeriggio, e nessuno lo paga.
           </p>
           <p class="cta-row">
-            <!-- TODO: collegare a un indirizzo vero o a un modulo di iscrizione. -->
+            <!-- TODO: point this at a real address or a signup endpoint before publishing. -->
             <a class="button" href="#waitlist">Chiedi un invito</a>
             <a class="button quiet" href="#how">Guarda come funziona</a>
           </p>
@@ -229,7 +214,7 @@
           Gli host si registrano in Italia, l'unico paese di cui abbiamo verificato le regole. Chi
           viaggia può arrivare da ovunque.
         </p>
-        <!-- TODO: sostituire con l'indirizzo vero o con un modulo di iscrizione. -->
+        <!-- TODO: replace with the real contact address or a signup endpoint. -->
         <p class="cta-row"><a class="button" href="#waitlist">Chiedi un invito</a></p>
       </section>
     </main>

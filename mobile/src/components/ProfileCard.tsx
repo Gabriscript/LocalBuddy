@@ -25,9 +25,12 @@ export const ProfileCard = memo(function ProfileCard({
   busy,
 }: {
   card: Card;
-  onOpen?: () => void;
-  onPass?: () => void;
-  onInterest?: () => void;
+  /// These take the card rather than closing over it, so the feed can hand the same three
+  /// functions to every row. Closures built per row make the `memo` above a no-op: the props
+  /// never compare equal, and every card re-renders whenever the screen does.
+  onOpen?: (card: Card) => void;
+  onPass?: (card: Card) => void;
+  onInterest?: (card: Card) => void;
   busy?: boolean;
 }) {
   const c = useColors();
@@ -52,7 +55,7 @@ export const ProfileCard = memo(function ProfileCard({
   return (
     <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
       <Pressable
-        onPress={onOpen}
+        onPress={() => onOpen?.(card)}
         accessibilityRole="button"
         accessibilityLabel={summary}
         accessibilityHint="Opens the full profile"
@@ -105,7 +108,7 @@ export const ProfileCard = memo(function ProfileCard({
           <IconButton
             name="close"
             label={`Pass on ${card.name}`}
-            onPress={onPass}
+            onPress={() => onPass(card)}
             tint={c.textMuted}
             disabled={busy}
           />
@@ -114,7 +117,7 @@ export const ProfileCard = memo(function ProfileCard({
             // person, and a heart answers a different one.
             name="checkmark"
             label={`Show interest in ${card.name}`}
-            onPress={onInterest}
+            onPress={() => onInterest(card)}
             tint={c.primary}
             disabled={busy}
           />

@@ -41,21 +41,6 @@
     <!-- The only script on the page. The menu is CSS; this gives it Escape, a focus that goes
          back where it came from, and a button that says whether it is open. -->
     <script src="menu.js" defer></script>
-    <noscript>
-      <style>
-        /* The button cannot open anything without the script, and below 860px it is the only
-           way to the sections. So without it the links come back and the button goes. */
-        @media (max-width: 860px) {
-          .site nav.sections {
-            display: flex;
-            flex-wrap: wrap;
-          }
-          .burger {
-            display: none;
-          }
-        }
-      </style>
-    </noscript>
   </head>
 
   <body>

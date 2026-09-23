@@ -39,7 +39,9 @@ export function StepPage({
   return (
     <SafeAreaView style={[styles.page, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.body}>
-        {step ? (
+        {/* Not `step ?`: a step numbered 0 is a number, and a falsy check would hide the dots
+            for it without a word of complaint. */}
+        {step !== undefined ? (
           <View
             style={styles.dots}
             role="progressbar"

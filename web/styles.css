@@ -642,12 +642,15 @@ section + section {
   outline-offset: 4px;
 }
 
+/* Both sides of the swap are gated on `.js`, which menu.js adds only after it has wired the
+   menu up. Without it — scripting off, the file blocked, an exception while loading — the
+   links stay and the button never appears, instead of a dead button and no navigation. */
 @media (max-width: 860px) {
-  .site nav.sections {
+  .js .site nav.sections {
     display: none;
   }
 
-  .burger {
+  .js .burger {
     display: flex;
   }
 }

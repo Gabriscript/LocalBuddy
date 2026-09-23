@@ -75,6 +75,40 @@ public class ReachabilityTests
         Assert.Empty(brunos.Items);
     }
 
+    /// The chat screen asks for its one conversation rather than scanning the paged inbox for
+    /// it. Everything the screen hangs off that answer — the other member's name, and the
+    /// report and block controls — used to vanish once the inbox grew past its first page.
+    [Fact]
+    public async Task One_conversation_is_reachable_without_walking_the_inbox()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
+        var chat = await Chat(t, anna, bruno);
+
+        var mine = (await new ConversationsController(t.Db).As(anna).One(chat)).Value!;
+        Assert.Equal(bruno, mine.OtherUserId);
+
+        // Whichever side asks, the other member is the one they are not.
+        var theirs = (await new ConversationsController(t.Db).As(bruno).One(chat)).Value!;
+        Assert.Equal(anna, theirs.OtherUserId);
+
+        // A stranger is refused rather than told whether the conversation exists.
+        Assert.IsType<ForbidResult>((await new ConversationsController(t.Db).As(carla).One(chat)).Result);
+    }
+
+    [Fact]
+    public async Task A_blocked_conversation_cannot_be_fetched_one_by_one_either()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        var chat = await Chat(t, anna, bruno);
+        await Block(t, bruno, anna);
+
+        // It left both inboxes; fetching it directly must not be the way back in.
+        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db).As(anna).One(chat)).Result);
+        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db).As(bruno).One(chat)).Result);
+    }
+
     [Fact]
     public async Task A_block_rules_out_a_review()
     {
