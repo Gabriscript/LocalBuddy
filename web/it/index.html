@@ -43,6 +43,21 @@
     <!-- L'unico script della pagina. Il menu è CSS; questo gli dà Escape, un focus che torna
          da dove è partito, e un pulsante che dice se è aperto. -->
     <script src="../menu.js" defer></script>
+    <noscript>
+      <style>
+        /* Senza lo script il pulsante non apre niente, e sotto gli 860px è l'unica via alle
+           sezioni. Quindi senza, i link tornano e il pulsante sparisce. */
+        @media (max-width: 860px) {
+          .site nav.sections {
+            display: flex;
+            flex-wrap: wrap;
+          }
+          .burger {
+            display: none;
+          }
+        }
+      </style>
+    </noscript>
   </head>
 
   <body>
