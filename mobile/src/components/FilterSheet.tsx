@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import type { DiscoveryFilters } from '@/api/hooks';
 import { TIMES_OF_DAY } from '@/api/labels';
-import { radius, space, type, useColors } from '@/theme';
+import { space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
+import { Chip } from './Chip';
 import { Field } from './Field';
 import { Sheet } from './Sheet';
 import { Toggle } from './Toggle';
@@ -108,45 +109,8 @@ function Tri({
   );
 }
 
-function Chip({
-  label,
-  selected,
-  onPress,
-  as,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-  as: 'radio' | 'checkbox';
-}) {
-  const c = useColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      role={as}
-      aria-checked={selected}
-      style={({ pressed }) => [
-        styles.chip,
-        {
-          backgroundColor: selected ? c.text : c.surfaceMuted,
-          borderColor: selected ? c.text : c.border,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}>
-      <Text style={[type.label, { color: selected ? c.background : c.text }]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   group: { gap: space.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: {
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: space.md,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
   footerItem: { flex: 1 },
 });

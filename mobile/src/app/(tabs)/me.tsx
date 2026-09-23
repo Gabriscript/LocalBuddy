@@ -43,7 +43,11 @@ export default function Me() {
             <Pill icon="sparkles-outline" label={`${data?.creditsBalance ?? 0} credits`} />
           </View>
 
-          <Button title="Edit profile" variant="secondary" onPress={() => {}} />
+          <Button
+            title="Edit profile"
+            variant="secondary"
+            onPress={() => router.push('/edit-profile')}
+          />
           <Button
             title="Blocked members"
             variant="secondary"
