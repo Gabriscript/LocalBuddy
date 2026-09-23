@@ -461,3 +461,212 @@ section + section {
     text-align: center;
   }
 }
+
+/* ---------------------------------------------------------------------------------------- */
+/* The curved menu. Only below 860px: above it the four sections fit in the header, and
+   hiding four links where there is room to show them costs more than it buys. */
+
+.burger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* The two rules meet in the middle and cross: the button becomes the thing that closes it. */
+.burger[aria-expanded='true'] span:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+
+.burger[aria-expanded='true'] span:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--step-xxl) var(--step-lg);
+  background: var(--ink);
+  color: var(--on-ink);
+  visibility: hidden;
+  /* It opens as a circle out of the button that was pressed, which is the whole idea: the
+     curve is the movement, not a shape drawn around the panel. */
+  clip-path: circle(0% at calc(100% - 46px) 46px);
+  transition:
+    clip-path 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+    visibility 0s 0.55s;
+}
+
+.menu.is-open {
+  visibility: visible;
+  clip-path: circle(142% at calc(100% - 46px) 46px);
+  transition:
+    clip-path 0.6s cubic-bezier(0.33, 1, 0.68, 1),
+    visibility 0s;
+}
+
+.menu-close {
+  position: absolute;
+  top: var(--step-lg);
+  right: var(--step-lg);
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.menu ol {
+  counter-reset: item;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu li {
+  border-top: 1px solid var(--on-ink);
+  border-top-color: color-mix(in srgb, var(--on-ink) 22%, transparent);
+}
+
+.menu li:last-child {
+  border-bottom: 1px solid var(--on-ink);
+  border-bottom-color: color-mix(in srgb, var(--on-ink) 22%, transparent);
+}
+
+/* Scoped to the list: the language link below is not one of these, and must not be numbered
+   as though it were a fifth section of the page. */
+.menu ol a {
+  counter-increment: item;
+  display: flex;
+  align-items: baseline;
+  gap: var(--step-md);
+  padding: clamp(14px, 3.4vw, 24px) 0;
+  color: inherit;
+  font-family: var(--display);
+  font-size: clamp(1.75rem, 8.5vw, 3rem);
+  text-decoration: none;
+}
+
+/* The number is drawn by a counter rather than typed in, so the order can never disagree
+   with the list. */
+.menu ol a::before {
+  content: counter(item, decimal-leading-zero);
+  font-family: var(--body);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  /* 0.72, not the 0.55 this started at: against the pale panel dark mode flips to, 0.55 came
+     out at 3.01:1 on 12.8px type. This is 4.54:1 there and 6.85:1 on the ink panel. */
+  opacity: 0.72;
+}
+
+.menu .letter {
+  display: inline-block;
+  transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1);
+  /* Each letter waits its turn, so the word rolls rather than jumping all at once. */
+  transition-delay: calc(var(--i) * 18ms);
+}
+
+.menu a:hover .letter,
+.menu a:focus-visible .letter {
+  transform: translateY(-0.13em);
+}
+
+/* The same movement, but on opening, because this menu only exists below 860px and most of
+   what is below 860px is a phone: `hover` never fires there, and an effect nobody on a touch
+   screen can reach is an effect built for the designer. Each row follows the one above it and
+   each letter the one before it. No `forwards`, so the hover transition takes the letters back
+   the moment this has finished. */
+@keyframes letter-in {
+  from {
+    transform: translateY(0.45em);
+    opacity: 0;
+  }
+}
+
+.menu.is-open .letter {
+  animation: letter-in 0.5s cubic-bezier(0.33, 1, 0.68, 1) backwards;
+  animation-delay: calc(0.12s + var(--row, 0) * 70ms + var(--i) * 16ms);
+}
+
+.menu.is-open .menu-language {
+  animation: letter-in 0.5s cubic-bezier(0.33, 1, 0.68, 1) 0.45s backwards;
+}
+
+/* The language link is not a section of this page, so it is neither numbered nor set in the
+   display face: it leaves rather than moving you down the page. */
+.menu-language {
+  align-self: flex-start;
+  margin-top: var(--step-xl);
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+  color: inherit;
+  font-family: var(--body);
+  font-size: 0.95rem;
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+/* The dialog itself takes focus on opening: a ring around the close button is the wrong
+   first thing to see, and a screen reader should hear the menu, not a button in it. */
+.menu:focus {
+  outline: none;
+}
+
+.menu a:focus-visible,
+.menu-close:focus-visible,
+.burger:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+@media (max-width: 860px) {
+  .site nav.sections {
+    display: none;
+  }
+
+  .burger {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu.is-open,
+  .menu .letter,
+  .burger span {
+    transition: none;
+  }
+
+  .menu.is-open .letter,
+  .menu.is-open .menu-language {
+    animation: none;
+  }
+
+  .menu a:hover .letter,
+  .menu a:focus-visible .letter {
+    transform: none;
+  }
+}

@@ -219,6 +219,12 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 ### Navigation
 - Three tabs, each with an icon and a word. An icon alone is a guess. The active tab is Ink, the rest are Muted Text. Icons inside a labelled control are always `aria-hidden`, or a screen reader reads the tab as an empty string followed by its name.
 
+### The curved menu (landing page only)
+- Below 860px the four header links give way to one button, and the menu opens as a circle growing out of that button: the curve is the movement, not a shape drawn around the panel. Above 860px the links stay where they can be seen — hiding four of them where there is room to show them costs more than it buys.
+- Ink panel, Paper text, and in dark mode the same pair the other way round. The sections are a numbered list whose numbers are drawn by a CSS counter, so the order cannot disagree with the list. The language link sits below and outside it: it leaves the page rather than moving you down it, so it is neither numbered nor set in the display face.
+- The letters rise one after another, each waiting on the one before it. This happens on opening, not only on hover: the menu exists only below 860px, and most of what is below 860px has no pointer at all. Hover repeats it for anyone who has one.
+- It is a modal dialog with a name. Everything behind it is `inert` while it is open, Escape closes it, and focus returns to the button that opened it. None of it moves when the system asks for less motion, and all of it still works.
+
 ### Loading
 - Lists load into their own shape: the discovery feed shows cards down to the 4:3 block, the conversation list shows rows. One pulse, 0.65 to 1 opacity over 700ms each way, drives every block on a screen, and no pulse at all when the system asks for less movement. Screens without a known shape keep a centred spinner.
 

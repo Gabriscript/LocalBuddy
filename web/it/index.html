@@ -40,6 +40,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../styles.css" />
+    <!-- L'unico script della pagina. Il menu è CSS; questo gli dà Escape, un focus che torna
+         da dove è partito, e un pulsante che dice se è aperto. -->
+    <script src="../menu.js" defer></script>
   </head>
 
   <body>
@@ -47,13 +50,35 @@
 
     <header class="site">
       <a class="wordmark" href="#main">LocalBuddy</a>
-      <nav aria-label="Sezioni">
+
+      <!-- Sopra gli 860px questi quattro ci stanno, e restano dove si vedono. -->
+      <nav class="sections" aria-label="Sezioni">
         <a href="#how">Come funziona</a>
         <a href="#who">Per chi è</a>
         <a href="#safety">Sicurezza</a>
         <a href="../index.html" hreflang="en" lang="en">English</a>
       </nav>
+
+      <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
     </header>
+
+    <!-- Figlio diretto di body apposta: menu.js rende inert i fratelli mentre è aperto, così
+         dietro un menu a schermo intero non resta niente raggiungibile con Tab. -->
+    <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" tabindex="-1">
+      <button class="menu-close" type="button" aria-label="Chiudi il menu">&times;</button>
+      <nav aria-label="Sezioni">
+        <ol>
+          <li><a href="#main" data-letters>Inizio</a></li>
+          <li><a href="#how" data-letters>Come funziona</a></li>
+          <li><a href="#who" data-letters>Per chi è</a></li>
+          <li><a href="#safety" data-letters>Sicurezza</a></li>
+        </ol>
+      </nav>
+      <a class="menu-language" href="../index.html" hreflang="en" lang="en">English</a>
+    </div>
 
     <main id="main">
       <section class="hero">
