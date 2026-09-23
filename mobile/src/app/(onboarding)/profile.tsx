@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
 import { useDeletePhoto, useMe, useSetAvailability, useUploadPhoto } from '@/api/hooks';
+import { TIMES_OF_DAY } from '@/api/labels';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -13,14 +14,6 @@ import { StepPage } from '@/components/StepPage';
 import { radius, space, type, useColors } from '@/theme';
 
 type Me = components['schemas']['MyProfile'];
-
-/// TimeOfDay on the wire: 0 morning, 1 afternoon, 2 evening, 3 night.
-const TIMES = [
-  { value: 0, label: 'Morning' },
-  { value: 1, label: 'Afternoon' },
-  { value: 2, label: 'Evening' },
-  { value: 3, label: 'Night' },
-];
 
 /// Step 4: a profile photo and when the member is usually free.
 /// POST /api/v1/photos + PUT /api/v1/users/me/availability. Seasons are left for later: the
@@ -110,7 +103,7 @@ function PhotoAndTimes({ me }: { me: Me }) {
       <View style={styles.group}>
         <Text style={[type.label, { color: c.text }]}>When are you usually free?</Text>
         <View style={styles.chips}>
-          {TIMES.map((time) => {
+          {TIMES_OF_DAY.map((time) => {
             const on = times.includes(time.value);
             return (
               <Pressable
