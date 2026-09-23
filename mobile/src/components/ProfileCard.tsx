@@ -105,7 +105,9 @@ export const ProfileCard = memo(function ProfileCard({
             disabled={busy}
           />
           <IconButton
-            name="heart"
+            // A tick, not a heart: the question the card asks is whether to meet this
+            // person, and a heart answers a different one.
+            name="checkmark"
             label={`Show interest in ${card.name}`}
             onPress={onInterest}
             tint={c.primary}

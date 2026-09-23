@@ -8,6 +8,7 @@ import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
 import { FilterSheet } from '@/components/FilterSheet';
 import { ProfileCard } from '@/components/ProfileCard';
 import { Screen } from '@/components/Screen';
+import { FeedSkeleton } from '@/components/Skeleton';
 import { radius, space, type, useColors } from '@/theme';
 
 const ROLES = [
@@ -137,6 +138,7 @@ export default function Discover() {
 
       <Screen
         loading={isPending}
+        skeleton={<FeedSkeleton />}
         error={error}
         onRetry={refetch}
         empty={data?.items?.length ? undefined : 'Nobody new here right now. Try widening your filters.'}>

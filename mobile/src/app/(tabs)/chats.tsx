@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useConversations } from '@/api/hooks';
 import { Screen } from '@/components/Screen';
+import { ChatListSkeleton } from '@/components/Skeleton';
 import { space, type, useColors } from '@/theme';
 
 export default function Chats() {
@@ -20,6 +21,7 @@ export default function Chats() {
 
       <Screen
         loading={isPending}
+        skeleton={<ChatListSkeleton />}
         error={error}
         onRetry={refetch}
         empty={data?.items?.length ? undefined : 'No conversations yet. A chat opens when interest is mutual.'}>

@@ -14,21 +14,27 @@ export function Screen({
   error,
   empty,
   onRetry,
+  skeleton,
   children,
 }: {
   loading?: boolean;
   error?: unknown;
   empty?: string;
   onRetry?: () => void;
+  /// The shape of what is loading, for screens whose content has a known one. A list gets
+  /// its rows back rather than a spinner in the middle of nothing.
+  skeleton?: ReactNode;
   children: ReactNode;
 }) {
   const c = useColors();
 
   if (loading) {
     return (
-      <Centered>
-        <ActivityIndicator color={c.primary} />
-      </Centered>
+      skeleton ?? (
+        <Centered>
+          <ActivityIndicator color={c.primary} />
+        </Centered>
+      )
     );
   }
 

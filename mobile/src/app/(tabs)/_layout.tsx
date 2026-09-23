@@ -19,6 +19,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.textMuted,
         tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.border },
+        // The navigator draws these labels itself, so it needs the family naming the app.
+        tabBarLabelStyle: { fontFamily: 'Geist_600SemiBold' },
       }}>
       <Tabs.Screen
         name="discover"
