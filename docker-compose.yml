@@ -1,14 +1,30 @@
 services:
   postgres:
-    image: postgres:16
+    # Pinned to a patch release: "16" moves under you, and a development database that
+    # silently changes version is a morning spent on the wrong problem.
+    image: postgres:16.11
     environment:
       POSTGRES_USER: localbuddy
       POSTGRES_PASSWORD: localbuddy
       POSTGRES_DB: localbuddy
     ports:
-      - "5434:5432"
+      # Bound to the loopback address on purpose. Without the 127.0.0.1 prefix Docker
+      # publishes on 0.0.0.0, and then every member, message and payment in here is offered
+      # to anyone on the same wifi who tries localbuddy/localbuddy — the password sitting
+      # three lines above.
+      - "127.0.0.1:5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # So a caller can wait for "ready" rather than for "started", which are not the same
+    # thing: Postgres accepts the port before it accepts queries.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localbuddy -d localbuddy"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
+  # Named, so the data survives `docker compose down`. It does not survive Docker Desktop's
+  # "Reset to factory defaults", and the demo accounts live here — take a dump before
+  # touching anything in Docker's own settings.
   pgdata:
