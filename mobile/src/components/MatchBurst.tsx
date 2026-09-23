@@ -6,6 +6,7 @@ import {
   Easing,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -108,75 +109,89 @@ export function MatchBurst({
         aria-modal
         aria-label={`You and ${name} both said yes`}
         style={[styles.backdrop, { backgroundColor: c.scrimStrong }]}>
-        <View style={styles.headline}>
-          <Text role="heading" style={[type.display, styles.centred, { color: c.onOverlay }]}>
-            You both said yes
-          </Text>
-          <Text style={[type.body, styles.centred, { color: c.onOverlay }]}>
-            The chat with {name} is open, and nobody paid for it.
-          </Text>
-        </View>
+        {/* The stage is a fixed 320pt: turn a phone on its side, or raise the text size, and
+            without somewhere to scroll the actions fall off the bottom of the screen. */}
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.headline}>
+            <Text role="heading" style={[type.display, styles.centred, { color: c.onOverlay }]}>
+              You both said yes
+            </Text>
+            <Text style={[type.body, styles.centred, { color: c.onOverlay }]}>
+              The chat with {name} is open, and nobody paid for it.
+            </Text>
+          </View>
 
-        <View style={styles.stage}>
-          <Animated.View style={[styles.ring, { transform: [{ rotate: spin }] }]}>
-            {actions.map((action, index) => {
-              const { x, y } = pointOnCircle(index, actions.length, ORBIT);
-              return (
-                <Animated.View
-                  key={action.label}
-                  style={[
-                    styles.satellite,
-                    {
-                      opacity: progress,
-                      transform: [
-                        {
-                          translateX: progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, x],
-                          }),
-                        },
-                        {
-                          translateY: progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, y],
-                          }),
-                        },
-                        { scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
-                        { rotate: counterSpin },
-                      ],
-                    },
-                  ]}>
-                  <Pressable
-                    onPress={() => leave(action.onPress)}
-                    accessibilityRole="button"
-                    accessibilityLabel={action.label}
-                    style={({ pressed }) => [
-                      styles.satelliteButton,
-                      { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 },
+          <View style={styles.stage}>
+            <Animated.View style={[styles.ring, { transform: [{ rotate: spin }] }]}>
+              {actions.map((action, index) => {
+                const { x, y } = pointOnCircle(index, actions.length, ORBIT);
+                return (
+                  <Animated.View
+                    key={action.label}
+                    style={[
+                      styles.satellite,
+                      {
+                        opacity: progress,
+                        transform: [
+                          {
+                            translateX: progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, x],
+                            }),
+                          },
+                          {
+                            translateY: progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, y],
+                            }),
+                          },
+                          { scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+                          { rotate: counterSpin },
+                        ],
+                      },
                     ]}>
-                    <Ionicons name={action.icon} size={24} color={c.text} aria-hidden />
-                  </Pressable>
-                  <Text style={[type.caption, styles.centred, { color: c.onOverlay }]}>
-                    {action.label}
-                  </Text>
-                </Animated.View>
-              );
-            })}
-          </Animated.View>
+                    <Pressable
+                      onPress={() => leave(action.onPress)}
+                      accessibilityRole="button"
+                      accessibilityLabel={action.label}
+                      style={({ pressed }) => [
+                        styles.satelliteButton,
+                        { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 },
+                      ]}>
+                      <Ionicons name={action.icon} size={24} color={c.text} aria-hidden />
+                    </Pressable>
+                    <Text style={[type.caption, styles.centred, { color: c.onOverlay }]}>
+                      {action.label}
+                    </Text>
+                  </Animated.View>
+                );
+              })}
+            </Animated.View>
 
-          <AuthedImage
-            path={photoPath}
-            style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
-            accessibilityLabel={`Photo of ${name}`}
-          />
-        </View>
+            <AuthedImage
+              path={photoPath}
+              style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
+              accessibilityLabel={`Photo of ${name}`}
+            />
+          </View>
+        </ScrollView>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.xl },
+  backdrop: { flex: 1 },
+  // Centred while it fits, scrollable the moment it does not.
+  scroll: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.xl,
+    paddingVertical: space.lg,
+  },
   headline: { gap: space.sm, paddingHorizontal: space.lg, maxWidth: 420 },
   centred: { textAlign: 'center' },
   stage: { width: STAGE, height: STAGE, alignItems: 'center', justifyContent: 'center' },

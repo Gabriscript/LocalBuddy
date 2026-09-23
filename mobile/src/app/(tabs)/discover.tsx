@@ -6,10 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
+import { ActionError } from '@/components/ActionError';
+import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { FilterSheet } from '@/components/FilterSheet';
 import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
-import { Screen } from '@/components/Screen';
+import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -79,7 +82,8 @@ export default function Discover() {
     });
   }
 
-  const { data, isPending, error, refetch, isRefetching } = useDiscovery(filters);
+  const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
+    useDiscovery(filters);
   const { interest, pass } = useDecide();
   const busy = interest.isPending || pass.isPending;
 
@@ -87,16 +91,22 @@ export default function Discover() {
   // own instead of a silent navigation. Anything else: the card simply goes.
   const [match, setMatch] = useState<Match | null>(null);
 
-  async function showInterest(card: Card) {
-    const result = await interest.mutateAsync(card.id!);
-    if (result.matched && result.conversationId) {
-      setMatch({
-        userId: card.id!,
-        name: card.name!,
-        photoUrl: card.photoUrl,
-        conversationId: result.conversationId,
-      });
-    }
+  /// `mutate`, not `mutateAsync`: a refusal from the server is a rejected promise nobody
+  /// awaits, and an unverified member got a tick that silently did nothing. This way the
+  /// refusal lands in `interest.error`, where the screen can say it out loud.
+  function showInterest(card: Card) {
+    interest.mutate(card.id!, {
+      onSuccess: (result) => {
+        if (result.matched && result.conversationId) {
+          setMatch({
+            userId: card.id!,
+            name: card.name!,
+            photoUrl: card.photoUrl,
+            conversationId: result.conversationId,
+          });
+        }
+      },
+    });
   }
 
   return (
@@ -127,41 +137,57 @@ export default function Discover() {
       </View>
 
       <View style={styles.filters} role="radiogroup" aria-label="Who to show">
-        {ROLES.map((role) => {
-          const active = params.role === role.value;
-          return (
-            <Pressable
-              key={role.label}
-              onPress={() => router.setParams({ role: role.value })}
-              role="radio"
-              aria-checked={active}
-              style={({ pressed }) => [
-                styles.chip,
-                {
-                  backgroundColor: active ? c.text : c.surfaceMuted,
-                  borderColor: active ? c.text : c.border,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}>
-              <Text style={[type.label, { color: active ? c.background : c.text }]}>{role.label}</Text>
-            </Pressable>
-          );
-        })}
+        {ROLES.map((role) => (
+          <Chip
+            key={role.label}
+            as="radio"
+            label={role.label}
+            selected={params.role === role.value}
+            onPress={() => router.setParams({ role: role.value })}
+          />
+        ))}
       </View>
+
+      {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
+          own: the feed behind it is still fine. */}
+      {interest.error || pass.error ? (
+        <View style={styles.note}>
+          <ActionError error={interest.error ?? pass.error} />
+        </View>
+      ) : null}
 
       <Screen
         loading={isPending}
         skeleton={<FeedSkeleton />}
         error={error}
         onRetry={refetch}
-        empty={data?.items?.length ? undefined : 'Nobody new here right now. Try widening your filters.'}>
+        empty={
+          items.length
+            ? undefined
+            : active
+              ? 'Nobody matches these filters right now.'
+              : 'Nobody new here right now. Come back later, or look at another city.'
+        }
+        // Telling somebody to widen their filters without handing them the filters is advice,
+        // not a way out.
+        emptyAction={
+          <Button
+            title={active ? 'Change the filters' : 'Open the filters'}
+            variant="secondary"
+            onPress={() => setFiltering(true)}
+          />
+        }>
         <FlatList
-          data={data?.items ?? []}
+          data={items}
           keyExtractor={(card) => card.id!}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           onRefresh={refetch}
           refreshing={isRefetching}
+          // The feed is paged: without this it stopped at the first page and looked finished.
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
           renderItem={({ item }) => (
             <ProfileCard
               card={item}
@@ -216,14 +242,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  filters: { flexDirection: 'row', gap: space.sm, padding: space.md },
-  chip: {
-    minHeight: 44,
-    justifyContent: 'center',
-    paddingHorizontal: space.md,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
+  // Wraps, because at the largest text size three chips no longer fit across a phone and a
+  // row that does not wrap simply runs off the side of the screen.
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, padding: space.md },
+  note: { paddingHorizontal: space.md, paddingBottom: space.md },
   // The last card clears the tab bar instead of hiding behind it.
   list: { paddingHorizontal: space.md, paddingBottom: space.xxl * 2, gap: space.lg },
 });

@@ -67,7 +67,8 @@ export function FeedSkeleton() {
   );
 }
 
-/// The conversation list: one row per chat, two lines each.
+/// The conversation list: a face and two lines, in the geometry the real row uses, down to the
+/// 48pt avatar and the 72pt height. A skeleton of a different shape is just a different jump.
 export function ChatListSkeleton() {
   const c = useColors();
   const opacity = usePulse();
@@ -76,8 +77,11 @@ export function ChatListSkeleton() {
     <View role="progressbar" aria-label="Loading conversations">
       {[0, 1, 2, 3, 4].map((row) => (
         <View key={row} style={[styles.row, { borderBottomColor: c.border }]}>
-          <Block opacity={opacity} style={styles.lineWide} />
-          <Block opacity={opacity} style={styles.line} />
+          <Block opacity={opacity} style={styles.avatar} />
+          <View style={styles.rowText}>
+            <Block opacity={opacity} style={styles.line} />
+            <Block opacity={opacity} style={styles.lineWide} />
+          </View>
         </View>
       ))}
     </View>
@@ -93,11 +97,14 @@ const styles = StyleSheet.create({
   line: { height: 14, width: '30%' },
   lineWide: { height: 14, width: '80%' },
   row: {
-    minHeight: 64,
-    justifyContent: 'center',
-    gap: space.sm,
+    minHeight: 72,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
     paddingHorizontal: space.md,
-    paddingVertical: space.md,
+    paddingVertical: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  avatar: { width: 48, height: 48, borderRadius: radius.pill },
+  rowText: { flex: 1, gap: space.sm },
 });

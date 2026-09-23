@@ -5,7 +5,8 @@ import { useColorScheme } from 'react-native';
 /// you around their neighbourhood does not greet people in the palette of a dating app.
 /// The neutrals are warm paper rather than white, so a card reads as something laid on the
 /// page instead of a rectangle drawn by its border.
-/// Every pair below is >= 4.5:1 against the surface it sits on.
+/// Every pair below is >= 4.5:1 against the surface it sits on, `surfaceMuted` included —
+/// which is the one that catches people out, because it is where the small print lives.
 const light = {
   background: '#F7F4F1',
   surface: '#FEFDFC',
@@ -15,7 +16,9 @@ const light = {
   border: '#E6E1DC',
   primary: '#1E3A5C',
   onPrimary: '#FFFFFF',
-  success: '#0A7D22',
+  // Dark enough for the muted surface it always sits on: the old #0A7D22 was 4.43:1 there,
+  // under AA, because every use of it is a Pill and a Pill is always on surfaceMuted.
+  success: '#0B6E20',
   danger: '#DC2626',
   scrim: 'rgba(0,0,0,0.5)',
   // For the one screen that takes the whole display: a veil thin enough to remember where you

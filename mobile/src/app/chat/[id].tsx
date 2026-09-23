@@ -14,25 +14,26 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useConversations, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
+import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { ReviewSheet } from '@/components/ReviewSheet';
 import { SafetySheet } from '@/components/SafetySheet';
-import { Screen } from '@/components/Screen';
+import { LoadingMore, Screen } from '@/components/Screen';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Chat() {
   const c = useColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data, isPending, error, refetch } = useMessages(id);
+  const { items, isPending, error, refetch, loadMore, isFetchingNextPage } = useMessages(id);
   const send = useSendMessage(id);
   const [draft, setDraft] = useState('');
   const [sheet, setSheet] = useState<'none' | 'safety' | 'review'>('none');
 
   // The conversation list is where the other member's id lives. It is cached by the time
   // anyone taps through to here, and fetched once on a cold deep link.
-  const { data: conversations } = useConversations();
-  const otherId = conversations?.items?.find((conversation) => conversation.id === id)?.otherUserId;
+  const { items: conversations } = useConversations();
+  const otherId = conversations.find((conversation) => conversation.id === id)?.otherUserId;
   const { data: other } = useProfile(otherId);
   const { data: me } = useMe();
   const photo = other?.photos?.find((p) => p.type === 0)?.url;
@@ -89,12 +90,19 @@ export default function Chat() {
           loading={isPending}
           error={error}
           onRetry={refetch}
-          empty={data?.items?.length ? undefined : 'No messages yet. Say hello.'}>
+          empty={items.length ? undefined : 'No messages yet. Say hello.'}
+          emptyIcon="chatbubble-outline">
           <FlatList
-            data={data?.items ?? []}
+            data={items}
             keyExtractor={(m) => m.id!}
             inverted
             contentContainerStyle={styles.list}
+            // Page 0 is the newest and the list is inverted, so the end of the data sits at the
+            // top of the screen — exactly where somebody scrolls to read back through a
+            // conversation. Without this the chat stopped at its most recent page.
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.4}
+            ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
             renderItem={({ item }) => {
               // Tonal, not accented: the dark bubble is mine, the paper one is theirs, and ink
               // stays with the actions.
@@ -117,6 +125,14 @@ export default function Chat() {
             }}
           />
         </Screen>
+
+        {/* Above the composer, so it sits with the draft it refused to send rather than
+            somewhere up in the conversation. The draft is never cleared on failure. */}
+        {send.error ? (
+          <View style={styles.note}>
+            <ActionError error={send.error} />
+          </View>
+        ) : null}
 
         <View style={[styles.composer, { borderTopColor: c.border, backgroundColor: c.surface }]}>
           <TextInput
@@ -178,6 +194,7 @@ const styles = StyleSheet.create({
   titleAvatar: { width: 32, height: 32, borderRadius: radius.pill },
   list: { padding: space.md, gap: space.sm },
   bubble: { maxWidth: '80%', padding: space.md, borderRadius: radius.lg },
+  note: { paddingHorizontal: space.sm, paddingBottom: space.sm },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

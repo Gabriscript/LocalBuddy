@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
+import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { MatchBurst } from '@/components/MatchBurst';
@@ -34,14 +35,15 @@ export default function Profile() {
 
   const [matched, setMatched] = useState<string | null>(null);
 
-  async function showInterest() {
-    const result = await interest.mutateAsync(id);
-    // A mutual yes gets its moment; a one-sided one just returns to the feed.
-    if (result.matched && result.conversationId) {
-      setMatched(result.conversationId);
-    } else {
-      goBack();
-    }
+  /// `mutate` rather than `mutateAsync`: a refusal from the server would otherwise be a
+  /// rejected promise nobody awaits, leaving a button that looks like it did nothing. The
+  /// refusal goes to `interest.error`, which the action bar shows.
+  function showInterest() {
+    interest.mutate(id, {
+      // A mutual yes gets its moment; a one-sided one just returns to the feed.
+      onSuccess: (result) =>
+        result.matched && result.conversationId ? setMatched(result.conversationId) : goBack(),
+    });
   }
 
   const photos = data?.photos ?? [];
@@ -134,13 +136,17 @@ export default function Profile() {
             styles.bar,
             { paddingBottom: insets.bottom + space.md, backgroundColor: c.surface, borderTopColor: c.border },
           ]}>
+          {/* With the buttons that failed, not on a screen of its own: the profile behind it
+              is still perfectly readable. */}
+          <ActionError error={interest.error ?? pass.error} />
+
           <View style={styles.barRow}>
             <View style={styles.barItem}>
               <Button
                 title="Pass"
                 variant="secondary"
                 disabled={busy}
-                onPress={() => pass.mutateAsync(id).then(goBack)}
+                onPress={() => pass.mutate(id, { onSuccess: goBack })}
               />
             </View>
             <View style={styles.barItem}>
@@ -196,16 +202,15 @@ export default function Profile() {
 /// of these carry a name.
 function Reviews({ userId }: { userId: string }) {
   const c = useColors();
-  const { data } = useReviews(userId);
-  const reviews = data?.items ?? [];
-  if (!reviews.length) return null;
+  const { items, hasNextPage, isFetchingNextPage, loadMore } = useReviews(userId);
+  if (!items.length) return null;
 
   return (
     <View style={styles.section}>
       <Text role="heading" style={[type.title, { color: c.text }]}>
         What people say
       </Text>
-      {reviews.map((review) => (
+      {items.map((review) => (
         <View key={review.id} style={[styles.review, { borderTopColor: c.border }]}>
           {/* role="img": five hidden glyphs that together mean one thing, and a bare label on
               a plain container is announced by nothing. */}
@@ -228,6 +233,17 @@ function Reviews({ userId }: { userId: string }) {
           ) : null}
         </View>
       ))}
+
+      {/* A button, not an endless scroll: this list sits inside the profile's own ScrollView,
+          and a second scrolling region inside the first one fights it. */}
+      {hasNextPage ? (
+        <Button
+          title="More reviews"
+          variant="quiet"
+          loading={isFetchingNextPage}
+          onPress={loadMore}
+        />
+      ) : null}
     </View>
   );
 }

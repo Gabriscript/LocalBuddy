@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { components } from '@/api/generated';
 import { useConversations, useProfile } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
-import { Screen } from '@/components/Screen';
+import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -14,7 +14,8 @@ type Conversation = components['schemas']['ConversationSummary'];
 
 export default function Chats() {
   const c = useColors();
-  const { data, isPending, error, refetch } = useConversations();
+  const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
+    useConversations();
 
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
@@ -27,10 +28,17 @@ export default function Chats() {
         skeleton={<ChatListSkeleton />}
         error={error}
         onRetry={refetch}
-        empty={data?.items?.length ? undefined : 'No conversations yet. A chat opens when interest is mutual.'}>
+        empty={items.length ? undefined : 'No conversations yet. A chat opens when interest is mutual.'}
+        emptyIcon="chatbubble-outline">
         <FlatList
-          data={data?.items ?? []}
+          data={items}
           keyExtractor={(conversation) => conversation.id!}
+          // The inbox is the one list people come back to expecting it to have changed.
+          onRefresh={refetch}
+          refreshing={isRefetching}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
           renderItem={({ item }) => <ChatRow conversation={item} />}
         />
       </Screen>
@@ -57,7 +65,13 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
         styles.row,
         { borderBottomColor: c.border, backgroundColor: pressed ? c.surfaceMuted : c.background },
       ]}>
-      <AuthedImage path={photo} style={[styles.avatar, { backgroundColor: c.surfaceMuted }]} />
+      {/* Decorative: the row reads out its children, and the name follows immediately. Without
+          this the face is announced as an image with no name at all. */}
+      <AuthedImage
+        path={photo}
+        aria-hidden
+        style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
+      />
 
       <View style={styles.rowText}>
         <Text style={[type.label, { color: c.text }]} numberOfLines={1}>

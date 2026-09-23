@@ -26,7 +26,11 @@ export function Sheet({
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       {/* Tapping beside the sheet closes it, the way a sheet does. Hidden from screen
           readers, which have the Close button instead. */}
-      <Pressable aria-hidden style={styles.backdrop} onPress={onClose} />
+      <Pressable
+        aria-hidden
+        style={[styles.backdrop, { backgroundColor: c.scrim }]}
+        onPress={onClose}
+      />
 
       <View
         role="dialog"
@@ -70,14 +74,8 @@ export function Sheet({
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
+  // Colour comes from the theme: the one hand-written veil in the app was also the thinnest.
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   sheet: {
     position: 'absolute',
     left: 0,

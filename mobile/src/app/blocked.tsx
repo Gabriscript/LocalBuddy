@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useBlock, useBlocks } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
+import { LoadingMore, Screen } from '@/components/Screen';
 import { radius, space, type, useColors } from '@/theme';
 
 /// The only screen a blocked member still appears on. Everywhere else they are gone, which is
@@ -14,7 +14,7 @@ import { radius, space, type, useColors } from '@/theme';
 export default function Blocked() {
   const c = useColors();
   const router = useRouter();
-  const { data, isPending, error, refetch } = useBlocks();
+  const { items, isPending, error, refetch, loadMore, isFetchingNextPage } = useBlocks();
   const { unblock } = useBlock();
 
   return (
@@ -38,17 +38,23 @@ export default function Blocked() {
         error={error}
         onRetry={refetch}
         empty={
-          data?.items?.length
+          items.length
             ? undefined
             : 'Nobody is blocked. Blocking hides two people from each other, and this is where it can be undone.'
-        }>
+        }
+        emptyIcon="shield-outline">
         <FlatList
-          data={data?.items ?? []}
+          data={items}
           keyExtractor={(member) => member.id!}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
           renderItem={({ item }) => (
             <View style={[styles.row, { borderBottomColor: c.border }]}>
+              {/* Decorative: the name is read out right after it. */}
               <AuthedImage
                 path={item.photoUrl}
+                aria-hidden
                 style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
               />
               <View style={styles.rowText}>

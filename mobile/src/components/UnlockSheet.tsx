@@ -67,7 +67,12 @@ export function UnlockSheet({
       footer={
         <View style={styles.grow}>
           {unverified ? (
-            <Button title="Verify your identity" onPress={() => router.push('/verify')} />
+            <Button
+              title="Verify your identity"
+              // `from` keeps the verify screen out of its onboarding costume: no "Step 2 of 5"
+              // dots, and it comes back to this profile instead of walking on to step 3.
+              onPress={() => router.push({ pathname: '/verify', params: { from: 'app' } })}
+            />
           ) : (
             <Button
               title={cta}

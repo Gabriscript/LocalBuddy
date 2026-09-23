@@ -8,6 +8,10 @@ import { Button } from './Button';
 
 /// Shared shell for the onboarding steps. The progress dots are not decoration: a five-step
 /// flow with no sense of how much is left is a flow people abandon halfway.
+///
+/// Leaving `step` out drops the dots, for the one screen that is also reachable on its own:
+/// "Step 2 of 5" is a lie to somebody who finished onboarding months ago and came back only to
+/// verify themselves.
 export function StepPage({
   step,
   total = 5,
@@ -19,7 +23,8 @@ export function StepPage({
   loading,
   children,
 }: {
-  step: number;
+  /// Absent on a screen reached from inside the app rather than from the flow.
+  step?: number;
   total?: number;
   title: string;
   subtitle?: string;
@@ -34,22 +39,24 @@ export function StepPage({
   return (
     <SafeAreaView style={[styles.page, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.body}>
-        <View
-          style={styles.dots}
-          role="progressbar"
-          aria-label="Progress"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={step}
-          // Read out as words: "Step 3 of 5" is clearer than the "60%" a bare value becomes.
-          aria-valuetext={`Step ${step} of ${total}`}>
-          {Array.from({ length: total }, (_, i) => (
-            <View
-              key={i}
-              style={[styles.dot, { backgroundColor: i < step ? c.primary : c.border }]}
-            />
-          ))}
-        </View>
+        {step ? (
+          <View
+            style={styles.dots}
+            role="progressbar"
+            aria-label="Progress"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={step}
+            // Read out as words: "Step 3 of 5" is clearer than the "60%" a bare value becomes.
+            aria-valuetext={`Step ${step} of ${total}`}>
+            {Array.from({ length: total }, (_, i) => (
+              <View
+                key={i}
+                style={[styles.dot, { backgroundColor: i < step ? c.primary : c.border }]}
+              />
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.heading}>
           <Text role="heading" style={[type.display, { color: c.text }]}>

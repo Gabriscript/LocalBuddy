@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImagePickerAsset } from 'expo-image-picker';
 
 import { api, unwrap } from './client';
@@ -23,6 +23,32 @@ export const keys = {
   paymentOptions: ['payment-options'] as const,
 };
 
+/// Every paged endpoint answers with `items` and `hasMore` (ADR-0008), and those two are all it
+/// takes to walk one. Until this existed the client only ever read page 0: a conversation
+/// longer than one page could not be scrolled back through at all.
+type PageOf<T> = { items: T[]; hasMore: boolean };
+
+/// The page number is counted here rather than read back off the response, which types it as
+/// `number | string`. One helper for all five paged lists, so none of them can drift.
+function usePages<T>(queryKey: readonly unknown[], load: (page: number) => Promise<PageOf<T>>) {
+  const query = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam }) => load(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (last, _pages, lastPage) => (last.hasMore ? lastPage + 1 : undefined),
+  });
+
+  return {
+    ...query,
+    /// Flattened, so a screen never has to know how many requests it took.
+    items: query.data?.pages.flatMap((page) => page.items) ?? [],
+    /// Safe to hand straight to onEndReached, which fires more than once per end of list.
+    loadMore: () => {
+      if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
+    },
+  };
+}
+
 export function useMe() {
   return useQuery({
     queryKey: keys.me,
@@ -31,10 +57,9 @@ export function useMe() {
 }
 
 export function useDiscovery(filters: DiscoveryFilters) {
-  return useQuery({
-    queryKey: keys.discovery(filters),
-    queryFn: async () => unwrap(await api.GET('/api/v1/discovery', { params: { query: filters } })),
-  });
+  return usePages(keys.discovery(filters), async (page) =>
+    unwrap(await api.GET('/api/v1/discovery', { params: { query: { ...filters, page } } }))
+  );
 }
 
 /// The id is optional because the chat screen only learns who it is talking to once the
@@ -49,18 +74,21 @@ export function useProfile(id: string | undefined) {
 }
 
 export function useConversations() {
-  return useQuery({
-    queryKey: keys.conversations,
-    queryFn: async () => unwrap(await api.GET('/api/v1/conversations')),
-  });
+  return usePages(keys.conversations, async (page) =>
+    unwrap(await api.GET('/api/v1/conversations', { params: { query: { page } } }))
+  );
 }
 
+/// Page 0 is the newest messages, which is why the list showing them is inverted: reaching the
+/// visual top is reaching the end of the data, and asks for the page before.
 export function useMessages(id: string) {
-  return useQuery({
-    queryKey: keys.messages(id),
-    queryFn: async () =>
-      unwrap(await api.GET('/api/v1/conversations/{id}/messages', { params: { path: { id } } })),
-  });
+  return usePages(keys.messages(id), async (page) =>
+    unwrap(
+      await api.GET('/api/v1/conversations/{id}/messages', {
+        params: { path: { id }, query: { page } },
+      })
+    )
+  );
 }
 
 export function useSendMessage(id: string) {
@@ -177,11 +205,13 @@ export function useUnlock() {
 // ---- Safety and reviews -------------------------------------------------------------------
 
 export function useReviews(userId: string) {
-  return useQuery({
-    queryKey: keys.reviews(userId),
-    queryFn: async () =>
-      unwrap(await api.GET('/api/v1/users/{userId}/reviews', { params: { path: { userId } } })),
-  });
+  return usePages(keys.reviews(userId), async (page) =>
+    unwrap(
+      await api.GET('/api/v1/users/{userId}/reviews', {
+        params: { path: { userId }, query: { page } },
+      })
+    )
+  );
 }
 
 /// A review moves the subject's rating, so their profile and their card in the feed are both
@@ -235,10 +265,9 @@ export function useBlock() {
 
 /// The only screen a blocked member still appears on, which is what makes a block undoable.
 export function useBlocks() {
-  return useQuery({
-    queryKey: keys.blocks,
-    queryFn: async () => unwrap(await api.GET('/api/v1/users/me/blocks')),
-  });
+  return usePages(keys.blocks, async (page) =>
+    unwrap(await api.GET('/api/v1/users/me/blocks', { params: { query: { page } } }))
+  );
 }
 
 /// PhotoType on the wire: 0 = profile, 1 = home (only for hosts offering overnight).

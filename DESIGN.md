@@ -16,7 +16,7 @@ colors:
   night-text: "#F5F2F0"
   night-text-muted: "#A9A19B"
   night-hairline: "#332E2E"
-  verified: "#0A7D22"
+  verified: "#0B6E20"
   refusal: "#DC2626"
 typography:
   display:
@@ -146,7 +146,7 @@ Paper and ink, with the saturation left to the photographs.
 - Dark mode re-tones the same roles: **Night** (`#141212`), **Night Card** (`#1E1B1B`), **Night Sunk** (`#262222`), **Night Text** (`#F5F2F0`), **Night Muted** (`#A9A19B`), **Night Hairline** (`#332E2E`).
 
 ### Tertiary
-- **Verified** (`#0A7D22`): the identity badge, and nothing else. Green means "this person showed a document", never "success" in general.
+- **Verified** (`#0B6E20`): the identity badge, and nothing else. Green means "this person showed a document", never "success" in general.
 - **Refusal** (`#DC2626`): validation errors and destructive confirmations only.
 
 ### Named Rules

@@ -33,13 +33,18 @@ export const ProfileCard = memo(function ProfileCard({
   const c = useColors();
 
   // A card is one control, so a screen reader hears its label and nothing else. The label
-  // therefore carries what the card shows — otherwise pass and interest are a blind choice.
+  // therefore carries everything the card shows — the pills and the plan included, or pass and
+  // interest become a blind choice made on half of what everyone else can see.
   const summary = [
     card.name,
     card.city,
     card.role,
     card.identityVerified ? 'verified' : null,
     typeof card.rating === 'number' ? `rated ${card.rating.toFixed(1)}` : null,
+    card.hasCar ? 'has a car' : null,
+    card.hasPets ? 'has pets' : null,
+    card.smokes ? 'smokes' : null,
+    card.whatWeWillDo,
   ]
     .filter((part): part is string => !!part)
     .join(', ');

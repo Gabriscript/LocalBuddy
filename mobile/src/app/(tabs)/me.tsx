@@ -43,6 +43,15 @@ export default function Me() {
             <Pill icon="sparkles-outline" label={`${data?.creditsBalance ?? 0} credits`} />
           </View>
 
+          {/* The pill above says what is missing; on its own it was a dead end. Nobody can be
+              contacted before this is done (ADR-0007), so it belongs above everything else. */}
+          {data && !data.identityVerified ? (
+            <Button
+              title="Verify your identity"
+              onPress={() => router.push({ pathname: '/verify', params: { from: 'app' } })}
+            />
+          ) : null}
+
           <Button
             title="Edit profile"
             variant="secondary"
