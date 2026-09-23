@@ -64,4 +64,38 @@ public class SafetyController(LocalBuddyDbContext db) : ControllerBase
         await db.Blocks.Where(b => b.BlockerId == User.Id() && b.BlockedId == userId).ExecuteDeleteAsync();
         return NoContent();
     }
+
+    /// The only way back. A blocked member is gone from discovery, from the inbox and from
+    /// every profile lookup, so without this list the block could never be undone.
+    [HttpGet("users/me/blocks")]
+    [ProducesResponseType<Page<ProfileCard>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<Page<ProfileCard>>> Blocks(
+        int page = 0, int pageSize = Page<ProfileCard>.DefaultSize)
+    {
+        var me = User.Id();
+        (page, pageSize) = Page<ProfileCard>.Clamp(page, pageSize);
+
+        var rows = await db.Blocks
+            .Where(b => b.BlockerId == me)
+            .Join(db.Users, b => b.BlockedId, u => u.Id, (b, u) => new { b.Id, User = u })
+            // Version 7 ids carry the time they were made, so this is newest block first.
+            .OrderByDescending(r => r.Id)
+            .Skip(page * pageSize)
+            .Take(pageSize + 1)
+            .Select(r => new
+            {
+                r.User,
+                PhotoId = db.Photos.Where(p => p.UserId == r.User.Id && p.Type == PhotoType.Profile)
+                                   .Select(p => (Guid?)p.Id).FirstOrDefault()
+            })
+            .ToListAsync();
+
+        // No rating: this list is for recognising somebody and undoing a block, not for judging them.
+        var cards = rows.Select(r => new ProfileCard(
+            PublicProfile.From(r.User),
+            r.PhotoId is null ? null : PhotoDto.UrlFor(r.PhotoId.Value),
+            null)).ToList();
+
+        return Page<ProfileCard>.From(cards, page, pageSize);
+    }
 }

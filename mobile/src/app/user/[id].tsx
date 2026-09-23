@@ -1,12 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useDecide, useProfile } from '@/api/hooks';
+import { useDecide, useProfile, useReviews } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { Pill } from '@/components/Pill';
+import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -21,6 +23,7 @@ export default function Profile() {
   const { data, isPending, error, refetch } = useProfile(id);
   const { interest, pass } = useDecide();
   const busy = interest.isPending || pass.isPending;
+  const [safety, setSafety] = useState(false);
 
   // Reached by link or after a reload there is no screen to go back to, and router.back()
   // would leave the member stuck on a profile they have just passed on.
@@ -48,6 +51,21 @@ export default function Profile() {
           accessibilityLabel="Go back"
           style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
+        </Pressable>
+
+        {/* Reporting and blocking live here rather than in the action bar: they are not a
+            third choice next to pass and interest, they are what you reach for when something
+            is wrong. */}
+        <Pressable
+          onPress={() => setSafety(true)}
+          disabled={!data}
+          accessibilityRole="button"
+          accessibilityLabel="Report or block"
+          style={[
+            styles.more,
+            { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border },
+          ]}>
+          <Ionicons name="ellipsis-horizontal" size={22} color={c.text} aria-hidden />
         </Pressable>
 
         <ScrollView
@@ -101,6 +119,7 @@ export default function Profile() {
             <Section title="What we'll do" body={data?.whatWeWillDo} />
             <Section title="Why I host" body={data?.whyIHost} />
             <Section title="Languages" body={data?.languagesSpoken} />
+            <Reviews userId={id} />
           </View>
         </ScrollView>
 
@@ -131,8 +150,57 @@ export default function Profile() {
             onPress={() => {}}
           />
         </View>
+
+        {safety && data ? (
+          <SafetySheet
+            user={{ id: data.id!, name: data.name! }}
+            onClose={() => setSafety(false)}
+            // Blocked, so this profile no longer exists for either of them.
+            onBlocked={() => router.replace('/discover')}
+          />
+        ) : null}
       </View>
     </Screen>
+  );
+}
+
+/// What people who actually met them wrote. The API does not say who wrote a review, so none
+/// of these carry a name.
+function Reviews({ userId }: { userId: string }) {
+  const c = useColors();
+  const { data } = useReviews(userId);
+  const reviews = data?.items ?? [];
+  if (!reviews.length) return null;
+
+  return (
+    <View style={styles.section}>
+      <Text role="heading" style={[type.title, { color: c.text }]}>
+        What people say
+      </Text>
+      {reviews.map((review) => (
+        <View key={review.id} style={[styles.review, { borderTopColor: c.border }]}>
+          {/* role="img": five hidden glyphs that together mean one thing, and a bare label on
+              a plain container is announced by nothing. */}
+          <View role="img" aria-label={`Rated ${review.rating} out of 5`} style={styles.stars}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Ionicons
+                key={star}
+                name={star <= Number(review.rating) ? 'star' : 'star-outline'}
+                size={14}
+                color={c.text}
+                aria-hidden
+              />
+            ))}
+            <Text style={[type.caption, { color: c.textMuted }]}>
+              {new Date(review.createdAt).toLocaleDateString()}
+            </Text>
+          </View>
+          {review.comment ? (
+            <Text style={[type.body, { color: c.text }]}>{review.comment}</Text>
+          ) : null}
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -168,6 +236,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  more: {
+    position: 'absolute',
+    zIndex: 1,
+    right: space.md,
+    width: 44,
+    height: 44,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  review: { gap: space.xs, paddingTop: space.md, borderTopWidth: StyleSheet.hairlineWidth },
+  stars: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   bar: {
     position: 'absolute',
     left: 0,

@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { radius, space, type, useColors } from '@/theme';
 
-type Variant = 'primary' | 'secondary' | 'quiet';
+type Variant = 'primary' | 'secondary' | 'quiet' | 'danger';
 
 /// One button, three weights. A screen shows at most one `primary`: that is what makes the
 /// intended action obvious instead of leaving three equal-looking choices.
@@ -22,9 +22,16 @@ export function Button({
   const c = useColors();
   const off = disabled || loading;
 
-  const background =
-    variant === 'primary' ? c.primary : variant === 'secondary' ? c.surfaceMuted : 'transparent';
-  const foreground = variant === 'primary' ? c.onPrimary : c.text;
+  // `danger` is for a confirmation that takes something away, and nothing else: it is the one
+  // place red belongs outside a validation error.
+  const fills: Record<Variant, string> = {
+    primary: c.primary,
+    danger: c.danger,
+    secondary: c.surfaceMuted,
+    quiet: 'transparent',
+  };
+  const background = fills[variant];
+  const foreground = variant === 'primary' || variant === 'danger' ? c.onPrimary : c.text;
 
   return (
     <Pressable

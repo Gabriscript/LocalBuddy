@@ -104,3 +104,30 @@ public class ProfileVisibilityTests
     public void A_new_account_is_not_visible_to_anonymous_visitors()
         => Assert.False(new User().ProfileVisibleToAnonymous);
 }
+
+/// Blocking is reversible in the API and unreachable everywhere else: a blocked member is gone
+/// from discovery, from the inbox and from every profile lookup. This list is the way back.
+public class BlockListTests
+{
+    [Fact]
+    public async Task My_blocks_are_listed_to_me_alone_and_can_be_undone()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
+        var safety = new SafetyController(t.Db).As(anna);
+
+        await safety.Block(bruno);
+        await safety.Block(carla);
+
+        var blocked = (await safety.Blocks()).Value!;
+        Assert.Equal(2, blocked.Items.Count);
+        Assert.Contains(blocked.Items, c => c.Id == bruno);
+        Assert.Contains(blocked.Items, c => c.Id == carla);
+
+        await safety.Unblock(bruno);
+        Assert.Equal([carla], (await safety.Blocks()).Value!.Items.Select(c => c.Id));
+
+        // Being blocked is not the same as blocking: Bruno's own list stays empty.
+        Assert.Empty((await new SafetyController(t.Db).As(bruno).Blocks()).Value!.Items);
+    }
+}

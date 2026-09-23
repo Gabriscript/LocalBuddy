@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,6 +12,7 @@ import { radius, space, type, useColors } from '@/theme';
 
 export default function Me() {
   const c = useColors();
+  const router = useRouter();
   const { data, isPending, error, refetch } = useMe();
   const { signOut } = useAuth();
 
@@ -42,6 +44,11 @@ export default function Me() {
           </View>
 
           <Button title="Edit profile" variant="secondary" onPress={() => {}} />
+          <Button
+            title="Blocked members"
+            variant="secondary"
+            onPress={() => router.push('/blocked')}
+          />
 
           {/* Sign out sits apart from the rest: it is not one more settings row. */}
           <View style={[styles.separated, { borderTopColor: c.border }]}>

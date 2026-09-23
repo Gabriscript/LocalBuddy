@@ -18,6 +18,8 @@ export const keys = {
   discovery: (filters: DiscoveryFilters) => ['discovery', filters] as const,
   conversations: ['conversations'] as const,
   messages: (id: string) => ['messages', id] as const,
+  reviews: (id: string) => ['reviews', id] as const,
+  blocks: ['blocks'] as const,
 };
 
 export function useMe() {
@@ -34,10 +36,14 @@ export function useDiscovery(filters: DiscoveryFilters) {
   });
 }
 
-export function useProfile(id: string) {
+/// The id is optional because the chat screen only learns who it is talking to once the
+/// conversation list has arrived.
+export function useProfile(id: string | undefined) {
   return useQuery({
-    queryKey: keys.profile(id),
-    queryFn: async () => unwrap(await api.GET('/api/v1/users/{id}', { params: { path: { id } } })),
+    queryKey: keys.profile(id ?? ''),
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/users/{id}', { params: { path: { id: id! } } })),
+    enabled: !!id,
   });
 }
 
@@ -137,6 +143,73 @@ export function useDeletePhoto() {
   return useMeMutation(async (id: string) =>
     unwrap(await api.DELETE('/api/v1/photos/{id}', { params: { path: { id } } }))
   );
+}
+
+// ---- Safety and reviews -------------------------------------------------------------------
+
+export function useReviews(userId: string) {
+  return useQuery({
+    queryKey: keys.reviews(userId),
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/users/{userId}/reviews', { params: { path: { userId } } })),
+  });
+}
+
+/// A review moves the subject's rating, so their profile and their card in the feed are both
+/// stale the moment it lands.
+export function useCreateReview(subjectId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { rating: number; comment: string }) =>
+      unwrap(await api.POST('/api/v1/reviews', { body: { subjectId, ...body } })),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.reviews(subjectId) });
+      client.invalidateQueries({ queryKey: keys.profile(subjectId) });
+      client.invalidateQueries({ queryKey: ['discovery'] });
+    },
+  });
+}
+
+/// 202, not 201: the report goes into a queue for a human, and the reporter gets no handle to
+/// read it back with.
+export function useReport() {
+  return useMutation({
+    mutationFn: async ({ reportedId, reason }: { reportedId: string; reason: string }) =>
+      unwrap(await api.POST('/api/v1/reports', { body: { reportedId, reason } })),
+  });
+}
+
+/// A block takes the member out of the feed, the inbox and their own profile page at once, so
+/// every list is stale afterwards. Unblocking puts them back.
+export function useBlock() {
+  const client = useQueryClient();
+  const forget = () => {
+    client.invalidateQueries({ queryKey: ['discovery'] });
+    client.invalidateQueries({ queryKey: keys.conversations });
+    client.invalidateQueries({ queryKey: keys.blocks });
+  };
+
+  const block = useMutation({
+    mutationFn: async (userId: string) =>
+      unwrap(await api.PUT('/api/v1/users/{userId}/block', { params: { path: { userId } } })),
+    onSuccess: forget,
+  });
+
+  const unblock = useMutation({
+    mutationFn: async (userId: string) =>
+      unwrap(await api.DELETE('/api/v1/users/{userId}/block', { params: { path: { userId } } })),
+    onSuccess: forget,
+  });
+
+  return { block, unblock };
+}
+
+/// The only screen a blocked member still appears on, which is what makes a block undoable.
+export function useBlocks() {
+  return useQuery({
+    queryKey: keys.blocks,
+    queryFn: async () => unwrap(await api.GET('/api/v1/users/me/blocks')),
+  });
 }
 
 /// PhotoType on the wire: 0 = profile, 1 = home (only for hosts offering overnight).
