@@ -27,6 +27,7 @@
 /* The tokens are the app's, from DESIGN.md: paper, ink, and the photographs carrying the
    colour. The page is deliberately still. Motion here reports a hover and nothing else. */
 :root {
+  color-scheme: light dark;
   --paper: #f7f4f1;
   --card: #fefdfc;
   --paper-sunk: #efeae5;
