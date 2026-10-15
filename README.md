@@ -130,7 +130,8 @@ Entries are account ids, not email addresses: nothing verifies that the person r
 address owns it, so an address here would hand moderator powers to whoever signs up with it
 first. Anything that is not an id is ignored with a warning in the log.
 
-Listed accounts are given the `moderator` role at startup, once the account exists. The role
-is baked into the access token, so it takes effect at their next sign-in. Moderators reach
+Listed accounts are given the `moderator` role at startup, once the account exists. Every
+moderation request checks the role in the database, so granting it or taking it away takes
+effect at once — a token says what was true for the 30 days it lives. Moderators reach
 `/api/v1/moderation/*`: the open report queue, and banning or unbanning an account with a reason
 on the record. See [ADR-0005](docs/adr/0005-platform-ban-with-identity-continuity.md).

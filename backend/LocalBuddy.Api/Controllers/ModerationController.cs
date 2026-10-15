@@ -1,6 +1,7 @@
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,8 @@ namespace LocalBuddy.Api.Controllers;
 /// The verbs here are deliberate: banning is an action, not a resource you create.
 [ApiController]
 [Route("api/v1/moderation")]
-[Authorize(Roles = Roles.Moderator)]
+[Authorize]
+[RequiresModerator]
 [Produces("application/json")]
 public class ModerationController(LocalBuddyDbContext db, ILogger<ModerationController> log) : ControllerBase
 {

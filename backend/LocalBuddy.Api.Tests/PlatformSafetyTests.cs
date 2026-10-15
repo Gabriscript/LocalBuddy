@@ -6,6 +6,10 @@ using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -107,6 +111,61 @@ public class ProfileVisibilityTests
     [Fact]
     public void A_new_account_is_not_visible_to_anonymous_visitors()
         => Assert.False(new User().ProfileVisibleToAnonymous);
+}
+
+/// A token says what was true when it was issued, and says it for 30 days. Moderation asks the
+/// database instead.
+public class ModeratorGateTests
+{
+    static AuthorizationFilterContext ContextFor(TestDb t, ClaimsPrincipal caller)
+    {
+        var http = new DefaultHttpContext
+        {
+            RequestServices = new ServiceCollection().AddSingleton(t.Db).BuildServiceProvider(),
+            User = caller
+        };
+        return new AuthorizationFilterContext(new ActionContext(http, new RouteData(), new ActionDescriptor()), []);
+    }
+
+    static ClaimsPrincipal WithModeratorClaim(Guid id) =>
+        new(new ClaimsIdentity(
+            [new Claim(ClaimTypes.NameIdentifier, id.ToString()), new Claim(ClaimTypes.Role, Roles.Moderator)], "test"));
+
+    static void GrantModerator(TestDb t, Guid id)
+    {
+        var role = new IdentityRole<Guid>(Roles.Moderator) { Id = Guid.CreateVersion7() };
+        t.Db.Add(role);
+        t.Db.Add(new IdentityUserRole<Guid> { UserId = id, RoleId = role.Id });
+        t.Db.SaveChanges();
+    }
+
+    /// The whole point: the role was taken away, the token still carries it.
+    [Fact]
+    public async Task A_moderator_claim_in_the_token_is_not_enough()
+    {
+        using var t = new TestDb();
+        var context = ContextFor(t, WithModeratorClaim(t.AddUser("stoodDown")));
+
+        await new RequiresModeratorAttribute().OnAuthorizationAsync(context);
+
+        var problem = Assert.IsType<ProblemDetails>(Assert.IsType<ObjectResult>(context.Result).Value);
+        Assert.Equal(StatusCodes.Status403Forbidden, problem.Status);
+        Assert.Equal("moderator_only", problem.Extensions["code"]);
+    }
+
+    /// And the other way round: the role granted since the token was issued already counts.
+    [Fact]
+    public async Task The_role_in_the_database_lets_the_request_through()
+    {
+        using var t = new TestDb();
+        var anna = t.AddUser("anna");
+        GrantModerator(t, anna);
+        var context = ContextFor(t, TestCaller.For(anna)); // no role claim in the token
+
+        await new RequiresModeratorAttribute().OnAuthorizationAsync(context);
+
+        Assert.Null(context.Result);
+    }
 }
 
 /// Counts the password hashes a sign-in pays for, which is what the timing leak was made of.
