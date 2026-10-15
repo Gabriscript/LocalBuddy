@@ -78,7 +78,15 @@ public class AuthController(
         // the response still does not confirm that the address exists.
         var result = await signIn.CheckPasswordSignInAsync(user, req.Password, lockoutOnFailure: true);
         if (!result.Succeeded)
+        {
+            // PreSignInCheck returns these two before it verifies anything, so they used to come
+            // back a PBKDF2 pass early: lock an account with five guesses and the faster refusal
+            // says the address is registered. Same hash as above, thrown away.
+            if (result.IsLockedOut || result.IsNotAllowed)
+                _ = users.PasswordHasher.HashPassword(user: new User(), req.Password);
+
             return this.Failure(StatusCodes.Status401Unauthorized, "invalid_credentials", "Invalid credentials.");
+        }
 
         // A banned account is told plainly: unlike the cases above, the holder already knows
         // the account exists, and needs to know why it stopped working.
