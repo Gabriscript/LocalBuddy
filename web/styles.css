@@ -488,6 +488,41 @@ section + section {
   }
 }
 
+/* shortcut: labelled empty slots keep the places of the photographs and of the invitation
+   button, at their real sizes, until the real ones exist; this block goes with the last one. */
+.slot {
+  display: grid;
+  place-items: center;
+  padding: 15px 28px;
+  border: 1px dashed var(--text-muted);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+figure .slot {
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+}
+
+.who figure .slot {
+  aspect-ratio: 5 / 6;
+}
+
+@media (max-width: 860px) {
+  figure .slot,
+  .who figure .slot {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 520px) {
+  .slot {
+    width: 100%;
+  }
+}
+
 /* ---------------------------------------------------------------------------------------- */
 /* The curved menu. Only below 860px: above it the four sections fit in the header, and
    hiding four links where there is room to show them costs more than it buys. */

@@ -17,16 +17,8 @@
       content="Chi viaggia e chi abita, presentati. La giornata insieme non si paga mai."
     />
     <meta property="og:type" content="website" />
-    <!-- TODO: a real photograph, like the rest of them. Without any og:image the shared link
-         shows up as a bare grey box. -->
-    <meta
-      property="og:image"
-      content="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/630"
-    />
-    <meta
-      property="og:image:alt"
-      content="Una via stretta di una città italiana nel tardo pomeriggio"
-    />
+    <!-- [SHARE IMAGE HERE]: og:image (1200x630) and og:image:alt come back with a real
+         photograph. A random one would go out described as a street in an Italian city. -->
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" hreflang="en" href="../index.html" />
@@ -103,19 +95,16 @@
             Un locale ti mostra il suo pomeriggio, e nessuno lo paga.
           </p>
           <p class="cta-row">
-            <!-- TODO: point this at a real address or a signup endpoint before publishing. -->
-            <a class="button" href="#waitlist">Chiedi un invito</a>
+            <!-- The invitation button comes back once it has somewhere real to go, an address or
+                 a signup endpoint: a button here now would promise what nothing delivers. -->
+            <span class="slot">[INVITATION DESTINATION HERE]</span>
             <a class="button quiet" href="#how">Guarda come funziona</a>
           </p>
         </div>
         <figure class="hero-figure">
-          <img
-            src="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/1500"
-            width="1200"
-            height="1500"
-            fetchpriority="high"
-            alt="Una via stretta di una città italiana nel tardo pomeriggio"
-          />
+          <!-- Meant to be a narrow street in an Italian city in the late afternoon: a real
+               photograph, 1200x1500, fetchpriority="high", and an alt that says what it shows. -->
+          <div class="slot">[HERO PHOTO HERE]</div>
         </figure>
       </section>
 
@@ -157,14 +146,9 @@
 
       <section id="who" class="who">
         <figure>
-          <img
-            src="https://picsum.photos/seed/localbuddy-market-morning-produce/1000/1200"
-            width="1000"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-            alt="Un banco del mercato al mattino, con frutta e verdura"
-          />
+          <!-- Meant to be a market stall in the morning: a real photograph, 1000x1200,
+               loading="lazy", and an alt that says what it shows. -->
+          <div class="slot">[MARKET PHOTO HERE]</div>
         </figure>
         <div class="who-copy">
           <h2>Due ruoli, e puoi averli tutti e due</h2>
@@ -216,8 +200,8 @@
           Gli host si registrano in Italia, l'unico paese di cui abbiamo verificato le regole. Chi
           viaggia può arrivare da ovunque.
         </p>
-        <!-- TODO: replace with the real contact address or a signup endpoint. -->
-        <p class="cta-row"><a class="button" href="#waitlist">Chiedi un invito</a></p>
+        <!-- The same invitation button as the hero's, once it has somewhere real to go. -->
+        <p class="cta-row"><span class="slot">[INVITATION DESTINATION HERE]</span></p>
       </section>
     </main>
 
