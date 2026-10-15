@@ -19,8 +19,28 @@
     <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.13" />
   </ItemGroup>
 
+  <!-- The five advisories against ImageSharp 2.1.13 are fixed only in 4.1.2 and later, and 4.x
+       needs a sixlabors.lic to compile (3.x does not help: it is affected too, and licensed
+       differently). Until that licence exists they are accepted one by one, each with the reason
+       it is accepted. Delete this whole group together with the move to 4.1.2 or later. -->
+  <ItemGroup Label="Accepted advisories, ImageSharp 2.1.13">
+    <!-- High: HistogramEqualization on a float TIFF. Nothing here equalises a histogram. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j3p4-wp97-rph4" />
+    <!-- High: the CCITT T4 TIFF encoder overflows. Nothing here encodes anything but JPEG. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j9gm-c75j-xc9q" />
+    <!-- High: the CCITT T6 TIFF encoder overflows. Nothing here encodes anything but JPEG. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-jjfr-hcj7-qf5w" />
+    <!-- Moderate: a BigTIFF can loop the decoder. PhotosController decodes JPEG, PNG and WebP only. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wmxv-xphr-5c9g" />
+    <!-- Moderate: a malformed ICC profile can force a huge allocation. JPEG and PNG carry ICC
+         profiles, so this one is still reachable as far as we know: accepted, and bounded by the
+         two-at-a-time decode limit in Program.cs. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
+  </ItemGroup>
+
   <ItemGroup Label="Tests">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EfCoreVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />

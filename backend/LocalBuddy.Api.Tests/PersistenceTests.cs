@@ -138,3 +138,17 @@ public class ErasureTests
         Assert.Equal(1, await t.Db.Reports.CountAsync());
     }
 }
+
+public class MigrationTests
+{
+    /// The SQLite tests build their schema from the model, so a model change without its
+    /// migration passes all of them and fails only at deploy, when the bundle refuses to run.
+    /// The design-time context compares the model with the migrations without opening a connection.
+    [Fact]
+    public void Every_model_change_has_its_migration()
+    {
+        using var db = new DesignTimeDbContextFactory().CreateDbContext([]);
+
+        Assert.False(db.Database.HasPendingModelChanges());
+    }
+}

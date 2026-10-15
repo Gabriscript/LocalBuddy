@@ -115,4 +115,23 @@ public class ConcurrencyTests(PostgresFixture postgres) : IClassFixture<Postgres
             Assert.Equal(0, await check.Users.Where(u => u.Id == anna).Select(u => u.CreditsBalance).SingleAsync());
         }
     }
+
+    [Fact]
+    public async Task A_double_tap_on_subscribe_charges_once()
+    {
+        for (var i = 0; i < Rounds; i++)
+        {
+            var anna = await Member("anna");
+
+            var results = await AllAtOnce(
+                db => Payments(db, anna).Subscribe(new SubscribeRequest("monthly")),
+                db => Payments(db, anna).Subscribe(new SubscribeRequest("monthly")));
+
+            Assert.Equal([201, 409], results.Select(r => Assert.IsType<ObjectResult>(r).StatusCode).Order());
+
+            await using var check = new LocalBuddyDbContext(postgres.Options);
+            Assert.Equal(1, await check.Subscriptions.CountAsync(s => s.UserId == anna));
+            Assert.Equal(1, await check.Payments.CountAsync(p => p.UserId == anna));
+        }
+    }
 }

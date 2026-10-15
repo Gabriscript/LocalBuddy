@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
 import { useDeletePhoto, useMe, useSetAvailability, useUploadPhoto } from '@/api/hooks';
-import { TIMES_OF_DAY } from '@/api/labels';
+import { TIMES_OF_DAY, type TimeOfDay } from '@/api/labels';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -36,8 +36,8 @@ function PhotoAndTimes({ me }: { me: Me }) {
   const hosts = me.role !== 'guest';
 
   // `me` is refetched after every upload, so the photo shown is always the stored one.
-  const photo = me.photos.find((p) => p.type === 0);
-  const [times, setTimes] = useState(() => me.availability.map((a) => a.timeOfDay as number));
+  const photo = me.photos.find((p) => p.type === 'profile');
+  const [times, setTimes] = useState(() => me.availability.map((a) => a.timeOfDay));
 
   async function pickPhoto() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -50,13 +50,13 @@ function PhotoAndTimes({ me }: { me: Me }) {
     if (result.canceled) return;
 
     upload.mutate(
-      { asset: result.assets[0], type: 0 },
+      { asset: result.assets[0], type: 'profile' },
       // Replace, not add: discovery shows a member's profile photo, so there should be one.
       { onSuccess: () => photo && remove.mutate(photo.id) }
     );
   }
 
-  function toggleTime(value: number) {
+  function toggleTime(value: TimeOfDay) {
     setTimes((current) => (current.includes(value) ? current.filter((t) => t !== value) : [...current, value]));
   }
 

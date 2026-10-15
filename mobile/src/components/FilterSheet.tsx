@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { DiscoveryFilters } from '@/api/hooks';
-import { TIMES_OF_DAY } from '@/api/labels';
+import { TIMES_OF_DAY, type TimeOfDay } from '@/api/labels';
 import { space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -31,7 +31,7 @@ export function FilterSheet({
       setDraft((f) => ({ ...f, [key]: next }));
 
   const times = draft.timeOfDay ?? [];
-  const toggleTime = (time: number) =>
+  const toggleTime = (time: TimeOfDay) =>
     set('timeOfDay')(times.includes(time) ? times.filter((t) => t !== time) : [...times, time]);
 
   return (

@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Models;
@@ -19,7 +21,15 @@ var jwt = (builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>(
            ?? throw new InvalidOperationException($"Missing '{JwtOptions.Section}' configuration section."))
     .Validated();
 
-builder.Services.AddControllers();
+// Enums travel by name, not by position: "evening" means the same thing to every app version,
+// while 2 only meant evening as long as nobody reordered the members.
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+
+// The OpenAPI document is built from these options, not from the MVC ones above. Without the
+// same converter here it would go on describing enums as integers while the API sends names.
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
@@ -81,6 +91,11 @@ builder.Services.AddRateLimiter(o =>
         RateLimitPartition.GetFixedWindowLimiter(
             ClientAddress(context),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+
+    // A decoding photo holds up to a few hundred MB until it is resized, and the budgets above
+    // count requests per minute, not how many decode at once. Two at a time for the whole
+    // server; the rest wait their turn.
+    o.AddConcurrencyLimiter("photo-upload", c => { c.PermitLimit = 2; c.QueueLimit = 10; });
 });
 
 builder.Services.AddScoped<ConversationService>();

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
+import type { TimeOfDay } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -22,7 +23,7 @@ const ROLES = [
   { value: 'guest', label: 'Guests' },
 ];
 
-/// Route params are strings; the query takes booleans and a list of numbers.
+/// Route params are strings; the query takes booleans and a list of times of day.
 type Params = {
   city?: string;
   role?: string;
@@ -54,7 +55,7 @@ export default function Discover() {
     smokes: asBool(params.smokes),
     hasPets: asBool(params.hasPets),
     // One comma-separated param rather than a repeated one: shorter link, one thing to parse.
-    timeOfDay: params.timeOfDay ? params.timeOfDay.split(',').map(Number) : undefined,
+    timeOfDay: params.timeOfDay ? (params.timeOfDay.split(',') as TimeOfDay[]) : undefined,
   };
 
   const [filtering, setFiltering] = useState(false);

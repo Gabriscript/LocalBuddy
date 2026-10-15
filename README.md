@@ -34,8 +34,9 @@ npm install
 npm start                 # then open the dev build on a device or simulator
 ```
 
-The TypeScript API client is generated from the running backend, not written by hand:
-`npm run api:gen` with the API up on :5200. See [mobile/README.md](mobile/README.md).
+The TypeScript API client is generated from the backend's OpenAPI document, not written by hand:
+`npm run api:gen` reads the committed copy in `backend/openapi.v1.json`. See
+[mobile/README.md](mobile/README.md).
 
 ## Where the work stands
 

@@ -32,7 +32,10 @@ type PageOf<T> = { items: T[]; hasMore: boolean };
 
 /// The page number is counted here rather than read back off the response, which types it as
 /// `number | string`. One helper for all five paged lists, so none of them can drift.
-function usePages<T>(queryKey: readonly unknown[], load: (page: number) => Promise<PageOf<T>>) {
+function usePages<T extends { id?: string }>(
+  queryKey: readonly unknown[],
+  load: (page: number) => Promise<PageOf<T>>
+) {
   const query = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) => load(pageParam),
@@ -43,10 +46,13 @@ function usePages<T>(queryKey: readonly unknown[], load: (page: number) => Promi
 
   // Memoised: a fresh array on every render is a fresh `data` prop for every FlatList, which
   // then cannot skip a single row. The cost grew with how far somebody had scrolled.
-  const items = useMemo(
-    () => query.data?.pages.flatMap((page) => page.items) ?? [],
-    [query.data]
-  );
+  // One row per id: pages are offsets, so a row added at the top while somebody scrolls pushes
+  // the next page back by one, and its first row arrives a second time. The generated types
+  // call `id` optional; a row without one is kept as it is rather than merged with another.
+  const items = useMemo(() => {
+    const rows = query.data?.pages.flatMap((page) => page.items) ?? [];
+    return [...new Map(rows.map((row): [unknown, T] => [row.id ?? row, row])).values()];
+  }, [query.data]);
 
   return {
     ...query,
@@ -295,9 +301,9 @@ export function useBlocks() {
   );
 }
 
-/// PhotoType on the wire: 0 = profile, 1 = home (only for hosts offering overnight).
+/// A home photo is only accepted from a host offering overnight stays.
 export function useUploadPhoto() {
-  return useMeMutation(async ({ asset, type }: { asset: ImagePickerAsset; type: 0 | 1 }) => {
+  return useMeMutation(async ({ asset, type }: { asset: ImagePickerAsset; type: Schemas['PhotoType'] }) => {
     const form = new FormData();
     // The web picker hands over a real File; native platforms give a file URI, which React
     // Native's FormData uploads when it is passed in this { uri, name, type } shape.

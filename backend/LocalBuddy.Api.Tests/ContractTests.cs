@@ -8,11 +8,54 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LocalBuddy.Api.Tests;
+
+/// ADR-0008 made this document the client's contract and ADR-0009 generates the client from it,
+/// yet a rename in C# renames the JSON field with every other test still green. The approved copy
+/// is committed; any difference rewrites it and fails, so the change arrives as a diff to review.
+public class OpenApiDocumentTests(WebApplicationFactory<Program> app) : IClassFixture<WebApplicationFactory<Program>>
+{
+    [Fact]
+    public async Task The_wire_contract_changes_only_on_purpose()
+    {
+        var current = (await app.CreateClient().GetStringAsync("/openapi/v1.json")).ReplaceLineEndings("\n");
+
+        var path = Path.Combine(BackendDirectory(), "openapi.v1.json");
+        var approved = File.Exists(path) ? File.ReadAllText(path).ReplaceLineEndings("\n") : null;
+        if (current == approved) return;
+
+        File.WriteAllText(path, current);
+        Assert.Fail($"The API contract changed and {path} was rewritten. Read the diff: commit it if the " +
+                    "change is meant, undo the code if it is not. Then run `npm run api:gen` in mobile/.");
+    }
+
+    /// The document is written with the minimal-API JSON options, the responses with the MVC ones.
+    /// Program.cs configures both; if they ever disagree, the document describes a wire format the
+    /// controllers do not send, and the test above cannot see it.
+    [Fact]
+    public void The_document_and_the_responses_serialise_alike()
+    {
+        var responses = app.Services.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions;
+        var document = app.Services.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value.SerializerOptions;
+        var slot = new AvailabilityDto(TimeOfDay.Evening, null, null);
+
+        Assert.Equal(JsonSerializer.Serialize(slot, document), JsonSerializer.Serialize(slot, responses));
+        Assert.Contains("\"timeOfDay\":\"evening\"", JsonSerializer.Serialize(slot, responses));
+    }
+
+    static string BackendDirectory()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "LocalBuddy.slnx"))) dir = dir.Parent;
+        return dir?.FullName ?? throw new InvalidOperationException("No LocalBuddy.slnx above the test binaries.");
+    }
+}
 
 public class JwtOptionsTests
 {

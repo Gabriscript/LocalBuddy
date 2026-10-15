@@ -128,7 +128,10 @@ public class PaymentsController(
         var monthly = req.PlanType == "monthly";
 
         var me = User.Id();
-        if (await db.Subscriptions.AnyAsync(s => s.UserId == me && s.Status == "active" && s.ExpiresAt > DateTime.UtcNow))
+
+        // Without the lock a double tap passed the check twice and started two subscriptions.
+        await using var transaction = await db.BeginLockedAsync(AdvisoryLocks.KeyOf(me));
+        if (await HasActiveSubscriptionAsync(me))
             return this.Conflicted("already_subscribed", "You already have an active subscription.");
 
         var stripeId = await gateway.StartSubscriptionAsync(me, req.PlanType);
@@ -153,6 +156,7 @@ public class PaymentsController(
         });
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return StatusCode(StatusCodes.Status201Created, SubscriptionDto.From(subscription));
         // ponytail: no Stripe webhook yet — renewals and cancellations land here when
         // the real gateway replaces the stub.

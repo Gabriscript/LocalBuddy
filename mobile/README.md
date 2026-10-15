@@ -12,11 +12,12 @@ npm run typecheck         # tsc --noEmit
 ## The API client is generated
 
 `src/api/generated.ts` is produced from the backend's OpenAPI document and is **never edited by
-hand**. After any backend change to a route, a DTO or a status code:
+hand**. The document is committed as `backend/openapi.v1.json`: after any backend change to a
+route, a DTO or a status code, `dotnet test` rewrites it and fails once, so the diff gets read.
+Then:
 
 ```bash
-# with the API running on :5200 (see the repo README)
-npm run api:gen
+npm run api:gen           # reads ../backend/openapi.v1.json; the API does not need to be running
 npm run typecheck         # a breaking change shows up here, not in a simulator
 ```
 
