@@ -394,13 +394,17 @@ section + section {
 
 .who dl {
   display: grid;
-  gap: var(--step-lg);
   margin: 0;
 }
 
 .who dt {
   font-weight: 600;
   margin-bottom: 4px;
+}
+
+/* A term sits with its own description: the air goes between the pairs, not inside them. */
+.who dd + dt {
+  margin-top: var(--step-lg);
 }
 
 .who dd {
