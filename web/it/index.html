@@ -33,11 +33,13 @@
     <link rel="alternate" hreflang="it" href="index.html" />
     <link rel="alternate" hreflang="x-default" href="../index.html" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Only the headline face is worth fetching before the stylesheet asks for it. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Playfair+Display:wght@600&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="../fonts/playfair-display-latin-600-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <link rel="stylesheet" href="../styles.css" />
     <!-- The only script on the page. The menu is CSS; this gives it Escape, a focus that goes

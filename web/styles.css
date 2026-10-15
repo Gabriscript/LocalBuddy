@@ -1,3 +1,29 @@
+/* Served from here, so no visit hands its address to a font CDN: the latin subsets from
+   Fontsource 5.3.0 (OFL-1.1, licences beside the files), which cover both pages' accents. */
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/playfair-display-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/geist-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/geist-latin-600-normal.woff2") format("woff2");
+}
+
 /* The tokens are the app's, from DESIGN.md: paper, ink, and the photographs carrying the
    colour. The page is deliberately still. Motion here reports a hover and nothing else. */
 :root {
