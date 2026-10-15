@@ -149,7 +149,14 @@ app.UseMiddleware<BanEnforcementMiddleware>();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-await SeedModeratorsAsync(app);
+using (var scope = app.Services.CreateScope())
+{
+    await ModeratorSeed.ApplyAsync(
+        app.Configuration.GetSection("Moderators").Get<string[]>() ?? [],
+        scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
+        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>(),
+        scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Moderators"));
+}
 
 app.Run();
 
@@ -161,40 +168,3 @@ static string PartitionKey(HttpContext context) =>
 
 static string ClientAddress(HttpContext context) =>
     context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-/// Moderators are bootstrapped from configuration rather than edited into the database by hand.
-/// Idempotent, and safe to run from several instances at once.
-static async Task SeedModeratorsAsync(WebApplication app)
-{
-    var emails = app.Configuration.GetSection("Moderators").Get<string[]>() ?? [];
-    if (emails.Length == 0) return;
-
-    using var scope = app.Services.CreateScope();
-    var log = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Moderators");
-    var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    var users = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-    try
-    {
-        if (!await roles.RoleExistsAsync(Roles.Moderator))
-            await roles.CreateAsync(new IdentityRole<Guid>(Roles.Moderator));
-
-        foreach (var email in emails)
-        {
-            var user = await users.FindByEmailAsync(email);
-            if (user is null)
-            {
-                log.LogWarning("Configured moderator has no account yet: the role is granted at the first start after they register.");
-                continue;
-            }
-
-            if (!await users.IsInRoleAsync(user, Roles.Moderator))
-                await users.AddToRoleAsync(user, Roles.Moderator);
-        }
-    }
-    catch (Exception ex)
-    {
-        // Losing a race with another instance is fine; the winner did the same work.
-        log.LogWarning(ex, "Moderator seeding did not complete.");
-    }
-}

@@ -2,9 +2,11 @@ using System.Security.Claims;
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LocalBuddy.Api.Tests;
 
@@ -45,8 +47,13 @@ public sealed class TestDb : IDisposable
             UserName = $"{name}@test.local",
             NormalizedUserName = $"{name}@TEST.LOCAL",
             Email = $"{name}@test.local",
+            // As Identity's own normalizer writes it, so UserManager.FindByEmailAsync finds it.
+            NormalizedEmail = $"{name}@test.local".ToUpperInvariant(),
             Name = name,
-            City = "Milano"
+            City = "Milano",
+            // UserManager refuses to update an account without one, the way a registration never
+            // leaves it null.
+            SecurityStamp = Guid.NewGuid().ToString()
         };
         Db.Users.Add(user);
         Db.SaveChanges();
@@ -66,4 +73,27 @@ public sealed class TestDb : IDisposable
         Db.Dispose();
         connection.Dispose();
     }
+}
+
+/// Identity over the same test database, for the paths that go through UserManager instead of
+/// the DbContext: roles and password hashing.
+public sealed class TestIdentity : IDisposable
+{
+    readonly ServiceProvider services;
+
+    public TestIdentity(LocalBuddyDbContext db)
+    {
+        var collection = new ServiceCollection();
+        collection.AddLogging();
+        collection.AddSingleton(db);
+        collection.AddIdentityCore<User>()
+                  .AddRoles<IdentityRole<Guid>>()
+                  .AddEntityFrameworkStores<LocalBuddyDbContext>();
+        services = collection.BuildServiceProvider();
+    }
+
+    public UserManager<User> Users => services.GetRequiredService<UserManager<User>>();
+    public RoleManager<IdentityRole<Guid>> Roles => services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    public void Dispose() => services.Dispose();
 }

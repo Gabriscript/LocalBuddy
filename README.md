@@ -111,10 +111,14 @@ been applied anywhere.
 Moderator access is granted from configuration, not by editing the database:
 
 ```json
-{ "Moderators": ["someone@example.com"] }
+{ "Moderators": ["0194c0f3-7a1e-7c6b-9a10-2f8d4b6e5c31"] }
 ```
 
-Listed addresses are given the `moderator` role at startup, once the account exists. The role
+Entries are account ids, not email addresses: nothing verifies that the person registering an
+address owns it, so an address here would hand moderator powers to whoever signs up with it
+first. Anything that is not an id is ignored with a warning in the log.
+
+Listed accounts are given the `moderator` role at startup, once the account exists. The role
 is baked into the access token, so it takes effect at their next sign-in. Moderators reach
 `/api/v1/moderation/*`: the open report queue, and banning or unbanning an account with a reason
 on the record. See [ADR-0005](docs/adr/0005-platform-ban-with-identity-continuity.md).

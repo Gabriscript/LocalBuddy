@@ -3,7 +3,10 @@ using LocalBuddy.Api.Controllers;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LocalBuddy.Api.Tests;
 
@@ -103,6 +106,43 @@ public class ProfileVisibilityTests
     [Fact]
     public void A_new_account_is_not_visible_to_anonymous_visitors()
         => Assert.False(new User().ProfileVisibleToAnonymous);
+}
+
+/// Moderator powers are granted to an account, never to an address: registration does not check
+/// that the person typing an address owns it.
+public class ModeratorSeedTests
+{
+    static readonly ILogger Log = NullLogger.Instance;
+
+    [Fact]
+    public async Task A_configured_account_id_becomes_a_moderator()
+    {
+        using var t = new TestDb();
+        using var identity = new TestIdentity(t.Db);
+        var anna = t.AddUser("anna");
+
+        await ModeratorSeed.ApplyAsync([anna.ToString()], identity.Users, identity.Roles, Log);
+
+        var seeded = await identity.Users.FindByIdAsync(anna.ToString());
+        Assert.Equal([Roles.Moderator], await identity.Users.GetRolesAsync(seeded!));
+    }
+
+    /// The old seeding looked the address up: whoever registered it first got the powers.
+    [Fact]
+    public async Task An_address_in_the_list_grants_nothing()
+    {
+        using var t = new TestDb();
+        using var identity = new TestIdentity(t.Db);
+        const string Address = "impostor@test.local";
+        var impostor = t.AddUser("impostor"); // registered as impostor@test.local
+
+        await ModeratorSeed.ApplyAsync([Address], identity.Users, identity.Roles, Log);
+
+        // The address does resolve to that account — the lookup the old code did. It is the rule
+        // that changed, not the fixture.
+        Assert.Equal(impostor, (await identity.Users.FindByEmailAsync(Address))!.Id);
+        Assert.Empty(await identity.Users.GetRolesAsync((await identity.Users.FindByIdAsync(impostor.ToString()))!));
+    }
 }
 
 /// Blocking is reversible in the API and unreachable everywhere else: a blocked member is gone
