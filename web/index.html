@@ -17,13 +17,8 @@
       content="Travellers and locals, introduced. The day out is never paid for."
     />
     <meta property="og:type" content="website" />
-    <!-- TODO: a real photograph, like the rest of them. Without any og:image the link shows up
-         in a message as a bare grey box. -->
-    <meta
-      property="og:image"
-      content="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/630"
-    />
-    <meta property="og:image:alt" content="A narrow street in an Italian city in the late afternoon" />
+    <!-- [SHARE IMAGE HERE]: og:image (1200x630) and og:image:alt come back with a real
+         photograph. A random one would go out described as a street in an Italian city. -->
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" hreflang="en" href="index.html" />
@@ -31,11 +26,13 @@
     <!-- Neither language is the fallback for the rest of the world; English is. -->
     <link rel="alternate" hreflang="x-default" href="index.html" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Only the headline face is worth fetching before the stylesheet asks for it. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Playfair+Display:wght@600&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="fonts/playfair-display-latin-600-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <link rel="stylesheet" href="styles.css" />
     <!-- The only script on the page. The menu is CSS; this gives it Escape, a focus that goes
@@ -101,19 +98,16 @@
             local shows you their afternoon, and nobody pays for it.
           </p>
           <p class="cta-row">
-            <!-- TODO: point this at a real address or a waitlist endpoint before publishing. -->
-            <a class="button" href="#waitlist">Ask for an invitation</a>
+            <!-- The invitation button comes back once it has somewhere real to go, an address or
+                 a signup endpoint: a button here now would promise what nothing delivers. -->
+            <span class="slot">[INVITATION DESTINATION HERE]</span>
             <a class="button quiet" href="#how">See how it works</a>
           </p>
         </div>
         <figure class="hero-figure">
-          <img
-            src="https://picsum.photos/seed/localbuddy-milano-street-afternoon/1200/1500"
-            width="1200"
-            height="1500"
-            fetchpriority="high"
-            alt="A narrow street in an Italian city in the late afternoon"
-          />
+          <!-- Meant to be a narrow street in an Italian city in the late afternoon: a real
+               photograph, 1200x1500, fetchpriority="high", and an alt that says what it shows. -->
+          <div class="slot">[HERO PHOTO HERE]</div>
         </figure>
       </section>
 
@@ -154,14 +148,9 @@
 
       <section id="who" class="who">
         <figure>
-          <img
-            src="https://picsum.photos/seed/localbuddy-market-morning-produce/1000/1200"
-            width="1000"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-            alt="A morning market stall with fruit and vegetables"
-          />
+          <!-- Meant to be a market stall in the morning: a real photograph, 1000x1200,
+               loading="lazy", and an alt that says what it shows. -->
+          <div class="slot">[MARKET PHOTO HERE]</div>
         </figure>
         <div class="who-copy">
           <h2>Two roles, and you can hold both</h2>
@@ -197,8 +186,8 @@
             directions, takes it out of both inboxes, and hides each profile from the other.
           </li>
           <li>
-            <strong>Reviews from people who met.</strong> Only the two sides of an exchange that
-            actually happened can review each other.
+            <strong>Reviews only between people who have written to each other.</strong> Both
+            must have written in the same conversation before either can review the other.
           </li>
           <li>
             <strong>A ban that follows the person.</strong> A removed member cannot return with a
@@ -213,8 +202,8 @@
           Hosts register in Italy, the one country whose rules we have checked. Travellers can come
           from anywhere.
         </p>
-        <!-- TODO: replace with the real contact address or a signup endpoint. -->
-        <p class="cta-row"><a class="button" href="#waitlist">Ask for an invitation</a></p>
+        <!-- The same invitation button as the hero's, once it has somewhere real to go. -->
+        <p class="cta-row"><span class="slot">[INVITATION DESTINATION HERE]</span></p>
       </section>
     </main>
 
