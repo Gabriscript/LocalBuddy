@@ -46,6 +46,10 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         // A banned account is gone as far as other members are concerned (ADR-0005).
         if (user is null || user.BannedAt is not null || !User.CanSeeProfileOf(user)) return NotFound();
 
+        // A block is symmetric and covers every way of reaching somebody, this one included:
+        // discovery already hides them, and the id is guessable from an old screenshot.
+        if (User.TryGetId(out var me) && await db.IsBlockedBetweenAsync(me, id)) return NotFound();
+
         // Home photos exist for overnight hosting only; switching it off takes them off the profile.
         var photos = user.Photos.Where(p => p.Type == PhotoType.Profile || user.Listing?.OffersOvernight == true);
 

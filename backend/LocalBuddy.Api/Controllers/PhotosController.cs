@@ -50,6 +50,15 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         // NotFound rather than Forbid: a refusal should not confirm that the photo exists.
         if (owner is null || owner.BannedAt is not null || !User.CanSeeProfileOf(owner)) return NotFound();
 
+        if (User.TryGetId(out var me) && await db.IsBlockedBetweenAsync(me, photo.UserId)) return NotFound();
+
+        // Home photos belong to an overnight listing: when the host stops offering it the profile
+        // stops showing them (UsersController.GetById), and the bare URL has to stop serving them
+        // too, or the inside of the house stays published to anyone who kept the link.
+        if (photo.Type == PhotoType.Home &&
+            !await db.Listings.AnyAsync(l => l.UserId == photo.UserId && l.OffersOvernight))
+            return NotFound();
+
         var content = await storage.OpenReadAsync(photo.Url, HttpContext.RequestAborted);
         if (content is null) return NotFound();
 

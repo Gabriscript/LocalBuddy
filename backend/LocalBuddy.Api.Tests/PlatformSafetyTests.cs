@@ -257,6 +257,109 @@ public class ModeratorSeedTests
     }
 }
 
+file class OnePhoto : IPhotoStorage
+{
+    public Task<string> SaveJpegAsync(Stream jpeg, CancellationToken ct = default) => Task.FromResult("key");
+    public Task<Stream?> OpenReadAsync(string key, CancellationToken ct = default)
+        => Task.FromResult<Stream?>(new MemoryStream([1, 2, 3]));
+    public Task DeleteAsync(string key, CancellationToken ct = default) => Task.CompletedTask;
+}
+
+/// Discovery hides blocked and banned members, but the profile, the photo bytes and the reviews
+/// are all reachable by id — from an old screenshot, a saved link, a client that kept the id.
+/// The rules have to hold on these reads too.
+public class ProfileSurfaceTests
+{
+    static UsersController Users(TestDb t, Guid caller) =>
+        new UsersController(t.Db, new StubVerifier("unused"), new UnusedStorage()).As(caller);
+
+    static Task BlockBetween(TestDb t, Guid blocker, Guid blocked) =>
+        new SafetyController(t.Db).As(blocker).Block(blocked);
+
+    static void AddReview(TestDb t, Guid author, Guid subject)
+    {
+        t.Db.Reviews.Add(new Review
+        {
+            Id = Guid.CreateVersion7(), AuthorId = author, SubjectId = subject, Rating = 5, Comment = "Ottimo"
+        });
+        t.Db.SaveChanges();
+    }
+
+    [Fact]
+    public async Task A_block_hides_the_profile_from_both_sides()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        await BlockBetween(t, anna, bruno);
+
+        Assert.IsType<NotFoundResult>((await Users(t, bruno).GetById(anna)).Result);
+        Assert.IsType<NotFoundResult>((await Users(t, anna).GetById(bruno)).Result);
+    }
+
+    [Fact]
+    public async Task A_block_hides_the_reviews_with_the_profile()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
+        AddReview(t, carla, anna);
+        await BlockBetween(t, anna, bruno);
+
+        Assert.IsType<NotFoundResult>((await new ReviewsController(t.Db).As(bruno).ForUser(anna)).Result);
+        // Everyone else still reads them.
+        Assert.Single((await new ReviewsController(t.Db).As(carla).ForUser(anna)).Value!.Items);
+    }
+
+    [Fact]
+    public async Task A_banned_members_reviews_go_with_the_profile()
+    {
+        using var t = new TestDb();
+        var (anna, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("carla"));
+        AddReview(t, carla, anna);
+        (await t.Db.Users.FindAsync(anna))!.BannedAt = DateTime.UtcNow;
+        await t.Db.SaveChangesAsync();
+
+        Assert.IsType<NotFoundResult>((await new ReviewsController(t.Db).As(carla).ForUser(anna)).Result);
+    }
+
+    /// The profile stopped showing home photos the moment overnight hosting went off; the bytes
+    /// kept coming to anyone holding the URL.
+    [Fact]
+    public async Task A_home_photo_is_served_only_while_the_host_offers_overnight()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        var photo = new Photo { Id = Guid.CreateVersion7(), UserId = anna, Type = PhotoType.Home, Url = "key" };
+        var listing = new Listing
+        {
+            Id = Guid.CreateVersion7(), UserId = anna, OffersOvernight = true, OvernightComplianceAck = true
+        };
+        t.Db.Photos.Add(photo);
+        t.Db.Listings.Add(listing);
+        await t.Db.SaveChangesAsync();
+        var photos = new PhotosController(t.Db, new OnePhoto()).As(bruno);
+
+        Assert.IsType<FileStreamResult>(await photos.Content(photo.Id));
+
+        listing.OffersOvernight = false;
+        await t.Db.SaveChangesAsync();
+
+        Assert.IsType<NotFoundResult>(await photos.Content(photo.Id));
+    }
+
+    [Fact]
+    public async Task A_block_hides_the_photo_bytes()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        var photo = new Photo { Id = Guid.CreateVersion7(), UserId = anna, Type = PhotoType.Profile, Url = "key" };
+        t.Db.Photos.Add(photo);
+        await t.Db.SaveChangesAsync();
+        await BlockBetween(t, bruno, anna);
+
+        Assert.IsType<NotFoundResult>(await new PhotosController(t.Db, new OnePhoto()).As(bruno).Content(photo.Id));
+    }
+}
+
 /// Blocking is reversible in the API and unreachable everywhere else: a blocked member is gone
 /// from discovery, from the inbox and from every profile lookup. This list is the way back.
 public class BlockListTests

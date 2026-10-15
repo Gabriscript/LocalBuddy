@@ -64,9 +64,16 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
 
     [HttpGet("users/{userId:guid}/reviews")]
     [ProducesResponseType<Page<ReviewDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Page<ReviewDto>>> ForUser(
         Guid userId, int page = 0, int pageSize = Page<ReviewDto>.DefaultSize)
     {
+        // The reviews are part of a member's profile, and answered the same way as the profile
+        // itself: gone for a banned account (ADR-0005), gone in both directions after a block.
+        if (!await db.Users.AnyAsync(u => u.Id == userId && u.BannedAt == null) ||
+            await db.IsBlockedBetweenAsync(User.Id(), userId))
+            return NotFound();
+
         (page, pageSize) = Page<ReviewDto>.Clamp(page, pageSize);
 
         var rows = await db.Reviews.Where(r => r.SubjectId == userId)
