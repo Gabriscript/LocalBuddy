@@ -64,6 +64,18 @@ of that are worth doing together.
 during a browser preview. Nothing outside Development registers it; delete it the day the web
 preview stops being useful.
 
+## Behind a reverse proxy
+
+The API reads the caller's address from `X-Forwarded-For`, but only when the connection comes
+from a proxy it has been told about. A proxy that is not on the same host has to be listed:
+
+```json
+{ "KnownProxies": ["10.0.0.4"] }
+```
+
+Empty means loopback only, which is right for Caddy on the same machine. Get this wrong and
+every caller shares one rate-limit partition — the login budget included.
+
 ## Applying migrations on deploy
 
 The application deliberately does **not** migrate at startup: with more than one instance,

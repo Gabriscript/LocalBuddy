@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -6,6 +7,7 @@ using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +64,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o => o.TokenValidationParameters = jwt.ValidationParameters());
 
 builder.Services.AddAuthorization();
+
+// Behind a reverse proxy every request arrives from the proxy, so without this the limiters
+// below put the whole internet in one partition — one attacker spends the login budget for
+// everybody — and HTTPS redirection loops on a hop the proxy already terminated. X-Forwarded-*
+// is caller-supplied, so it is believed only from these addresses; with none configured, only
+// loopback (the framework default) is.
+var knownProxies = (builder.Configuration.GetSection("KnownProxies").Get<string[]>() ?? [])
+    .Select(value => IPAddress.TryParse(value, out var address)
+        ? address
+        : throw new InvalidOperationException($"KnownProxies: '{value}' is not an IP address."))
+    .ToList();
+
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    foreach (var proxy in knownProxies) o.KnownProxies.Add(proxy);
+});
 
 // A lockout only slows down one account at a time; the limiter is what stops the spray.
 builder.Services.AddRateLimiter(o =>
@@ -121,6 +140,9 @@ else
 }
 
 var app = builder.Build();
+
+// First: everything after it reads the client address or the scheme.
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler(); // unhandled errors come back as RFC 7807 ProblemDetails
 if (app.Environment.IsDevelopment())
