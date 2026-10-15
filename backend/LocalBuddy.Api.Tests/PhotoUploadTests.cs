@@ -4,6 +4,7 @@ using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace LocalBuddy.Api.Tests;
@@ -17,7 +18,16 @@ public class PhotoUploadTests
         return File(bytes.ToArray());
     }
 
+    static IFormFile Jpeg(Image image)
+    {
+        var bytes = new MemoryStream();
+        image.SaveAsJpeg(bytes);
+        return File(bytes.ToArray());
+    }
+
     static IFormFile File(byte[] bytes) => new FormFile(new MemoryStream(bytes), 0, bytes.Length, "file", "photo.png");
+
+    static bool IsRed(Rgb24 pixel) => pixel is { R: > 200, G: < 60, B: < 60 };
 
     static string? Code(IActionResult result) =>
         (Assert.IsType<ObjectResult>(result).Value as ProblemDetails)?.Extensions["code"]?.ToString();
@@ -47,6 +57,34 @@ public class PhotoUploadTests
         Assert.Equal(2048, stored.Width);
     }
 
+    /// Phones store a portrait shot sideways, with an EXIF flag saying how to turn it. The flag
+    /// leaves with the rest of the EXIF (GUIDELINES §9: it carries the GPS position), so the
+    /// stored copy has to be upright on its own.
+    [Fact]
+    public async Task A_sideways_phone_photo_is_stored_upright_and_without_its_exif()
+    {
+        using var t = new TestDb();
+        var storage = new KeepLast();
+        using var sideways = new Image<Rgb24>(3000, 2000, new Rgb24(255, 255, 255));
+        sideways.ProcessPixelRows(rows =>
+        {
+            for (var y = 0; y < 300; y++)
+                rows.GetRowSpan(y)[..300].Fill(new Rgb24(255, 0, 0)); // red corner, top left as stored
+        });
+        sideways.Metadata.ExifProfile = new ExifProfile();
+        sideways.Metadata.ExifProfile.SetValue(ExifTag.Orientation, (ushort)6); // view turned 90° clockwise
+
+        Assert.IsType<CreatedResult>(
+            await new PhotosController(t.Db, storage).As(t.AddUser("anna")).Upload(Jpeg(sideways), PhotoType.Profile));
+
+        using var stored = Image.Load<Rgb24>(storage.Last!);
+        Assert.Equal(2048, stored.Height);
+        Assert.True(stored.Width < stored.Height);
+        Assert.True(IsRed(stored[stored.Width - 10, 10])); // the corner turned to the top right
+        Assert.False(IsRed(stored[10, 10]));
+        Assert.Null(stored.Metadata.ExifProfile);
+    }
+
     /// A known format with broken data used to escape the catch and come back as a 500.
     [Fact]
     public async Task A_corrupt_image_is_a_400_not_a_500()
@@ -66,6 +104,21 @@ public class PhotoUploadTests
         Array.Fill(broken, (byte)0xFF, broken.Length / 2, 64); // wreck the pixel data, keep the header
 
         var result = await new PhotosController(t.Db, new KeepLast()).As(t.AddUser("anna")).Upload(File(broken), PhotoType.Profile);
+
+        Assert.Equal("not_an_image", Code(result));
+    }
+
+    /// ImageSharp 2.1.13 has a known TIFF denial of service, and no phone sends a TIFF: the format
+    /// is refused at the header, before any decoder sees the file.
+    [Fact]
+    public async Task A_tiff_is_refused_before_it_reaches_a_decoder()
+    {
+        using var t = new TestDb();
+        using var tiff = new Image<Rgba32>(10, 10);
+        var bytes = new MemoryStream();
+        tiff.SaveAsTiff(bytes);
+
+        var result = await new PhotosController(t.Db, new KeepLast()).As(t.AddUser("anna")).Upload(File(bytes.ToArray()), PhotoType.Profile);
 
         Assert.Equal("not_an_image", Code(result));
     }

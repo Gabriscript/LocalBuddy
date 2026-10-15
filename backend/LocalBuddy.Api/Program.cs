@@ -1,9 +1,13 @@
+using System.Net;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +23,15 @@ var jwt = (builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>(
            ?? throw new InvalidOperationException($"Missing '{JwtOptions.Section}' configuration section."))
     .Validated();
 
-builder.Services.AddControllers();
+// Enums travel by name, not by position: "evening" means the same thing to every app version,
+// while 2 only meant evening as long as nobody reordered the members.
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+
+// The OpenAPI document is built from these options, not from the MVC ones above. Without the
+// same converter here it would go on describing enums as integers while the API sends names.
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
@@ -53,6 +65,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Behind a reverse proxy every request arrives from the proxy, so without this the limiters
+// below put the whole internet in one partition — one attacker spends the login budget for
+// everybody — and HTTPS redirection loops on a hop the proxy already terminated. X-Forwarded-*
+// is caller-supplied, so it is believed only from these addresses; with none configured, only
+// loopback (the framework default) is.
+var knownProxies = (builder.Configuration.GetSection("KnownProxies").Get<string[]>() ?? [])
+    .Select(value => IPAddress.TryParse(value, out var address)
+        ? address
+        : throw new InvalidOperationException($"KnownProxies: '{value}' is not an IP address."))
+    .ToList();
+
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    foreach (var proxy in knownProxies) o.KnownProxies.Add(proxy);
+});
+
 // A lockout only slows down one account at a time; the limiter is what stops the spray.
 builder.Services.AddRateLimiter(o =>
 {
@@ -81,6 +110,11 @@ builder.Services.AddRateLimiter(o =>
         RateLimitPartition.GetFixedWindowLimiter(
             ClientAddress(context),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+
+    // A decoding photo holds up to a few hundred MB until it is resized, and the budgets above
+    // count requests per minute, not how many decode at once. Two at a time for the whole
+    // server; the rest wait their turn.
+    o.AddConcurrencyLimiter("photo-upload", c => { c.PermitLimit = 2; c.QueueLimit = 10; });
 });
 
 builder.Services.AddScoped<ConversationService>();
@@ -106,6 +140,9 @@ else
 }
 
 var app = builder.Build();
+
+// First: everything after it reads the client address or the scheme.
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler(); // unhandled errors come back as RFC 7807 ProblemDetails
 if (app.Environment.IsDevelopment())
@@ -134,7 +171,14 @@ app.UseMiddleware<BanEnforcementMiddleware>();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-await SeedModeratorsAsync(app);
+using (var scope = app.Services.CreateScope())
+{
+    await ModeratorSeed.ApplyAsync(
+        app.Configuration.GetSection("Moderators").Get<string[]>() ?? [],
+        scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
+        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>(),
+        scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Moderators"));
+}
 
 app.Run();
 
@@ -146,40 +190,3 @@ static string PartitionKey(HttpContext context) =>
 
 static string ClientAddress(HttpContext context) =>
     context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-/// Moderators are bootstrapped from configuration rather than edited into the database by hand.
-/// Idempotent, and safe to run from several instances at once.
-static async Task SeedModeratorsAsync(WebApplication app)
-{
-    var emails = app.Configuration.GetSection("Moderators").Get<string[]>() ?? [];
-    if (emails.Length == 0) return;
-
-    using var scope = app.Services.CreateScope();
-    var log = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Moderators");
-    var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    var users = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-    try
-    {
-        if (!await roles.RoleExistsAsync(Roles.Moderator))
-            await roles.CreateAsync(new IdentityRole<Guid>(Roles.Moderator));
-
-        foreach (var email in emails)
-        {
-            var user = await users.FindByEmailAsync(email);
-            if (user is null)
-            {
-                log.LogWarning("Configured moderator has no account yet: the role is granted at the first start after they register.");
-                continue;
-            }
-
-            if (!await users.IsInRoleAsync(user, Roles.Moderator))
-                await users.AddToRoleAsync(user, Roles.Moderator);
-        }
-    }
-    catch (Exception ex)
-    {
-        // Losing a race with another instance is fine; the winner did the same work.
-        log.LogWarning(ex, "Moderator seeding did not complete.");
-    }
-}

@@ -52,7 +52,7 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
   const c = useColors();
   const router = useRouter();
   const { data: other } = useProfile(conversation.otherUserId);
-  const photo = other?.photos?.find((p) => p.type === 0)?.url;
+  const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
 
   return (
     <Pressable

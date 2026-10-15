@@ -13,16 +13,7 @@ public class ConversationService(LocalBuddyDbContext db)
     /// about the same pair — a double tap on unlock, or both people expressing interest at the
     /// same moment — then run one after the other, and the second sees what the first wrote.
     /// Without it a double tap charged twice, and a simultaneous match stayed pending forever.
-    public async Task<IDbContextTransaction> BeginPairAsync(Guid a, Guid b)
-    {
-        var transaction = await db.Database.BeginTransactionAsync();
-
-        // Advisory locks are Postgres-only; the SQLite unit tests do not exercise concurrency.
-        if (db.Database.IsNpgsql())
-            await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({PairKey(a, b)})");
-
-        return transaction;
-    }
+    public Task<IDbContextTransaction> BeginPairAsync(Guid a, Guid b) => db.BeginLockedAsync(PairKey(a, b));
 
     /// Idempotent: a pair of users never ends up with two conversations, provided the caller
     /// holds the pair lock from BeginPairAsync. The conversation is only added to the change
@@ -48,12 +39,5 @@ public class ConversationService(LocalBuddyDbContext db)
 
     /// Order-independent, so (a, b) and (b, a) take the same lock. A collision between two
     /// unrelated pairs only makes one wait for the other; it cannot break anything.
-    static long PairKey(Guid a, Guid b)
-    {
-        Span<byte> x = stackalloc byte[16], y = stackalloc byte[16];
-        a.TryWriteBytes(x);
-        b.TryWriteBytes(y);
-        return BitConverter.ToInt64(x) ^ BitConverter.ToInt64(x[8..]) ^
-               BitConverter.ToInt64(y) ^ BitConverter.ToInt64(y[8..]);
-    }
+    static long PairKey(Guid a, Guid b) => AdvisoryLocks.KeyOf(a) ^ AdvisoryLocks.KeyOf(b);
 }

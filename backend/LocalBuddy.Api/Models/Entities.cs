@@ -3,11 +3,14 @@ namespace LocalBuddy.Api.Models;
 // ponytail: every entity in one file — they're all 5-line shapes, splitting them into
 // 10 files buys nothing. Split when one grows real behaviour.
 
-public enum PhotoType { Profile, Home }
-public enum TimeOfDay { Morning, Afternoon, Evening, Night }
-public enum MatchStatus { Pending, Matched, Passed }
-public enum PaymentType { OneTimeUnlock, Subscription }
-public enum ReportStatus { Open, Reviewed, Dismissed }
+// The database stores these as integers, so a number is what every existing row means. Numbers
+// are written out and never reused: a new member goes at the end, with the next free one.
+// The API sends them by name instead (Program.cs), so renaming a member breaks installed apps.
+public enum PhotoType { Profile = 0, Home = 1 }
+public enum TimeOfDay { Morning = 0, Afternoon = 1, Evening = 2, Night = 3 }
+public enum MatchStatus { Pending = 0, Matched = 1, Passed = 2 }
+public enum PaymentType { OneTimeUnlock = 0, Subscription = 1 }
+public enum ReportStatus { Open = 0, Reviewed = 1, Dismissed = 2 }
 
 public class Photo
 {

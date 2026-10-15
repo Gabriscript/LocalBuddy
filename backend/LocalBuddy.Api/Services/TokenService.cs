@@ -8,8 +8,9 @@ namespace LocalBuddy.Api.Services;
 /// The only place that knows how a LocalBuddy access token is built and signed.
 public class TokenService(JwtOptions jwt)
 {
-    /// Roles are baked into the token, so a role granted after issue only takes effect at the
-    /// next sign-in. Acceptable while the only role is moderator, which is granted rarely.
+    /// Roles ride along for information only. Nothing is authorised on them: a token lives 30
+    /// days and cannot be revoked, so the moderation surface asks the database on every request
+    /// (RequiresModeratorAttribute).
     public string Create(User user, IEnumerable<string> roles)
     {
         List<Claim> claims = [new(ClaimTypes.NameIdentifier, user.Id.ToString())];

@@ -38,7 +38,7 @@ export default function Chat() {
   const otherId = conversation?.otherUserId;
   const { data: other } = useProfile(otherId);
   const { data: me } = useMe();
-  const photo = other?.photos?.find((p) => p.type === 0)?.url;
+  const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
 
   const canSend = draft.trim().length > 0 && !send.isPending;
 

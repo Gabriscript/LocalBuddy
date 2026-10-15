@@ -46,7 +46,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "api:gen": "npx --yes openapi-typescript@7.13.0 http://localhost:5200/openapi/v1.json -o src/api/generated.ts",
+    "api:gen": "npx --yes openapi-typescript@7.13.0 ../backend/openapi.v1.json -o src/api/generated.ts",
     "typecheck": "tsc --noEmit"
   },
   "private": true

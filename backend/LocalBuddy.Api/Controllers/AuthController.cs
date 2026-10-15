@@ -65,7 +65,13 @@ public class AuthController(
         var user = await users.FindByEmailAsync(req.Email);
         // Same response either way — do not leak which emails exist.
         if (user is null)
+        {
+            // And the same cost: a registered address paid for a PBKDF2 pass while an unknown
+            // one answered in under a millisecond, which is the whole member list readable from
+            // the response times. The hash is computed and thrown away.
+            _ = users.PasswordHasher.HashPassword(user: new User(), req.Password);
             return this.Failure(StatusCodes.Status401Unauthorized, "invalid_credentials", "Invalid credentials.");
+        }
 
         // CheckPasswordSignInAsync, never UserManager.CheckPasswordAsync: only this path feeds
         // the lockout counter. A locked-out account answers exactly like a wrong password, so

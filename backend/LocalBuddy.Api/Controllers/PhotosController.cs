@@ -4,9 +4,12 @@ using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
 namespace LocalBuddy.Api.Controllers;
@@ -27,6 +30,11 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
     /// Longest side of what is stored. Plenty for a phone screen, a fraction of the disk and data.
     const int MaxSide = 2048;
 
+    /// Only what a phone or a browser hands over. Every other decoder ImageSharp ships is attack
+    /// surface this endpoint has no use for, and the TIFF one has a known denial of service.
+    static readonly Configuration Formats =
+        new(new JpegConfigurationModule(), new PngConfigurationModule(), new WebpConfigurationModule());
+
     /// Photos are not static files: every read passes through here so the host choice about
     /// anonymous visitors is actually enforced, instead of being bypassed by a bare URL.
     [HttpGet("{id:guid}/content")]
@@ -42,6 +50,15 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         // NotFound rather than Forbid: a refusal should not confirm that the photo exists.
         if (owner is null || owner.BannedAt is not null || !User.CanSeeProfileOf(owner)) return NotFound();
 
+        if (User.TryGetId(out var me) && await db.IsBlockedBetweenAsync(me, photo.UserId)) return NotFound();
+
+        // Home photos belong to an overnight listing: when the host stops offering it the profile
+        // stops showing them (UsersController.GetById), and the bare URL has to stop serving them
+        // too, or the inside of the house stays published to anyone who kept the link.
+        if (photo.Type == PhotoType.Home &&
+            !await db.Listings.AnyAsync(l => l.UserId == photo.UserId && l.OffersOvernight))
+            return NotFound();
+
         var content = await storage.OpenReadAsync(photo.Url, HttpContext.RequestAborted);
         if (content is null) return NotFound();
 
@@ -50,6 +67,7 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
 
     [HttpPost]
     [RequestSizeLimit(MaxBytes)]
+    [EnableRateLimiting("photo-upload")]
     [ProducesResponseType<PhotoDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Upload(IFormFile file, PhotoType type)
@@ -76,14 +94,14 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         {
             IImageInfo? info;
             await using (var header = file.OpenReadStream())
-                info = await Image.IdentifyAsync(header);
+                info = await Image.IdentifyAsync(Formats, header);
             if (info is null) return NotAnImage();
             if ((long)info.Width * info.Height > MaxPixels)
                 return this.Invalid("image_too_large", "That image has too many pixels. Photos from a phone camera are fine.");
 
             // Decoding is the real validation — a renamed .exe never gets this far.
             await using var incoming = file.OpenReadStream();
-            image = await Image.LoadAsync(incoming);
+            image = await Image.LoadAsync(Formats, incoming);
         }
         catch (ImageFormatException) // unknown formats and corrupt data of a known format alike
         {
@@ -95,10 +113,13 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
             var oversized = Math.Max(image.Width, image.Height) > MaxSide;
             image.Mutate(x =>
             {
-                // Phones store portrait shots sideways plus an EXIF rotation flag. The flag is
-                // about to be stripped, so the rotation has to be applied to the pixels first.
-                x.AutoOrient();
+                // Shrink before turning: a rotation copies every pixel, and at full size that copy
+                // doubled the memory of an upload. The box is square, so the result is the same.
                 if (oversized) x.Resize(new ResizeOptions { Size = new Size(MaxSide, MaxSide), Mode = ResizeMode.Max });
+
+                // Phones store portrait shots sideways plus an EXIF rotation flag. The flag is
+                // about to be stripped, so the rotation has to reach the pixels before that.
+                x.AutoOrient();
             });
 
             // GUIDELINES §9: strip EXIF before publishing — it carries the GPS coordinates

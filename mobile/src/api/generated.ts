@@ -1109,6 +1109,15 @@ export interface paths {
                         "application/json": components["schemas"]["PageOfReviewDto"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
             };
         };
         put?: never;
@@ -1709,7 +1718,8 @@ export interface components {
             type: components["schemas"]["PhotoType"];
             url: string;
         };
-        PhotoType: number;
+        /** @enum {unknown} */
+        PhotoType: "profile" | "home";
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -1785,7 +1795,8 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        ReportStatus: number;
+        /** @enum {unknown} */
+        ReportStatus: "open" | "reviewed" | "dismissed";
         ReviewDto: {
             /** Format: uuid */
             id: string;
@@ -1813,7 +1824,8 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
-        TimeOfDay: number;
+        /** @enum {unknown} */
+        TimeOfDay: "morning" | "afternoon" | "evening" | "night";
         UnlockResult: {
             /** Format: uuid */
             conversationId: string;
