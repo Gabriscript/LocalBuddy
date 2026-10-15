@@ -86,14 +86,18 @@ public sealed class TestIdentity : IDisposable
         var collection = new ServiceCollection();
         collection.AddLogging();
         collection.AddSingleton(db);
+        collection.AddHttpContextAccessor();
+        collection.AddAuthentication();
         collection.AddIdentityCore<User>()
                   .AddRoles<IdentityRole<Guid>>()
-                  .AddEntityFrameworkStores<LocalBuddyDbContext>();
+                  .AddEntityFrameworkStores<LocalBuddyDbContext>()
+                  .AddSignInManager();
         services = collection.BuildServiceProvider();
     }
 
     public UserManager<User> Users => services.GetRequiredService<UserManager<User>>();
     public RoleManager<IdentityRole<Guid>> Roles => services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    public SignInManager<User> SignIn => services.GetRequiredService<SignInManager<User>>();
 
     public void Dispose() => services.Dispose();
 }

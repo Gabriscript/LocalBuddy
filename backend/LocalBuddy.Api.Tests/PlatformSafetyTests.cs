@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using LocalBuddy.Api.Controllers;
+using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
@@ -106,6 +107,58 @@ public class ProfileVisibilityTests
     [Fact]
     public void A_new_account_is_not_visible_to_anonymous_visitors()
         => Assert.False(new User().ProfileVisibleToAnonymous);
+}
+
+/// Counts the password hashes a sign-in pays for, which is what the timing leak was made of.
+file class CountingHasher : IPasswordHasher<User>
+{
+    readonly PasswordHasher<User> real = new();
+
+    public int Calls { get; private set; }
+
+    public string HashPassword(User user, string password)
+    {
+        Calls++;
+        return real.HashPassword(user, password);
+    }
+
+    public PasswordVerificationResult VerifyHashedPassword(User user, string hashed, string provided)
+    {
+        Calls++;
+        return real.VerifyHashedPassword(user, hashed, provided);
+    }
+}
+
+/// A refusal used to cost a PBKDF2 pass for a registered address and nothing at all for an
+/// unknown one, so the response time said which addresses have an account here — the same thing
+/// register and login refuse to say in words.
+public class LoginTests
+{
+    static AuthController Auth(TestIdentity identity) =>
+        new(identity.Users, identity.SignIn,
+            new TokenService(new JwtOptions { Issuer = "test", Key = "a-signing-key-long-enough-for-hmac-sha256" }),
+            NullLogger<AuthController>.Instance)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
+
+    [Theory]
+    [InlineData("anna@test.local")]   // has an account
+    [InlineData("nobody@test.local")] // has none
+    public async Task Every_refusal_costs_one_password_hash(string address)
+    {
+        using var t = new TestDb();
+        using var identity = new TestIdentity(t.Db);
+        var anna = new User { UserName = "anna@test.local", Email = "anna@test.local", Name = "Anna", City = "Milano" };
+        Assert.True((await identity.Users.CreateAsync(anna, "Password123!")).Succeeded);
+
+        var hasher = new CountingHasher();
+        identity.Users.PasswordHasher = hasher;
+        var result = await Auth(identity).Login(new LoginRequest(address, "not-the-password"));
+
+        Assert.Equal(StatusCodes.Status401Unauthorized, Assert.IsType<ObjectResult>(result).StatusCode);
+        Assert.Equal(1, hasher.Calls);
+    }
 }
 
 /// Moderator powers are granted to an account, never to an address: registration does not check
