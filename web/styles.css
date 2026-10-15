@@ -167,11 +167,20 @@ a {
 }
 
 .site nav a {
+  position: relative;
   text-decoration: none;
   color: var(--text-muted);
   padding-bottom: 2px;
   border-bottom: 1px solid transparent;
   transition: color 0.2s, border-color 0.2s;
+}
+
+/* 27px of text is a small thing to hit with a thumb: the target grows to 44px, while the line
+   under the word stays where it was. */
+.site nav a::after {
+  content: "";
+  position: absolute;
+  inset: -9px 0;
 }
 
 .site nav a:hover,
