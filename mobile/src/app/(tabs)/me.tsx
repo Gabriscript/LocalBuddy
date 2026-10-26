@@ -7,11 +7,13 @@ import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { Pill } from '@/components/Pill';
 import { Screen } from '@/components/Screen';
+import { useTabBarClearance } from '@/components/TabBar';
 import { useAuth } from '@/lib/auth';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Me() {
   const c = useColors();
+  const clearance = useTabBarClearance();
   const router = useRouter();
   const { data, isPending, error, refetch } = useMe();
   const { signOut } = useAuth();
@@ -19,7 +21,7 @@ export default function Me() {
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
       <Screen loading={isPending} error={error} onRetry={refetch}>
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView contentContainerStyle={[styles.body, { paddingBottom: clearance }]}>
           <View style={styles.identity}>
             <AuthedImage
               path={data?.photos?.[0]?.url}

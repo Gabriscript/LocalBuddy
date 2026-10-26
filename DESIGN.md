@@ -217,7 +217,11 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Multiline:** 104px, text starting at the top rather than floating in the middle of the box.
 
 ### Navigation
-- Three tabs, each with an icon and a word. An icon alone is a guess. The active tab is Ink, the rest are Muted Text. Icons inside a labelled control are always `aria-hidden`, or a screen reader reads the tab as an empty string followed by its name.
+- A floating bar: one capsule of Card with a hairline all round, 16px in from each side and 8px above the bottom safe area. It floats over the content, so every tab screen ends its scroll with enough room for the last item to clear it.
+- Three destinations, each with an icon and a word. An icon alone is a guess. Discover sits in the middle, raised: a 56px circle centred on the capsule's top edge, so half of it stands above the bar, set in a 6px ring of Paper so it reads as cut out of the bar rather than stuck on it. Its word sits on the same line as the other two.
+- The active destination is Ink: the word and the filled icon at the sides, the whole circle in the middle. At rest the sides are Muted Text with an outline icon, and the circle is Sunk Paper with a hairline. Only one thing in the bar is ever Ink.
+- No shadow, no glow, no glass. The bar is a surface like any other, separated by tone and a hairline.
+- The bar is a `tablist` and each destination a `tab` with `aria-selected`. Icons inside it are always `aria-hidden`, or a screen reader reads each tab as an empty string followed by its name.
 
 ### The curved menu (landing page only)
 - Below 860px the four header links give way to one button, and the menu opens as a circle growing out of that button: the curve is the movement, not a shape drawn around the panel. Above 860px the links stay where they can be seen — hiding four of them where there is room to show them costs more than it buys.

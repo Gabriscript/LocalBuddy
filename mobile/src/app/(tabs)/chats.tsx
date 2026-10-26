@@ -8,12 +8,14 @@ import { useConversations, useProfile } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
+import { useTabBarClearance } from '@/components/TabBar';
 import { radius, space, type, useColors } from '@/theme';
 
 type Conversation = components['schemas']['ConversationSummary'];
 
 export default function Chats() {
   const c = useColors();
+  const clearance = useTabBarClearance();
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
     useConversations();
 
@@ -33,6 +35,7 @@ export default function Chats() {
         <FlatList
           data={items}
           keyExtractor={(conversation) => conversation.id!}
+          contentContainerStyle={{ paddingBottom: clearance }}
           // The inbox is the one list people come back to expecting it to have changed.
           onRefresh={refetch}
           refreshing={isRefetching}

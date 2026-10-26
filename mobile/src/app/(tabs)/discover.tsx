@@ -15,6 +15,7 @@ import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
+import { useTabBarClearance } from '@/components/TabBar';
 import { radius, space, type, useColors } from '@/theme';
 
 const ROLES = [
@@ -42,6 +43,7 @@ const asParam = (value?: boolean) => (value === undefined ? undefined : String(v
 
 export default function Discover() {
   const c = useColors();
+  const clearance = useTabBarClearance();
   const router = useRouter();
 
   // Filters live in the route, not in a store: they are already persisted, already shareable
@@ -202,7 +204,8 @@ export default function Discover() {
         <FlatList
           data={items}
           keyExtractor={(card) => card.id!}
-          contentContainerStyle={styles.list}
+          // The last card clears the floating tab bar instead of hiding behind it.
+          contentContainerStyle={[styles.list, { paddingBottom: clearance }]}
           showsVerticalScrollIndicator={false}
           onRefresh={refetch}
           refreshing={isRefetching}
@@ -260,6 +263,5 @@ const styles = StyleSheet.create({
   // row that does not wrap simply runs off the side of the screen.
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, padding: space.md },
   note: { marginHorizontal: space.md, marginBottom: space.md },
-  // The last card clears the tab bar instead of hiding behind it.
-  list: { paddingHorizontal: space.md, paddingBottom: space.xxl * 2, gap: space.lg },
+  list: { paddingHorizontal: space.md, gap: space.lg },
 });

@@ -1,34 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 
+import { TabBar } from '@/components/TabBar';
 import { useAuth } from '@/lib/auth';
-import { useColors } from '@/theme';
 
 /// Everything behind the tabs requires a session. One guard on the group covers all of it.
 /// Three destinations, each with an icon *and* a label: an icon alone is a guess.
 export default function TabsLayout() {
   const { token } = useAuth();
-  const c = useColors();
 
   if (!token) return <Redirect href="/login" />;
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: c.primary,
-        tabBarInactiveTintColor: c.textMuted,
-        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.border },
-        // The navigator draws these labels itself, so it needs the family naming the app.
-        tabBarLabelStyle: { fontFamily: 'Geist_600SemiBold' },
-      }}>
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       <Tabs.Screen
         name="discover"
         options={{
           title: 'Discover',
           // Filled marks the active tab, outline the rest: one distinction, applied everywhere.
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={26} color={color} aria-hidden />
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={size} color={color} aria-hidden />
           ),
         }}
       />
@@ -36,8 +27,8 @@ export default function TabsLayout() {
         name="chats"
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={24} color={color} aria-hidden />
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={size} color={color} aria-hidden />
           ),
         }}
       />
@@ -45,8 +36,8 @@ export default function TabsLayout() {
         name="me"
         options={{
           title: 'Me',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} aria-hidden />
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} aria-hidden />
           ),
         }}
       />
