@@ -37,10 +37,11 @@ export default function Login() {
   }
 
   return (
-    <SceneSheet image={require('../../../assets/images/scenes/s03-bar-counter.jpg')}>
+    // The three people sit at about 55% of the photo's height; the barman behind them is above.
+    <SceneSheet image={require('../../../assets/images/scenes/s03-bar-counter.jpg')} focus={{ y: 0.55, ratio: 1080 / 1907 }}>
       <View style={styles.brand}>
         <Text role="heading" style={[type.display, { color: c.text }]}>
-          LocalBuddy
+          Local<Text style={{ color: c.primary }}>Buddy</Text>
         </Text>
         <Text style={[type.body, { color: c.textMuted }]}>{s.auth.tagline}</Text>
       </View>

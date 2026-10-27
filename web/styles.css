@@ -38,6 +38,7 @@
   --on-ink: #f7f4f1;
   --action: #c8324e;
   --on-action: #ffffff;
+  --wordmark-local: #032b43;
 
   --step-sm: 8px;
   --step-md: 16px;
@@ -64,6 +65,7 @@
     --on-ink: #f7f4f1;
     --action: #f45d73;
     --on-action: #032b43;
+    --wordmark-local: #f7f4f1;
   }
 }
 
@@ -160,9 +162,37 @@ a {
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--display);
   font-size: 1.35rem;
   text-decoration: none;
+}
+
+.wordmark .mark {
+  width: 28px;
+  height: auto;
+  margin-right: 8px;
+}
+
+/* The brand's two halves: Local in night, Buddy in coral; on the dark scheme night is the page, so
+   Local turns to paper. */
+@media (prefers-color-scheme: dark) {
+  /* The mark's right-hand figure is night: on a night page it needs a paper tile behind it. */
+  .wordmark .mark {
+    box-sizing: content-box;
+    padding: 4px 5px;
+    border-radius: 9px;
+    background: #f7f4f1;
+  }
+}
+
+.w-local {
+  color: var(--wordmark-local);
+}
+
+.w-buddy {
+  color: var(--action);
 }
 
 .site nav {
@@ -338,6 +368,7 @@ section + section {
   border-radius: 20px;
   aspect-ratio: 4 / 5;
   object-fit: cover;
+  object-position: 50% 62%; /* the three people sit low in the photo; the barman behind them does not */
 }
 
 /* Two routes, two columns. No cards: a rule above each one does the same work with less
