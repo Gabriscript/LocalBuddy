@@ -13,14 +13,21 @@ public class JwtOptions
     public string Issuer { get; set; } = "";
     public string Key { get; set; } = "";
 
+    /// The key committed in appsettings.Development.json. Public by definition, so anywhere but
+    /// Development it would let anyone who has read the repository mint a token for any account.
+    public const string DevelopmentKey = "dev-only-signing-key-not-for-production-min-32-chars";
+
     /// Fails at boot instead of at the first login.
-    public JwtOptions Validated()
+    public JwtOptions Validated(bool developmentKeyAllowed)
     {
         if (string.IsNullOrWhiteSpace(Issuer))
             throw new InvalidOperationException($"{Section}:Issuer is not configured.");
         if (Key.Length < 32)
             throw new InvalidOperationException(
                 $"{Section}:Key is missing or shorter than the 32 characters HMAC-SHA256 requires.");
+        if (!developmentKeyAllowed && Key == DevelopmentKey)
+            throw new InvalidOperationException(
+                $"{Section}:Key is the development key committed in the repository. Supply a fresh one, e.g. Jwt__Key=$(openssl rand -base64 48).");
         return this;
     }
 

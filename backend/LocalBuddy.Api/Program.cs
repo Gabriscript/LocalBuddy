@@ -14,6 +14,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// A hosted showcase with invented people, run from deploy/demo/: the Development fakes, without
+// Development's key, CORS or OpenAPI. Not a staging environment for real users. See ADR-0010.
+var isDemo = builder.Environment.IsEnvironment("Demo");
+
 // No need to advertise the server software.
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 
@@ -21,7 +25,7 @@ builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 // instead of at the first login.
 var jwt = (builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>()
            ?? throw new InvalidOperationException($"Missing '{JwtOptions.Section}' configuration section."))
-    .Validated();
+    .Validated(developmentKeyAllowed: builder.Environment.IsDevelopment());
 
 // Enums travel by name, not by position: "evening" means the same thing to every app version,
 // while 2 only meant evening as long as nobody reordered the members.
@@ -76,10 +80,19 @@ var knownProxies = (builder.Configuration.GetSection("KnownProxies").Get<string[
         : throw new InvalidOperationException($"KnownProxies: '{value}' is not an IP address."))
     .ToList();
 
+// Whole ranges, for a proxy whose address is not fixed: a Docker network, where Caddy on the host
+// arrives from the bridge gateway and Caddy in a container from whatever address it was given.
+var knownNetworks = (builder.Configuration.GetSection("KnownNetworks").Get<string[]>() ?? [])
+    .Select(value => System.Net.IPNetwork.TryParse(value, out var network)
+        ? network
+        : throw new InvalidOperationException($"KnownNetworks: '{value}' is not a CIDR range."))
+    .ToList();
+
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
     o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     foreach (var proxy in knownProxies) o.KnownProxies.Add(proxy);
+    foreach (var network in knownNetworks) o.KnownIPNetworks.Add(network);
 });
 
 // A lockout only slows down one account at a time; the limiter is what stops the spray.
@@ -120,22 +133,25 @@ builder.Services.AddRateLimiter(o =>
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddSingleton<IPhotoStorage, LocalDiskPhotoStorage>();
 
-// The fakes are Development-only. Outside it nothing is registered and the app refuses to
-// start, rather than quietly accepting fake payments and approving every identity check.
-if (builder.Environment.IsDevelopment())
+// The fakes are Development and Demo only. Outside them nothing is registered and the app refuses
+// to start, rather than quietly accepting fake payments and approving every identity check.
+if (builder.Environment.IsDevelopment() || isDemo)
 {
     builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
     builder.Services.AddSingleton<IIdentityVerifier, FakeIdentityVerifier>();
 
-    // Development only: lets the Expo web preview call the API from the Metro dev server.
-    // The mobile client is not a browser and never needs this.
-    builder.Services.AddCors(o => o.AddPolicy("dev", p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+    // Lets the Expo web preview call the API from the Metro dev server: any origin in Development,
+    // only the configured Cors:AllowedOrigins in Demo, none by default. The mobile client is not a
+    // browser and never needs this.
+    var demoOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+    builder.Services.AddCors(o => o.AddPolicy("dev", p =>
+        (isDemo ? p.WithOrigins(demoOrigins) : p.AllowAnyOrigin()).AllowAnyHeader().AllowAnyMethod()));
 }
 else
 {
     throw new InvalidOperationException(
         "No real IPaymentGateway / IIdentityVerifier is registered. LocalBuddy will not start " +
-        "outside Development with fake payments and fake identity verification — wire up Stripe " +
+        "outside Development and Demo with fake payments and fake identity verification — wire up Stripe " +
         "in Program.cs first.");
 }
 
@@ -162,7 +178,7 @@ app.Use(async (context, next) =>
 
 // No UseStaticFiles: photos are served by PhotosController so the per-host visibility rule
 // cannot be bypassed with a bare URL. See ADR-0006.
-if (app.Environment.IsDevelopment()) app.UseCors("dev");
+if (app.Environment.IsDevelopment() || isDemo) app.UseCors("dev");
 
 app.UseAuthentication();
 app.UseAuthorization();

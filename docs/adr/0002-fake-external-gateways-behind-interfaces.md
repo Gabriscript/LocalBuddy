@@ -1,7 +1,7 @@
 # ADR-0002: Fake external gateways behind interfaces, Development only
 
 **Date**: 2026-08-27 (backfilled and amended 2026-08-28)
-**Status**: accepted
+**Status**: accepted, amended by [ADR-0010](0010-demo-environment.md) (the Demo environment also registers the fakes)
 **Deciders**: solo developer
 
 ## Context

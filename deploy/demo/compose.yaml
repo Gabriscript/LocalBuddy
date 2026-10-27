@@ -1,0 +1,77 @@
+# LocalBuddy DEMO: invented people, fake payments, fake identity checks. Not for real users.
+# See README.md next to this file and docs/adr/0010-demo-environment.md.
+#
+#   cp .env.example .env   # then fill it in; .env is never committed
+#   docker compose up -d --build
+#
+# Order on every `up`: postgres healthy -> migrate runs the EF bundle to completion -> api starts.
+
+# Fixed so container, network and volume names do not depend on the folder this sits in.
+name: localbuddy-demo
+
+services:
+  postgres:
+    image: postgres:16.11
+    environment:
+      POSTGRES_USER: localbuddy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: localbuddy
+    # No ports: only the api and migrate containers on this network ever reach it.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localbuddy -d localbuddy"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # One-shot: applies pending migrations (idempotent) and exits. The API never migrates itself.
+  migrate:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+    image: localbuddy-api:demo
+    entrypoint: ["./efbundle"]
+    environment:
+      ConnectionStrings__Default: Host=postgres;Database=localbuddy;Username=localbuddy;Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+    image: localbuddy-api:demo
+    environment:
+      ASPNETCORE_ENVIRONMENT: Demo
+      ConnectionStrings__Default: Host=postgres;Database=localbuddy;Username=localbuddy;Password=${POSTGRES_PASSWORD}
+      # Required; the app refuses to start if it is missing, short, or the committed dev key.
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+      # Believe X-Forwarded-For/-Proto only from this network: Caddy on the host arrives from its
+      # gateway, Caddy in a container joined to it from an address inside it. Never set
+      # ASPNETCORE_FORWARDEDHEADERS_ENABLED: it would believe the headers from anyone.
+      KnownNetworks__0: ${DEMO_SUBNET:-10.250.250.0/24}
+    ports:
+      # Loopback only: the internet reaches the API through Caddy, never directly.
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    volumes:
+      - photos:/app/wwwroot/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+networks:
+  default:
+    ipam:
+      config:
+        # Fixed so KnownNetworks above can name it. Change both (via DEMO_SUBNET) if it collides
+        # with a network already on the server.
+        - subnet: ${DEMO_SUBNET:-10.250.250.0/24}
+
+volumes:
+  # Named, so `docker compose down` keeps them; only `down -v` deletes the demo data.
+  pgdata:
+  photos:

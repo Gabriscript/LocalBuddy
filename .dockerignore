@@ -1,0 +1,14 @@
+# Allow-list: the build context is the repository root (for global.json), and nothing outside
+# these paths has any business in an image: not mobile/node_modules, not demo-photos, not a .env.
+*
+!global.json
+!backend/Directory.Build.props
+!backend/Directory.Packages.props
+!backend/LocalBuddy.Api/
+
+# Inside the allowed project: build output, uploaded photos, and anything with production secrets.
+**/bin/
+**/obj/
+**/wwwroot/uploads/
+**/appsettings.Production.json
+**/*.user
