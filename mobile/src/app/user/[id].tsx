@@ -167,7 +167,7 @@ export default function Profile() {
         </ScrollView>
 
         {/* Floats over the profile with no bar behind it: the two controls carry their own
-            surfaces, Card with a hairline and Ink. */}
+            surfaces, Card with a hairline and Coral. */}
         <View style={[styles.bar, { paddingBottom: insets.bottom + space.md }]}>
           {/* With the buttons that failed, not on a screen of its own: the profile behind it
               is still perfectly readable. */}

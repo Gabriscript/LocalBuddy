@@ -1,0 +1,5 @@
+<!-- Splash mark: the bubble alone on transparent, square around its bounds; the splash paints Night behind it. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 13.5 48 48">
+  <path d="M18 52 V32 a18 18 0 0 1 36 0 V52 H30 L19 61 Z" fill="#F45D73"/>
+  <circle cx="29" cy="38" r="2.6" fill="#032B43"/><circle cx="36" cy="38" r="2.6" fill="#032B43"/><circle cx="43" cy="38" r="2.6" fill="#032B43"/>
+</svg>

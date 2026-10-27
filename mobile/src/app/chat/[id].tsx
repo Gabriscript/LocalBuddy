@@ -121,7 +121,7 @@ export default function Chat() {
             onEndReachedThreshold={0.4}
             ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
             renderItem={({ item }) => {
-              // Tonal, not accented: mine is Card with a hairline, theirs Sunk Paper, and ink
+              // Tonal, not accented: mine is Card with a hairline, theirs Sunk Paper, and coral
               // stays with the send button. The 6pt corner is the tail, on the sender's side.
               const mine = item.senderId === me?.id;
               return (

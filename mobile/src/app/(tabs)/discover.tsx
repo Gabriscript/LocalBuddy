@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
@@ -15,6 +14,7 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
+import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -137,28 +137,23 @@ export default function Discover() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text role="heading" style={[type.display, { color: c.text }]}>
-            {s.discover.title}
-          </Text>
-          <Text style={[type.body, { color: c.textMuted }]}>
-            {s.discover.subtitle}
-          </Text>
-        </View>
-
-        <IconButton
-          name="options-outline"
-          // The count is in the label too: a badge read as "Filters" would hide that the feed
-          // is already narrowed.
-          label={active ? s.discover.filtersLabel(active) : s.discover.filters}
-          onPress={() => setFiltering(true)}
-          tint={c.text}
-          sunk
-          badge={active}
-        />
-      </View>
+    <View style={[styles.page, { backgroundColor: c.background }]}>
+      <TabHeader
+        title={s.discover.title}
+        subtitle={s.discover.subtitle}
+        action={
+          <IconButton
+            name="options-outline"
+            // The count is in the label too: a badge read as "Filters" would hide that the feed
+            // is already narrowed.
+            label={active ? s.discover.filtersLabel(active) : s.discover.filters}
+            onPress={() => setFiltering(true)}
+            tint={c.onNight}
+            band
+            badge={active}
+          />
+        }
+      />
 
       {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
           never the accent. */}
@@ -251,20 +246,12 @@ export default function Discover() {
           onClose={() => setMatch(null)}
         />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   page: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    paddingHorizontal: space.md,
-    paddingTop: space.sm,
-  },
-  headerText: { flex: 1, gap: space.xs },
   segments: {
     flexDirection: 'row',
     margin: space.md,

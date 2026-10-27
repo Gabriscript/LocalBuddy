@@ -1,0 +1,12 @@
+<!-- Android 13+ themed icon, 108x108: one white shape, the dots cut out, transparent. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <mask id="dots">
+    <rect width="108" height="108" fill="#FFFFFF"/>
+    <g transform="translate(21 21) scale(0.9166667)" fill="#000000">
+      <circle cx="29" cy="38" r="2.6"/><circle cx="36" cy="38" r="2.6"/><circle cx="43" cy="38" r="2.6"/>
+    </g>
+  </mask>
+  <g mask="url(#dots)">
+    <path transform="translate(21 21) scale(0.9166667)" d="M18 52 V32 a18 18 0 0 1 36 0 V52 H30 L19 61 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

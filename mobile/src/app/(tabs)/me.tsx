@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useMe } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
@@ -11,6 +10,7 @@ import { Pill } from '@/components/Pill';
 import { Screen } from '@/components/Screen';
 import { Sheet } from '@/components/Sheet';
 import { useTabBarClearance } from '@/components/TabBar';
+import { TabHeader } from '@/components/TabHeader';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage, useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { radius, space, type, useColors } from '@/theme';
@@ -27,7 +27,8 @@ export default function Me() {
   const phoneOption = s.language.phone(LANGUAGE_NAMES[phone]);
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
+    <View style={[styles.page, { backgroundColor: c.background }]}>
+      <TabHeader title={s.tabs.me} />
       <Screen loading={isPending} error={error} onRetry={refetch}>
         <ScrollView contentContainerStyle={[styles.body, { paddingBottom: clearance }]}>
           <View style={styles.identity}>
@@ -110,7 +111,7 @@ export default function Me() {
           </View>
         </Sheet>
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 

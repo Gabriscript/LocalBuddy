@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useConversations, useProfile } from '@/api/hooks';
@@ -9,6 +8,7 @@ import { AuthedImage } from '@/components/AuthedImage';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
+import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -22,10 +22,8 @@ export default function Chats() {
     useConversations();
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
-      <Text role="heading" style={[type.display, styles.header, { color: c.text }]}>
-        {s.chats.title}
-      </Text>
+    <View style={[styles.page, { backgroundColor: c.background }]}>
+      <TabHeader title={s.chats.title} />
 
       <Screen
         loading={isPending}
@@ -47,7 +45,7 @@ export default function Chats() {
           renderItem={({ item }) => <ChatRow conversation={item} />}
         />
       </Screen>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -98,7 +96,6 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
 
 const styles = StyleSheet.create({
   page: { flex: 1 },
-  header: { paddingHorizontal: space.md, paddingVertical: space.sm },
   // 72 keeps the whole row above the 44pt minimum with room for the face and two lines.
   row: {
     minHeight: 72,

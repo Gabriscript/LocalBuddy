@@ -11,7 +11,7 @@ export function IconButton({
   onPress,
   tint,
   disabled,
-  sunk,
+  band,
   badge,
 }: {
   name: keyof typeof Ionicons.glyphMap;
@@ -19,8 +19,8 @@ export function IconButton({
   onPress: () => void;
   tint: string;
   disabled?: boolean;
-  /// Sunk Paper instead of Card, for a control that sits on the page rather than on a photo.
-  sunk?: boolean;
+  /// For a control on the Night header band: a lighter navy so it still reads as a button.
+  band?: boolean;
   /// A count drawn on the corner. Visual only: the label has to say it too.
   badge?: number;
 }) {
@@ -35,16 +35,19 @@ export function IconButton({
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: sunk ? c.surfaceMuted : c.surface,
-          borderColor: c.border,
+          backgroundColor: band ? c.nightRaised : c.surface,
+          borderColor: band ? c.nightRaised : c.border,
           opacity: disabled ? 0.45 : pressed ? 0.7 : 1,
         },
       ]}>
       <Ionicons name={name} size={26} color={tint} />
       {badge ? (
-        // Text on Paper, like a selected chip: a count is state, not the accent.
-        <View aria-hidden style={[styles.badge, { backgroundColor: c.text }]}>
-          <Text style={[type.caption, styles.badgeText, { color: c.background }]}>{badge}</Text>
+        // Text on Paper, like a selected chip: a count is state, not the accent. On the band,
+        // Night on Paper, so the count still stands out from the navy around it.
+        <View aria-hidden style={[styles.badge, { backgroundColor: band ? c.onNight : c.text }]}>
+          <Text style={[type.caption, styles.badgeText, { color: band ? c.night : c.background }]}>
+            {badge}
+          </Text>
         </View>
       ) : null}
     </Pressable>
