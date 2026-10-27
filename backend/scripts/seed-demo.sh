@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Demo seed for the LocalBuddy DEV database: nine invented people from demo-photos/PROMPTS.md,
-# created through the real HTTP API. Never point this at anything but a local Development API.
+# created through the real HTTP API (credits excepted, see the end). Never point this at anything
+# but a local Development API.
 #
 #   docker start localbuddy-postgres-1
 #   dotnet run --project backend/LocalBuddy.Api --launch-profile http   # :5200
@@ -131,6 +132,12 @@ match julien anna
 say julien "Ciao Anna! I arrive in Milano on Friday by train from Genova. Would Saturday afternoon work for the Navigli walk?"
 say anna "Ciao Julien! Saturday is perfect. Let us meet at 17:00 at Porta Genova station, then aperitivo on the canal."
 say julien "Parfait, see you there. I bring some focaccia from Genova, it is the least I can do."
+
+# Credits only come from reviews, so no endpoint grants them: written straight to the dev database.
+# 11 beats the older @example.com demo accounts (10), which would otherwise lead the feed on the
+# id tie-break (DiscoveryController orders by credits, then id).
+echo "credits"
+docker exec "${PG:-localbuddy-postgres-1}" sh -c 'psql -U "$POSTGRES_USER" -d localbuddy -qAtc "update \"AspNetUsers\" set \"CreditsBalance\" = 11 where \"Email\" like '\''%@'"$DOMAIN"''\''"'
 
 echo
 echo "demo seed done: 9 accounts @$DOMAIN"
