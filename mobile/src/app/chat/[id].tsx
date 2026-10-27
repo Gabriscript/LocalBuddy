@@ -75,6 +75,7 @@ export default function Chat() {
           style={styles.title}>
           <AuthedImage
             path={photo}
+            size="thumb"
             style={[styles.titleAvatar, { backgroundColor: c.surfaceMuted }]}
           />
           <View style={styles.titleText}>

@@ -34,6 +34,7 @@ export default function Me() {
           <View style={styles.identity}>
             <AuthedImage
               path={data?.photos?.[0]?.url}
+              size="medium"
               style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
               accessibilityLabel={s.common.yourPhoto}
             />

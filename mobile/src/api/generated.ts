@@ -958,7 +958,9 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    size?: components["schemas"]["PhotoSize"];
+                };
                 header?: never;
                 path: {
                     id: string;
@@ -1791,6 +1793,8 @@ export interface components {
             type: components["schemas"]["PhotoType"];
             url: string;
         };
+        /** @enum {unknown} */
+        PhotoSize: "full" | "medium" | "thumb";
         /** @enum {unknown} */
         PhotoType: "profile" | "home";
         ProblemDetails: {

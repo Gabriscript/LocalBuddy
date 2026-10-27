@@ -52,6 +52,7 @@ export default function Blocked() {
               {/* Decorative: the name is read out right after it. */}
               <AuthedImage
                 path={item.photoUrl}
+                size="thumb"
                 aria-hidden
                 style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
               />

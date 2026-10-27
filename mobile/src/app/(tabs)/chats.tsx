@@ -89,6 +89,7 @@ function RequestStrip({ cards, count }: { cards: Card[]; count: number }) {
             style={({ pressed }) => [styles.face, { opacity: pressed ? 0.7 : 1 }]}>
             <AuthedImage
               path={card.photoUrl}
+              size="thumb"
               aria-hidden
               style={[styles.facePhoto, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
             />
@@ -126,6 +127,7 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
           this the face is announced as an image with no name at all. */}
       <AuthedImage
         path={photo}
+        size="thumb"
         aria-hidden
         style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
       />

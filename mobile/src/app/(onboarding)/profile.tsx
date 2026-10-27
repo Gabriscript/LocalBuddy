@@ -85,7 +85,7 @@ function PhotoAndTimes({ me }: { me: Me }) {
       <View style={styles.photoRow}>
         <View style={[styles.photo, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}>
           {photo ? (
-            <AuthedImage path={photo.url} style={StyleSheet.absoluteFill} accessibilityLabel={s.common.yourPhoto} />
+            <AuthedImage path={photo.url} size="medium" style={StyleSheet.absoluteFill} accessibilityLabel={s.common.yourPhoto} />
           ) : (
             <Ionicons name="person-outline" size={40} color={c.textMuted} aria-hidden />
           )}

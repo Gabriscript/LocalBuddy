@@ -1040,6 +1040,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "default": "full",
+              "$ref": "#/components/schemas/PhotoSize"
+            }
           }
         ],
         "responses": {
@@ -2301,6 +2309,13 @@
             "type": "string"
           }
         }
+      },
+      "PhotoSize": {
+        "enum": [
+          "full",
+          "medium",
+          "thumb"
+        ]
       },
       "PhotoType": {
         "enum": [

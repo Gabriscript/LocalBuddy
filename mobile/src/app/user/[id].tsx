@@ -95,6 +95,7 @@ export default function Profile() {
 
             <AuthedImage
               path={hero?.url}
+              size="medium"
               style={[styles.hero, { backgroundColor: c.surfaceMuted }]}
               accessibilityLabel={s.common.photoOf(data?.name ?? '')}
             />
@@ -146,6 +147,7 @@ export default function Profile() {
                   <AuthedImage
                     key={photo.id}
                     path={photo.url}
+                    size="medium"
                     style={[styles.thumb, { backgroundColor: c.surfaceMuted }]}
                     accessibilityLabel={s.profile.anotherPhotoOf(data?.name ?? '')}
                   />

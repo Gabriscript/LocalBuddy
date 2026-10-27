@@ -1,4 +1,5 @@
 using LocalBuddy.Api.Controllers;
+using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
@@ -85,6 +86,30 @@ public class PhotoUploadTests
         Assert.Null(stored.Metadata.ExifProfile);
     }
 
+    /// A feed card needs a phone's width and an avatar a fraction of it, not 2048 px of JPEG each.
+    [Fact]
+    public async Task A_smaller_copy_is_served_on_request_and_never_enlarged()
+    {
+        using var t = new TestDb();
+        var storage = new KeepLast();
+        var photos = new PhotosController(t.Db, storage).As(t.AddUser("anna"));
+        using var big = new Image<Rgba32>(1600, 1000);
+        var bigId = ((PhotoDto)Assert.IsType<CreatedResult>(await photos.Upload(Png(big), PhotoType.Profile)).Value!).Id;
+
+        async Task<IImageInfo> Served(PhotoSize size) =>
+            await Image.IdentifyAsync(Assert.IsType<FileStreamResult>(await photos.Content(bigId, size)).FileStream);
+
+        Assert.Equal(1600, (await Served(PhotoSize.Full)).Width);
+        Assert.Equal(1080, (await Served(PhotoSize.Medium)).Width);
+        var thumb = await Served(PhotoSize.Thumb);
+        Assert.Equal((256, 160), (thumb.Width, thumb.Height));
+
+        using var tiny = new Image<Rgba32>(100, 80);
+        var tinyId = ((PhotoDto)Assert.IsType<CreatedResult>(await photos.Upload(Png(tiny), PhotoType.Profile)).Value!).Id;
+        var small = await Image.IdentifyAsync(Assert.IsType<FileStreamResult>(await photos.Content(tinyId, PhotoSize.Thumb)).FileStream);
+        Assert.Equal(100, small.Width);
+    }
+
     /// A known format with broken data used to escape the catch and come back as a 500.
     [Fact]
     public async Task A_corrupt_image_is_a_400_not_a_500()
@@ -151,6 +176,7 @@ file class KeepLast : IPhotoStorage
         return $"/uploads/{Guid.NewGuid():N}.jpg";
     }
 
-    public Task<Stream?> OpenReadAsync(string key, CancellationToken ct = default) => Task.FromResult<Stream?>(null);
+    public Task<Stream?> OpenReadAsync(string key, CancellationToken ct = default) =>
+        Task.FromResult<Stream?>(Last is null ? null : new MemoryStream(Last));
     public Task DeleteAsync(string key, CancellationToken ct = default) => Task.CompletedTask;
 }

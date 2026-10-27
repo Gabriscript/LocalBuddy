@@ -174,6 +174,7 @@ export function MatchBurst({
 
             <AuthedImage
               path={photoPath}
+              size="medium"
               style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
               accessibilityLabel={s.common.photoOf(name)}
             />

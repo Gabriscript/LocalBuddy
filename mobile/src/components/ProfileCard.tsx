@@ -71,6 +71,7 @@ export const ProfileCard = memo(function ProfileCard({
         style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}>
         <AuthedImage
           path={card.photoUrl}
+          size="medium"
           style={[styles.photo, { backgroundColor: c.surfaceMuted }]}
           accessibilityLabel={s.common.photoOf(card.name ?? '')}
         />
