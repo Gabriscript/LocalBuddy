@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -9,8 +8,8 @@ import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
 import type { TimeOfDay } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { FilterSheet } from '@/components/FilterSheet';
+import { IconButton } from '@/components/IconButton';
 import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
@@ -149,31 +148,46 @@ export default function Discover() {
           </Text>
         </View>
 
-        <Pressable
+        <IconButton
+          name="options-outline"
+          // The count is in the label too: a badge read as "Filters" would hide that the feed
+          // is already narrowed.
+          label={active ? s.discover.filtersLabel(active) : s.discover.filters}
           onPress={() => setFiltering(true)}
-          accessibilityRole="button"
-          // The count is in the label too: "Filters (2)" read as "Filters" would hide that
-          // the feed is already narrowed.
-          accessibilityLabel={active ? s.discover.filtersLabel(active) : s.discover.filters}
-          style={({ pressed }) => [
-            styles.filterButton,
-            { borderColor: c.border, backgroundColor: c.surfaceMuted, opacity: pressed ? 0.7 : 1 },
-          ]}>
-          <Ionicons name="options-outline" size={18} color={c.text} aria-hidden />
-          <Text style={[type.label, { color: c.text }]}>{active ? s.discover.filtersCount(active) : s.discover.filters}</Text>
-        </Pressable>
+          tint={c.text}
+          sunk
+          badge={active}
+        />
       </View>
 
-      <View style={styles.filters} role="radiogroup" aria-label={s.discover.whoToShow}>
-        {roles.map((role) => (
-          <Chip
-            key={role.label}
-            as="radio"
-            label={role.label}
-            selected={params.role === role.value}
-            onPress={() => router.setParams({ role: role.value })}
-          />
-        ))}
+      {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
+          never the accent. */}
+      <View
+        style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
+        role="radiogroup"
+        aria-label={s.discover.whoToShow}>
+        {roles.map((role) => {
+          const selected = params.role === role.value;
+          return (
+            <Pressable
+              key={role.label}
+              role="radio"
+              aria-checked={selected}
+              onPress={() => router.setParams({ role: role.value })}
+              style={({ pressed }) => [
+                styles.segment,
+                {
+                  backgroundColor: selected ? c.surface : 'transparent',
+                  borderColor: selected ? c.border : 'transparent',
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}>
+              <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
+                {role.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
@@ -245,24 +259,28 @@ const styles = StyleSheet.create({
   page: { flex: 1 },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: space.sm,
     paddingHorizontal: space.md,
     paddingTop: space.sm,
   },
   headerText: { flex: 1, gap: space.xs },
-  filterButton: {
+  segments: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.xs,
-    minHeight: 44,
-    paddingHorizontal: space.md,
+    margin: space.md,
+    padding: space.xs,
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  // Wraps, because at the largest text size three chips no longer fit across a phone and a
-  // row that does not wrap simply runs off the side of the screen.
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, padding: space.md },
+  segment: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: space.sm,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   note: { marginHorizontal: space.md, marginBottom: space.md },
   list: { paddingHorizontal: space.md, gap: space.lg },
 });

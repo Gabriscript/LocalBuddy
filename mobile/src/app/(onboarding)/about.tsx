@@ -44,6 +44,7 @@ function AboutForm({ me }: { me: Me }) {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s02-local-shows.jpg')}
       step={3}
       total={hosts ? 5 : 4}
       title={s.onboarding.aboutTitle}

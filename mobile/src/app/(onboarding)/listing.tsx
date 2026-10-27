@@ -46,6 +46,7 @@ function ListingForm({ me }: { me: Me }) {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s01-wine-window.jpg')}
       step={5}
       title={s.onboarding.listingTitle}
       subtitle={s.onboarding.listingSubtitle}

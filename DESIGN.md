@@ -139,7 +139,7 @@ Paper and ink, with the saturation left to the photographs.
 ### Neutral
 - **Paper** (`#F7F4F1`): the page. Warm off-white, so a card laid on it is visible without a shadow.
 - **Card** (`#FEFDFC`): anything laid on the page. Cards, sheets, the tab bar.
-- **Sunk Paper** (`#EFEAE5`): anything you type into or toggle. Inputs, chips at rest, chat bubbles, skeleton blocks.
+- **Sunk Paper** (`#EFEAE5`): anything you type into or toggle. Inputs, chips at rest, the other person's chat bubbles, skeleton blocks.
 - **Text** (`#1C1A19`): body and headings. Warm near-black, never `#000000`.
 - **Muted Text** (`#6B6560`): captions, secondary lines, placeholders. 4.87:1 against Sunk Paper, so it stays readable on the darkest neutral it can land on.
 - **Hairline** (`#E6E1DC`): every border in the app is one hairline of this.
@@ -183,7 +183,7 @@ The system is flat. There is not one `shadowOffset` in the app and there should 
 
 This is why the neutrals are warm rather than white. On a pure white page a card can only be drawn by its border, which is how an interface ends up as a stack of rectangles. On warm paper the card is lighter than its surroundings and needs no outline to exist.
 
-Two surfaces float over content rather than sitting in it: the filter sheet and the profile action bar. Both are anchored to an edge, both carry a hairline on the side that faces the content, and neither uses a shadow to announce itself.
+Three things float over content rather than sitting in it: the filter sheet, the profile's action row and the chat composer. The sheet is anchored to an edge and carries a hairline on the side that faces the content; the action row and the composer have no bar behind them at all, only their own controls, each a surface with its own hairline or Ink fill. None of them uses a shadow to announce itself.
 
 ### Named Rules
 
@@ -194,7 +194,7 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 ### Buttons
 - **Shape:** fully rounded (pill, 999px), 52px tall, 24px of horizontal padding. 52 clears the 44pt minimum with room for larger type before anything clips.
 - **Primary:** Ink fill, white label. One per screen.
-- **Secondary:** Sunk Paper fill, Text label. The companion action, such as "Pass" beside "Show interest".
+- **Secondary:** Sunk Paper fill, Text label. The companion action, such as "Try again" under an error.
 - **Quiet:** no fill, no border, Text label. For anything deliberately understated, such as signing out or the paid unlock.
 - **Danger:** Refusal fill, white label. Only for confirming something that takes away: blocking a member, and one day deleting an account. Never for an ordinary action that happens to feel serious.
 - **States:** pressed drops opacity to 0.75, disabled to 0.45, and neither moves the bounds, so nothing around the button jumps. A loading button shows a spinner beside its label and reports `aria-busy`.
@@ -203,12 +203,23 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Style:** pill, 44px tall, Sunk Paper fill with a hairline at rest.
 - **Selected:** Text fill, Paper label. Selection is a tonal inversion, not the accent.
 - **Roles:** a single choice group is `role="radio"` inside `role="radiogroup"`; a multiple choice group is `role="checkbox"`. Never a plain button with a colour change, which says nothing to a screen reader.
+- **Segmented:** the one exception to chips, for who the feed shows. A full-pill Sunk Paper track with a hairline, the chosen option a Card thumb with a hairline and a Text label, the others Muted Text. Still a `radiogroup` of `radio`s.
 
 ### Cards
 - **Corner Style:** 20px, the largest radius in the system, reserved for the thing that holds a person.
 - **Background:** Card, on Paper, with one hairline border and clipped corners so the photograph reaches them.
+- **Headline:** the name in Playfair with the Verified badge on the right, only for a verified identity; under it the city, the role and the rating in Muted Text.
 - **Photo:** 4:3, declared as a ratio so the row keeps its height before the image arrives. Taller, and the name, the pills and the two decisions fall below the fold.
 - **Composition:** photograph, then name and city, then pills, then the one line that matters. The two round decision buttons are siblings of the card body, never nested inside it: a tappable card wrapping tappable buttons is ambiguous about what a tap meant.
+
+### Profile
+- The primary photo runs full width from the top edge, with round Card buttons over it for back and for report or block. The home photos follow the words as a row of 12px thumbnails.
+- The two decisions float at the bottom with no bar behind them: a round Card button with a hairline to pass, and the Ink capsule to show interest. The paid unlock sits at the end of the profile as a quiet button, away from both.
+
+### Conversation
+- The header is Card with a hairline below it: back, a small round photo, the name and the city.
+- Their bubbles are Sunk Paper; mine are Card with a hairline. Ink belongs to the send button alone. 18px corners, with the corner on the sender's side cut to 6px as the tail.
+- The composer floats above the bottom inset: a Sunk Paper capsule with a hairline and a round Ink send button.
 
 ### Inputs
 - **Style:** Sunk Paper fill, hairline border, 12px radius, 52px tall to match a button.

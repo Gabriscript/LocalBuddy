@@ -1,11 +1,11 @@
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
+import { SceneSheet } from '@/components/SceneSheet';
 import { errorMessage } from '@/components/Screen';
 import { useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
@@ -41,75 +41,76 @@ export default function Register() {
   }
 
   return (
-    <SafeAreaView style={[styles.page, { backgroundColor: c.background }]}>
-      <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <View style={styles.intro}>
-          <Text role="heading" style={[type.display, { color: c.text }]}>
-            {s.auth.createAccount}
-          </Text>
-          <Text style={[type.body, { color: c.textMuted }]}>{s.common.stepOf(1, 5)}</Text>
+    <SceneSheet image={require('../../../assets/images/scenes/s01-wine-window.jpg')}>
+      <View style={styles.intro}>
+        <Text role="heading" style={[type.display, { color: c.text }]}>
+          {s.auth.createAccount}
+        </Text>
+        <Text style={[type.body, { color: c.textMuted }]}>{s.common.stepOf(1, 5)}</Text>
+      </View>
+
+      <Field label={s.common.name} value={form.name} onChangeText={set('name')} autoCapitalize="words" />
+      <Field
+        label={s.common.email}
+        value={form.email}
+        onChangeText={set('email')}
+        keyboardType="email-address"
+        textContentType="emailAddress"
+        autoComplete="email"
+        autoCorrect={false}
+      />
+      <Field label={s.common.city} value={form.city} onChangeText={set('city')} autoCapitalize="words" />
+      <Field
+        label={s.common.password}
+        value={form.password}
+        onChangeText={set('password')}
+        secureTextEntry
+        textContentType="newPassword"
+        autoComplete="new-password"
+        hint={s.auth.passwordHint}
+        error={error}
+      />
+
+      <View style={styles.group}>
+        <Text style={[type.label, { color: c.text }]}>{s.common.iWantToBe}</Text>
+        <View style={styles.roles} role="radiogroup" aria-label={s.common.iWantToBe}>
+          {ROLES.map((role) => {
+            const active = form.role === role;
+            return (
+              <Pressable
+                key={role}
+                onPress={() => set('role')(role)}
+                role="radio"
+                aria-checked={active}
+                style={({ pressed }) => [
+                  styles.role,
+                  {
+                    backgroundColor: active ? c.text : c.surfaceMuted,
+                    borderColor: active ? c.text : c.border,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}>
+                <Text style={[type.label, { color: active ? c.background : c.text }]}>{s.roles[role]}</Text>
+              </Pressable>
+            );
+          })}
         </View>
+        <Text style={[type.caption, { color: c.textMuted }]}>{s.auth.changeLater}</Text>
+      </View>
 
-        <Field label={s.common.name} value={form.name} onChangeText={set('name')} autoCapitalize="words" />
-        <Field
-          label={s.common.email}
-          value={form.email}
-          onChangeText={set('email')}
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          autoComplete="email"
-          autoCorrect={false}
-        />
-        <Field label={s.common.city} value={form.city} onChangeText={set('city')} autoCapitalize="words" />
-        <Field
-          label={s.common.password}
-          value={form.password}
-          onChangeText={set('password')}
-          secureTextEntry
-          textContentType="newPassword"
-          autoComplete="new-password"
-          hint={s.auth.passwordHint}
-          error={error}
-        />
-
-        <View style={styles.group}>
-          <Text style={[type.label, { color: c.text }]}>{s.common.iWantToBe}</Text>
-          <View style={styles.roles} role="radiogroup" aria-label={s.common.iWantToBe}>
-            {ROLES.map((role) => {
-              const active = form.role === role;
-              return (
-                <Pressable
-                  key={role}
-                  onPress={() => set('role')(role)}
-                  role="radio"
-                  aria-checked={active}
-                  style={({ pressed }) => [
-                    styles.role,
-                    {
-                      backgroundColor: active ? c.text : c.surfaceMuted,
-                      borderColor: active ? c.text : c.border,
-                      opacity: pressed ? 0.7 : 1,
-                    },
-                  ]}>
-                  <Text style={[type.label, { color: active ? c.background : c.text }]}>{s.roles[role]}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <Text style={[type.caption, { color: c.textMuted }]}>{s.auth.changeLater}</Text>
-        </View>
-
-        <Button title={s.common.continue} onPress={submit} loading={busy} disabled={!complete} />
-      </ScrollView>
-    </SafeAreaView>
+      <Button title={s.common.continue} onPress={submit} loading={busy} disabled={!complete} />
+      {/* replace, not push: login already links here, and the two would stack up forever. */}
+      <Link href="/login" replace style={[type.label, styles.link, { color: c.text }]}>
+        {s.auth.haveAccount}
+      </Link>
+    </SceneSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1 },
-  form: { gap: space.md, padding: space.lg, paddingBottom: space.xxl },
   intro: { gap: space.xs, marginBottom: space.sm },
   group: { gap: space.sm },
+  link: { textAlign: 'center', paddingVertical: space.md },
   roles: { flexDirection: 'row', gap: space.sm },
   role: {
     flex: 1,

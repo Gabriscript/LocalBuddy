@@ -80,29 +80,33 @@ export const ProfileCard = memo(function ProfileCard({
             <Text style={[type.title, styles.name, { color: c.text }]} numberOfLines={1}>
               {card.name}
             </Text>
-            {rating ? (
-              <View style={styles.rating}>
-                <Ionicons name="star" size={14} color={c.text} aria-hidden />
-                {/* Tabular figures: a rating going from 4.9 to 5.0 must not nudge the row. */}
-                <Text style={[type.label, styles.figure, { color: c.text }]}>
-                  {rating}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-
-          <Text style={[type.caption, { color: c.textMuted }]}>
-            {card.city} · {role}
-          </Text>
-
-          <View style={styles.pills}>
             {card.identityVerified ? (
               <Pill icon="shield-checkmark-outline" label={s.common.verified} tone="positive" />
             ) : null}
-            {card.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
-            {card.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
-            {card.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
           </View>
+
+          <View style={styles.rating}>
+            <Text style={[type.caption, { color: c.textMuted }]}>
+              {card.city} · {role}
+            </Text>
+            {rating ? (
+              <>
+                <Text style={[type.caption, { color: c.textMuted }]}>·</Text>
+                <Ionicons name="star" size={12} color={c.textMuted} aria-hidden />
+                {/* Tabular figures: a rating going from 4.9 to 5.0 must not nudge the row. */}
+                <Text style={[type.caption, styles.figure, { color: c.textMuted }]}>{rating}</Text>
+              </>
+            ) : null}
+          </View>
+
+          {/* Left out when empty: an empty row would still take a gap's worth of height. */}
+          {card.hasCar || card.hasPets || card.smokes ? (
+            <View style={styles.pills}>
+              {card.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
+              {card.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
+              {card.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
+            </View>
+          ) : null}
 
           {card.whatWeWillDo ? (
             <Text style={[type.body, { color: c.text }]} numberOfLines={2}>
@@ -145,7 +149,7 @@ const styles = StyleSheet.create({
   body: { padding: space.md, gap: space.sm },
   headline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   name: { flexShrink: 1 },
-  rating: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  rating: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.xs },
   figure: { fontVariant: ['tabular-nums'] },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   actions: {

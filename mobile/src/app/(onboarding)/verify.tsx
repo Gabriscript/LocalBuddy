@@ -36,6 +36,7 @@ export default function Verify() {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s03-bar-counter.jpg')}
       step={onboarding ? 2 : undefined}
       total={guest ? 4 : 5}
       title={s.onboarding.verifyTitle}

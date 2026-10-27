@@ -73,6 +73,7 @@ function PhotoAndTimes({ me }: { me: Me }) {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s04-the-message.jpg')}
       step={4}
       total={hosts ? 5 : 4}
       title={s.onboarding.photoTitle}
