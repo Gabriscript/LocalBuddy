@@ -218,6 +218,28 @@ public class LoginTests
         Assert.Equal(StatusCodes.Status401Unauthorized, Assert.IsType<ObjectResult>(result).StatusCode);
         Assert.Equal(1, hasher.Calls);
     }
+
+    /// Lockout refuses before the password is verified, so five wrong guesses used to turn an
+    /// account into the fast answer that confirms the address is registered.
+    [Fact]
+    public async Task A_locked_out_account_costs_one_password_hash_too()
+    {
+        using var t = new TestDb();
+        using var identity = new TestIdentity(t.Db);
+        var anna = new User { UserName = "anna@test.local", Email = "anna@test.local", Name = "Anna", City = "Milano" };
+        Assert.True((await identity.Users.CreateAsync(anna, "Password123!")).Succeeded);
+        Assert.True((await identity.Users.SetLockoutEndDateAsync(anna, DateTimeOffset.UtcNow.AddMinutes(15))).Succeeded);
+        // Without lockout enabled on the account the date above is inert and this test would pass
+        // on the unfixed code.
+        Assert.True(await identity.Users.IsLockedOutAsync(anna));
+
+        var hasher = new CountingHasher();
+        identity.Users.PasswordHasher = hasher;
+        var result = await Auth(identity).Login(new LoginRequest(anna.Email!, "not-the-password"));
+
+        Assert.Equal(StatusCodes.Status401Unauthorized, Assert.IsType<ObjectResult>(result).StatusCode);
+        Assert.Equal(1, hasher.Calls);
+    }
 }
 
 /// Moderator powers are granted to an account, never to an address: registration does not check
