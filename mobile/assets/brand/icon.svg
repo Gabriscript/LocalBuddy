@@ -1,7 +1,9 @@
-<!-- The "talking arch" (arco che parla): an arch whose bottom-left ends as a speech-bubble tail. 72x72 grid, full bleed. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
-  <rect width="72" height="72" fill="#032B43"/>
-  <circle cx="64" cy="70" r="20" fill="#CFE6EF"/>
-  <path d="M18 52 V32 a18 18 0 0 1 36 0 V52 H30 L19 61 Z" fill="#F45D73"/>
-  <circle cx="29" cy="38" r="2.6" fill="#032B43"/><circle cx="36" cy="38" r="2.6" fill="#032B43"/><circle cx="43" cy="38" r="2.6" fill="#032B43"/>
+<!-- The two-person heart on Paper, full bleed 1024. Source of the app icon; the same mark as web/logo-mark.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#F7F4F1"/>
+  <g transform="translate(221 192) scale(4.85)" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="35" cy="15" r="11" fill="#C8324E"/><circle cx="85" cy="15" r="11" fill="#032B43"/>
+<path d="M35 40C4 42 2 82 60 124" stroke="#C8324E" stroke-width="17"/>
+<path d="M85 40C116 42 118 82 60 124" stroke="#032B43" stroke-width="17"/>
+<path d="M32 54C56 50 68 86 92 62" stroke="#C8324E" stroke-width="9"/>
+<path d="M88 54C64 50 52 86 28 62" stroke="#032B43" stroke-width="9"/></g>
 </svg>

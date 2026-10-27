@@ -1,7 +1,8 @@
-<!-- Adaptive icon foreground, 108x108: the bubble in the inner 66 safe zone, transparent around it. -->
+<!-- Adaptive icon foreground, 108x108: the heart inside the 66 safe zone, transparent around it. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
-  <g transform="translate(21 21) scale(0.9166667)">
-    <path d="M18 52 V32 a18 18 0 0 1 36 0 V52 H30 L19 61 Z" fill="#F45D73"/>
-    <circle cx="29" cy="38" r="2.6" fill="#032B43"/><circle cx="36" cy="38" r="2.6" fill="#032B43"/><circle cx="43" cy="38" r="2.6" fill="#032B43"/>
-  </g>
+  <g transform="translate(27 24.3) scale(0.45)" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="35" cy="15" r="11" fill="#C8324E"/><circle cx="85" cy="15" r="11" fill="#032B43"/>
+<path d="M35 40C4 42 2 82 60 124" stroke="#C8324E" stroke-width="17"/>
+<path d="M85 40C116 42 118 82 60 124" stroke="#032B43" stroke-width="17"/>
+<path d="M32 54C56 50 68 86 92 62" stroke="#C8324E" stroke-width="9"/>
+<path d="M88 54C64 50 52 86 28 62" stroke="#032B43" stroke-width="9"/></g>
 </svg>

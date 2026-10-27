@@ -1,7 +1,2 @@
-<!-- Adaptive icon background, 108x108: the 72 grid scaled into the inner 66 (offset 21). -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
-  <rect width="108" height="108" fill="#032B43"/>
-  <g transform="translate(21 21) scale(0.9166667)">
-    <circle cx="64" cy="70" r="20" fill="#CFE6EF"/>
-  </g>
-</svg>
+<!-- Adaptive icon background, 108x108: plain Paper. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><rect width="108" height="108" fill="#F7F4F1"/></svg>
