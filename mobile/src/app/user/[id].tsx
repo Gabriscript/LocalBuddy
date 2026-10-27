@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
+import { roleName } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
@@ -13,7 +14,10 @@ import { Pill } from '@/components/Pill';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
 import { UnlockSheet } from '@/components/UnlockSheet';
+import { useLanguage, useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
+
+const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 /// The expanded profile, and the only place the paid unlock appears: keeping it off the
 /// discovery card is what stops an accidental charge mid-scroll (GUIDELINES §11.2).
@@ -22,6 +26,8 @@ export default function Profile() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const c = useColors();
+  const s = useStrings();
+  const { language } = useLanguage();
 
   const { data, isPending, error, refetch } = useProfile(id);
   const { interest, pass } = useDecide();
@@ -56,7 +62,7 @@ export default function Profile() {
         <Pressable
           onPress={goBack}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={s.common.goBack}
           style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
         </Pressable>
@@ -68,7 +74,7 @@ export default function Profile() {
           onPress={() => setSafety(true)}
           disabled={!data}
           accessibilityRole="button"
-          accessibilityLabel="Report or block"
+          accessibilityLabel={s.profile.reportOrBlock}
           style={[
             styles.more,
             { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border },
@@ -82,7 +88,7 @@ export default function Profile() {
           <AuthedImage
             path={photos[0]?.url}
             style={[styles.hero, { backgroundColor: c.surfaceMuted }]}
-            accessibilityLabel={`Photo of ${data?.name}`}
+            accessibilityLabel={s.common.photoOf(data?.name ?? '')}
           />
 
           {photos.length > 1 ? (
@@ -95,7 +101,7 @@ export default function Profile() {
                   key={photo.id}
                   path={photo.url}
                   style={[styles.thumb, { backgroundColor: c.surfaceMuted }]}
-                  accessibilityLabel={`Another photo of ${data?.name}`}
+                  accessibilityLabel={s.profile.anotherPhotoOf(data?.name ?? '')}
                 />
               ))}
             </ScrollView>
@@ -107,26 +113,26 @@ export default function Profile() {
                 {data?.name}
               </Text>
               <Text style={[type.body, { color: c.textMuted }]}>
-                {data?.city} · {data?.role}
+                {data?.city} · {roleName(data?.role, s)}
               </Text>
             </View>
 
             <View style={styles.pills}>
               {data?.identityVerified ? (
-                <Pill icon="shield-checkmark-outline" label="Verified" tone="positive" />
+                <Pill icon="shield-checkmark-outline" label={s.common.verified} tone="positive" />
               ) : null}
               {typeof data?.rating === 'number' ? (
-                <Pill icon="star-outline" label={`${data.rating.toFixed(1)} rating`} />
+                <Pill icon="star-outline" label={s.profile.rating(data.rating.toLocaleString(language, ONE_DECIMAL))} />
               ) : null}
-              {data?.listing?.offersOvernight ? <Pill icon="bed-outline" label="Can host overnight" /> : null}
-              {data?.hasCar ? <Pill icon="car-outline" label="Has a car" /> : null}
-              {data?.hasPets ? <Pill icon="paw-outline" label="Pets" /> : null}
-              {data?.smokes ? <Pill icon="flame-outline" label="Smokes" /> : null}
+              {data?.listing?.offersOvernight ? <Pill icon="bed-outline" label={s.common.canHostOvernight} /> : null}
+              {data?.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
+              {data?.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
+              {data?.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
             </View>
 
-            <Section title="What we'll do" body={data?.whatWeWillDo} />
-            <Section title="Why I host" body={data?.whyIHost} />
-            <Section title="Languages" body={data?.languagesSpoken} />
+            <Section title={s.profile.whatWeDo} body={data?.whatWeWillDo} />
+            <Section title={s.profile.whyHost} body={data?.whyIHost} />
+            <Section title={s.profile.languages} body={data?.languagesSpoken} />
             <Reviews userId={id} />
           </View>
         </ScrollView>
@@ -143,20 +149,20 @@ export default function Profile() {
           <View style={styles.barRow}>
             <View style={styles.barItem}>
               <Button
-                title="Pass"
+                title={s.profile.pass}
                 variant="secondary"
                 disabled={busy}
                 onPress={() => pass.mutate(id, { onSuccess: goBack })}
               />
             </View>
             <View style={styles.barItem}>
-              <Button title="Show interest" loading={interest.isPending} disabled={busy} onPress={showInterest} />
+              <Button title={s.profile.showInterest} loading={interest.isPending} disabled={busy} onPress={showInterest} />
             </View>
           </View>
           {/* Deliberately below the free actions and visually quieter: paying is a separate
               decision, not a third button of equal weight. */}
           <Button
-            title="Unlock the chat without a match"
+            title={s.profile.unlock}
             variant="quiet"
             disabled={busy || !data}
             onPress={() => setUnlocking(true)}
@@ -202,19 +208,21 @@ export default function Profile() {
 /// of these carry a name.
 function Reviews({ userId }: { userId: string }) {
   const c = useColors();
+  const s = useStrings();
+  const { language } = useLanguage();
   const { items, hasNextPage, isFetchingNextPage, loadMore } = useReviews(userId);
   if (!items.length) return null;
 
   return (
     <View style={styles.section}>
       <Text role="heading" style={[type.title, { color: c.text }]}>
-        What people say
+        {s.profile.reviews}
       </Text>
       {items.map((review) => (
         <View key={review.id} style={[styles.review, { borderTopColor: c.border }]}>
           {/* role="img": five hidden glyphs that together mean one thing, and a bare label on
               a plain container is announced by nothing. */}
-          <View role="img" aria-label={`Rated ${review.rating} out of 5`} style={styles.stars}>
+          <View role="img" aria-label={s.profile.ratedOutOf5(Number(review.rating))} style={styles.stars}>
             {[1, 2, 3, 4, 5].map((star) => (
               <Ionicons
                 key={star}
@@ -225,7 +233,7 @@ function Reviews({ userId }: { userId: string }) {
               />
             ))}
             <Text style={[type.caption, { color: c.textMuted }]}>
-              {new Date(review.createdAt).toLocaleDateString()}
+              {new Date(review.createdAt).toLocaleDateString(language)}
             </Text>
           </View>
           {review.comment ? (
@@ -238,7 +246,7 @@ function Reviews({ userId }: { userId: string }) {
           and a second scrolling region inside the first one fights it. */}
       {hasNextPage ? (
         <Button
-          title="More reviews"
+          title={s.profile.moreReviews}
           variant="quiet"
           loading={isFetchingNextPage}
           onPress={loadMore}

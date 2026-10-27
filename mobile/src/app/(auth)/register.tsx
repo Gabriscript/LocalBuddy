@@ -6,14 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ApiError } from '@/api/client';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
+import { errorMessage } from '@/components/Screen';
+import { useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { radius, space, type, useColors } from '@/theme';
 
-const ROLES = [
-  { value: 'host', label: 'Host' },
-  { value: 'guest', label: 'Guest' },
-  { value: 'entrambi', label: 'Both' },
-];
+const ROLES = ['host', 'guest', 'entrambi'] as const;
 
 /// Step 1 of the five-step onboarding (GUIDELINES §11.1). Everything after this needs a
 /// token, so registration hands straight over to the onboarding stack.
@@ -21,6 +19,7 @@ export default function Register() {
   const c = useColors();
   const { register } = useAuth();
   const router = useRouter();
+  const s = useStrings();
   const [form, setForm] = useState({ name: '', email: '', city: '', password: '', role: 'entrambi' });
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -35,7 +34,7 @@ export default function Register() {
       await register(form);
       router.replace('/verify');
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Could not register. Check your connection.');
+      setError(e instanceof ApiError ? errorMessage(e, s) : s.auth.registerFailed);
     } finally {
       setBusy(false);
     }
@@ -46,14 +45,14 @@ export default function Register() {
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.intro}>
           <Text role="heading" style={[type.display, { color: c.text }]}>
-            Create account
+            {s.auth.createAccount}
           </Text>
-          <Text style={[type.body, { color: c.textMuted }]}>Step 1 of 5</Text>
+          <Text style={[type.body, { color: c.textMuted }]}>{s.common.stepOf(1, 5)}</Text>
         </View>
 
-        <Field label="Name" value={form.name} onChangeText={set('name')} autoCapitalize="words" />
+        <Field label={s.common.name} value={form.name} onChangeText={set('name')} autoCapitalize="words" />
         <Field
-          label="Email"
+          label={s.common.email}
           value={form.email}
           onChangeText={set('email')}
           keyboardType="email-address"
@@ -61,27 +60,27 @@ export default function Register() {
           autoComplete="email"
           autoCorrect={false}
         />
-        <Field label="City" value={form.city} onChangeText={set('city')} autoCapitalize="words" />
+        <Field label={s.common.city} value={form.city} onChangeText={set('city')} autoCapitalize="words" />
         <Field
-          label="Password"
+          label={s.common.password}
           value={form.password}
           onChangeText={set('password')}
           secureTextEntry
           textContentType="newPassword"
           autoComplete="new-password"
-          hint="At least 8 characters."
+          hint={s.auth.passwordHint}
           error={error}
         />
 
         <View style={styles.group}>
-          <Text style={[type.label, { color: c.text }]}>I want to be</Text>
-          <View style={styles.roles} role="radiogroup" aria-label="I want to be">
+          <Text style={[type.label, { color: c.text }]}>{s.common.iWantToBe}</Text>
+          <View style={styles.roles} role="radiogroup" aria-label={s.common.iWantToBe}>
             {ROLES.map((role) => {
-              const active = form.role === role.value;
+              const active = form.role === role;
               return (
                 <Pressable
-                  key={role.value}
-                  onPress={() => set('role')(role.value)}
+                  key={role}
+                  onPress={() => set('role')(role)}
                   role="radio"
                   aria-checked={active}
                   style={({ pressed }) => [
@@ -92,15 +91,15 @@ export default function Register() {
                       opacity: pressed ? 0.7 : 1,
                     },
                   ]}>
-                  <Text style={[type.label, { color: active ? c.background : c.text }]}>{role.label}</Text>
+                  <Text style={[type.label, { color: active ? c.background : c.text }]}>{s.roles[role]}</Text>
                 </Pressable>
               );
             })}
           </View>
-          <Text style={[type.caption, { color: c.textMuted }]}>You can change this later.</Text>
+          <Text style={[type.caption, { color: c.textMuted }]}>{s.auth.changeLater}</Text>
         </View>
 
-        <Button title="Continue" onPress={submit} loading={busy} disabled={!complete} />
+        <Button title={s.common.continue} onPress={submit} loading={busy} disabled={!complete} />
       </ScrollView>
     </SafeAreaView>
   );

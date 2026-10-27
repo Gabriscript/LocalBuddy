@@ -41,3 +41,19 @@ EXPO_PUBLIC_API_URL=http://192.168.1.x:5200 npm start
 
 Member photos must go through `<AuthedImage>`: `GET /api/v1/photos/{id}/content` filters on the
 caller, so a bare URL 404s for any host who restricted visibility.
+
+## Translations
+
+Every word the app shows lives in `src/i18n/`: `en.ts` is the source, and `it.ts`, `es.ts` and
+`fr.ts` are typed against it. Screens and components read them through `useStrings()`; the
+language follows the phone unless the member picks one under Me > Language.
+
+- **Adding a key:** add it to `en.ts` first, then run `npm run typecheck`. Every dictionary still
+  missing it is listed as an error. Plurals and interpolation are functions, not templates.
+- **Adding a language:** copy `en.ts` to `<code>.ts` (the ISO 639-1 code `expo-localization`
+  reports), type it as `Strings`, translate it, and add it to `DICTIONARIES` and
+  `LANGUAGE_NAMES` in `src/i18n/index.tsx`.
+- **Server errors** are translated from their `code` under `errors`; a code not listed there
+  shows the server's own English `detail`.
+- Italian uses the informal "tu", Spanish "tú", French "vous". The Spanish and French
+  dictionaries still need a review by a native speaker.

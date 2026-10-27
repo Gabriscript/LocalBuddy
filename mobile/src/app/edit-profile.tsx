@@ -10,16 +10,13 @@ import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Field } from '@/components/Field';
 import { draftFrom, ProfileFields } from '@/components/ProfileFields';
-import { Screen } from '@/components/Screen';
+import { errorMessage, Screen } from '@/components/Screen';
+import { useStrings } from '@/i18n';
 import { space, type, useColors } from '@/theme';
 
 type Me = components['schemas']['MyProfile'];
 
-const ROLES = [
-  { value: 'host', label: 'Host' },
-  { value: 'guest', label: 'Guest' },
-  { value: 'entrambi', label: 'Both' },
-];
+const ROLES = ['host', 'guest', 'entrambi'] as const;
 
 /// The same answers as onboarding step 3, without the five-step frame, plus the three things
 /// the onboarding never asks again: the name, the city, and which role you are here for
@@ -36,6 +33,7 @@ export default function EditProfile() {
 function EditForm({ me }: { me: Me }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const save = useUpdateProfile();
 
   const [name, setName] = useState(me.name);
@@ -57,26 +55,26 @@ function EditForm({ me }: { me: Me }) {
         <Pressable
           onPress={goBack}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={s.common.goBack}
           hitSlop={8}
           style={styles.iconButton}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
         </Pressable>
         <Text role="heading" style={[type.title, { color: c.text }]}>
-          Edit profile
+          {s.editProfile.title}
         </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <Field
-          label="Name"
+          label={s.common.name}
           value={name}
           onChangeText={setName}
           maxLength={80}
           autoCapitalize="words"
         />
         <Field
-          label="City"
+          label={s.common.city}
           value={city}
           onChangeText={setCity}
           maxLength={80}
@@ -84,15 +82,15 @@ function EditForm({ me }: { me: Me }) {
         />
 
         <View style={styles.group}>
-          <Text style={[type.label, { color: c.text }]}>I want to be</Text>
-          <View style={styles.chips} role="radiogroup" aria-label="I want to be">
+          <Text style={[type.label, { color: c.text }]}>{s.common.iWantToBe}</Text>
+          <View style={styles.chips} role="radiogroup" aria-label={s.common.iWantToBe}>
             {ROLES.map((option) => (
               <Chip
-                key={option.value}
+                key={option}
                 as="radio"
-                label={option.label}
-                selected={role === option.value}
-                onPress={() => setRole(option.value)}
+                label={s.roles[option]}
+                selected={role === option}
+                onPress={() => setRole(option)}
               />
             ))}
           </View>
@@ -102,14 +100,14 @@ function EditForm({ me }: { me: Me }) {
 
         {save.error ? (
           <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-            {save.error.message}
+            {errorMessage(save.error, s)}
           </Text>
         ) : null}
       </ScrollView>
 
       <View style={[styles.footer, { borderTopColor: c.border }]}>
         <Button
-          title="Save changes"
+          title={s.editProfile.save}
           loading={save.isPending}
           disabled={!complete}
           onPress={submit}

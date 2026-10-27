@@ -9,6 +9,7 @@ import { AuthedImage } from '@/components/AuthedImage';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 type Conversation = components['schemas']['ConversationSummary'];
@@ -16,13 +17,14 @@ type Conversation = components['schemas']['ConversationSummary'];
 export default function Chats() {
   const c = useColors();
   const clearance = useTabBarClearance();
+  const s = useStrings();
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
     useConversations();
 
   return (
     <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
       <Text role="heading" style={[type.display, styles.header, { color: c.text }]}>
-        Chats
+        {s.chats.title}
       </Text>
 
       <Screen
@@ -30,7 +32,7 @@ export default function Chats() {
         skeleton={<ChatListSkeleton />}
         error={error}
         onRetry={refetch}
-        empty={items.length ? undefined : 'No conversations yet. A chat opens when interest is mutual.'}
+        empty={items.length ? undefined : s.chats.empty}
         emptyIcon="chatbubble-outline">
         <FlatList
           data={items}
@@ -54,6 +56,7 @@ export default function Chats() {
 function ChatRow({ conversation }: { conversation: Conversation }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const { data: other } = useProfile(conversation.otherUserId);
   const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
 
@@ -81,10 +84,10 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
           {other?.name ?? ' '}
         </Text>
         <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
-          {conversation.lastMessage ?? 'Say hello'}
+          {conversation.lastMessage ?? s.chats.sayHello}
         </Text>
         {conversation.unlockedByPayment ? (
-          <Text style={[type.caption, { color: c.textMuted }]}>Unlocked</Text>
+          <Text style={[type.caption, { color: c.textMuted }]}>{s.chats.unlocked}</Text>
         ) : null}
       </View>
 

@@ -3,9 +3,11 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { usePaymentOptions, useUnlock } from '@/api/hooks';
+import { useLanguage, useStrings } from '@/i18n';
 import { type, useColors } from '@/theme';
 
 import { Button } from './Button';
+import { errorMessage } from './Screen';
 import { Sheet } from './Sheet';
 
 /// The only thing LocalBuddy ever charges for: opening a conversation without waiting for the
@@ -22,13 +24,15 @@ export function UnlockSheet({
 }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
+  const { language } = useLanguage();
   const { data: options } = usePaymentOptions();
   const unlock = useUnlock();
 
   const credits = Number(options?.credits ?? 0);
   const creditCost = Number(options?.creditCost ?? 1);
   const price = options
-    ? new Intl.NumberFormat(undefined, { style: 'currency', currency: options.currency }).format(
+    ? new Intl.NumberFormat(language, { style: 'currency', currency: options.currency }).format(
         Number(options.unlockPrice)
       )
     : '';
@@ -44,17 +48,17 @@ export function UnlockSheet({
         : 'money';
 
   const cost = {
-    unknown: 'Checking what this costs you.',
-    subscription: 'Your subscription covers it, with nothing more to pay.',
-    credits: `You have ${credits} ${credits === 1 ? 'credit' : 'credits'} from hosting. This uses ${creditCost}.`,
-    money: `${price}, once, for this one person.`,
+    unknown: s.unlock.checking,
+    subscription: s.unlock.subscription,
+    credits: s.unlock.credits(credits, creditCost),
+    money: s.unlock.money(price),
   }[pays];
 
   const cta = {
-    unknown: 'Unlock the chat',
-    subscription: 'Open the chat',
-    credits: `Use ${creditCost === 1 ? '1 credit' : `${creditCost} credits`}`,
-    money: `Pay ${price}`,
+    unknown: s.unlock.title,
+    subscription: s.unlock.ctaSubscription,
+    credits: s.unlock.ctaCredits(creditCost),
+    money: s.unlock.ctaMoney(price),
   }[pays];
 
   const unverified =
@@ -62,13 +66,13 @@ export function UnlockSheet({
 
   return (
     <Sheet
-      title="Unlock the chat"
+      title={s.unlock.title}
       onClose={onClose}
       footer={
         <View style={styles.grow}>
           {unverified ? (
             <Button
-              title="Verify your identity"
+              title={s.common.verifyIdentity}
               // `from` keeps the verify screen out of its onboarding costume: no "Step 2 of 5"
               // dots, and it comes back to this profile instead of walking on to step 3.
               onPress={() => router.push({ pathname: '/verify', params: { from: 'app' } })}
@@ -86,20 +90,18 @@ export function UnlockSheet({
         </View>
       }>
       <Text style={[type.body, { color: c.text }]}>
-        This opens a conversation with {user.name} straight away, instead of waiting for them to
-        show interest back.
+        {s.unlock.body(user.name)}
       </Text>
 
       <Text style={[type.label, { color: c.text }]}>{cost}</Text>
 
       <Text style={[type.caption, { color: c.textMuted }]}>
-        It pays for the introduction, and for nothing else. The time you spend together is never
-        paid for, by either of you.
+        {s.unlock.note}
       </Text>
 
       {unlock.error ? (
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-          {unlock.error.message}
+          {errorMessage(unlock.error, s)}
         </Text>
       ) : null}
     </Sheet>

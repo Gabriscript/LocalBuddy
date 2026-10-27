@@ -3,6 +3,8 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
+import { roleName } from '@/api/labels';
+import { useLanguage, useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 import { AuthedImage } from './AuthedImage';
@@ -10,6 +12,8 @@ import { IconButton } from './IconButton';
 import { Pill } from './Pill';
 
 type Card = components['schemas']['ProfileCard'];
+
+const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 /// The photo leads and the text sits underneath it, rather than over a gradient: it keeps
 /// body text at full contrast on every photo, including a bright one.
@@ -34,6 +38,11 @@ export const ProfileCard = memo(function ProfileCard({
   busy?: boolean;
 }) {
   const c = useColors();
+  const s = useStrings();
+  const { language } = useLanguage();
+  const rating =
+    typeof card.rating === 'number' ? card.rating.toLocaleString(language, ONE_DECIMAL) : null;
+  const role = roleName(card.role, s);
 
   // A card is one control, so a screen reader hears its label and nothing else. The label
   // therefore carries everything the card shows — the pills and the plan included, or pass and
@@ -41,12 +50,12 @@ export const ProfileCard = memo(function ProfileCard({
   const summary = [
     card.name,
     card.city,
-    card.role,
-    card.identityVerified ? 'verified' : null,
-    typeof card.rating === 'number' ? `rated ${card.rating.toFixed(1)}` : null,
-    card.hasCar ? 'has a car' : null,
-    card.hasPets ? 'has pets' : null,
-    card.smokes ? 'smokes' : null,
+    role,
+    card.identityVerified ? s.profileCard.verified : null,
+    rating ? s.profileCard.rated(rating) : null,
+    card.hasCar ? s.profileCard.hasCar : null,
+    card.hasPets ? s.profileCard.hasPets : null,
+    card.smokes ? s.profileCard.smokes : null,
     card.whatWeWillDo,
   ]
     .filter((part): part is string => !!part)
@@ -58,12 +67,12 @@ export const ProfileCard = memo(function ProfileCard({
         onPress={() => onOpen?.(card)}
         accessibilityRole="button"
         accessibilityLabel={summary}
-        accessibilityHint="Opens the full profile"
+        accessibilityHint={s.profileCard.openHint}
         style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}>
         <AuthedImage
           path={card.photoUrl}
           style={[styles.photo, { backgroundColor: c.surfaceMuted }]}
-          accessibilityLabel={`Photo of ${card.name}`}
+          accessibilityLabel={s.common.photoOf(card.name ?? '')}
         />
 
         <View style={styles.body}>
@@ -71,28 +80,28 @@ export const ProfileCard = memo(function ProfileCard({
             <Text style={[type.title, styles.name, { color: c.text }]} numberOfLines={1}>
               {card.name}
             </Text>
-            {typeof card.rating === 'number' ? (
+            {rating ? (
               <View style={styles.rating}>
                 <Ionicons name="star" size={14} color={c.text} aria-hidden />
                 {/* Tabular figures: a rating going from 4.9 to 5.0 must not nudge the row. */}
                 <Text style={[type.label, styles.figure, { color: c.text }]}>
-                  {card.rating.toFixed(1)}
+                  {rating}
                 </Text>
               </View>
             ) : null}
           </View>
 
           <Text style={[type.caption, { color: c.textMuted }]}>
-            {card.city} · {card.role}
+            {card.city} · {role}
           </Text>
 
           <View style={styles.pills}>
             {card.identityVerified ? (
-              <Pill icon="shield-checkmark-outline" label="Verified" tone="positive" />
+              <Pill icon="shield-checkmark-outline" label={s.common.verified} tone="positive" />
             ) : null}
-            {card.hasCar ? <Pill icon="car-outline" label="Has a car" /> : null}
-            {card.hasPets ? <Pill icon="paw-outline" label="Pets" /> : null}
-            {card.smokes ? <Pill icon="flame-outline" label="Smokes" /> : null}
+            {card.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
+            {card.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
+            {card.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
           </View>
 
           {card.whatWeWillDo ? (
@@ -107,7 +116,7 @@ export const ProfileCard = memo(function ProfileCard({
         <View style={styles.actions}>
           <IconButton
             name="close"
-            label={`Pass on ${card.name}`}
+            label={s.profileCard.passOn(card.name ?? '')}
             onPress={() => onPass(card)}
             tint={c.textMuted}
             disabled={busy}
@@ -116,7 +125,7 @@ export const ProfileCard = memo(function ProfileCard({
             // A tick, not a heart: the question the card asks is whether to meet this
             // person, and a heart answers a different one.
             name="checkmark"
-            label={`Show interest in ${card.name}`}
+            label={s.profileCard.interestIn(card.name ?? '')}
             onPress={() => onInterest(card)}
             tint={c.primary}
             disabled={busy}

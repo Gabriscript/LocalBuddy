@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -35,6 +36,7 @@ export function StepPage({
   children?: ReactNode;
 }) {
   const c = useColors();
+  const s = useStrings();
 
   return (
     <SafeAreaView style={[styles.page, { backgroundColor: c.background }]}>
@@ -45,12 +47,12 @@ export function StepPage({
           <View
             style={styles.dots}
             role="progressbar"
-            aria-label="Progress"
+            aria-label={s.common.progress}
             aria-valuemin={0}
             aria-valuemax={total}
             aria-valuenow={step}
             // Read out as words: "Step 3 of 5" is clearer than the "60%" a bare value becomes.
-            aria-valuetext={`Step ${step} of ${total}`}>
+            aria-valuetext={s.common.stepOf(step, total)}>
             {Array.from({ length: total }, (_, i) => (
               <View
                 key={i}

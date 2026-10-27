@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-na
 
 import { ApiError } from '@/api/client';
 import { useMe } from '@/api/hooks';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -24,6 +25,7 @@ import { errorMessage } from './Screen';
 export function ActionError({ error, style }: { error: unknown; style?: StyleProp<ViewStyle> }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const verified = useMe().data?.identityVerified;
 
   const unverified = error instanceof ApiError && error.code === 'identity_verification_required';
@@ -37,13 +39,13 @@ export function ActionError({ error, style }: { error: unknown; style?: StylePro
         {/* The icon repeats what the words say: red alone is not a message (DESIGN.md). */}
         <Ionicons name="alert-circle-outline" size={20} color={c.danger} aria-hidden />
         <Text accessibilityRole="alert" style={[type.body, styles.text, { color: c.text }]}>
-          {errorMessage(error)}
+          {errorMessage(error, s)}
         </Text>
       </View>
 
       {unverified ? (
         <Button
-          title="Verify your identity"
+          title={s.common.verifyIdentity}
           variant="secondary"
           // `from` tells the verify screen it was reached from inside the app rather than as
           // step 2 of onboarding, so it comes back here instead of walking on to step 3.

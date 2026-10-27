@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
+import { useStrings } from '@/i18n';
 import { space, type, useColors } from '@/theme';
 
 import { Field } from './Field';
@@ -43,6 +44,7 @@ export function ProfileFields({
   hosts: boolean;
 }) {
   const c = useColors();
+  const s = useStrings();
   const set =
     <K extends keyof ProfileDraft>(key: K) =>
     (value: ProfileDraft[K]) =>
@@ -51,8 +53,8 @@ export function ProfileFields({
   return (
     <>
       <Field
-        label="What would we do together?"
-        hint="A walk through your neighbourhood, a market you love, the bar only locals know."
+        label={s.profileFields.whatWeDo}
+        hint={s.profileFields.whatWeDoHint}
         value={draft.whatWeWillDo}
         onChangeText={set('whatWeWillDo')}
         multiline
@@ -61,7 +63,7 @@ export function ProfileFields({
       />
       {hosts ? (
         <Field
-          label="Why do you host?"
+          label={s.profileFields.whyHost}
           value={draft.whyIHost}
           onChangeText={set('whyIHost')}
           multiline
@@ -70,8 +72,8 @@ export function ProfileFields({
         />
       ) : null}
       <Field
-        label="Languages you speak"
-        hint="For example: Italian, English, a little Spanish."
+        label={s.profileFields.languages}
+        hint={s.profileFields.languagesHint}
         value={draft.languagesSpoken}
         onChangeText={set('languagesSpoken')}
         maxLength={120}
@@ -79,15 +81,15 @@ export function ProfileFields({
       />
 
       <View style={styles.group}>
-        <Text style={[type.label, { color: c.textMuted }]}>A few facts</Text>
-        <Toggle label="I have a car" value={draft.hasCar} onChange={set('hasCar')} />
-        <Toggle label="I smoke" value={draft.smokes} onChange={set('smokes')} />
-        <Toggle label="I have pets" value={draft.hasPets} onChange={set('hasPets')} />
+        <Text style={[type.label, { color: c.textMuted }]}>{s.profileFields.facts}</Text>
+        <Toggle label={s.profileFields.haveCar} value={draft.hasCar} onChange={set('hasCar')} />
+        <Toggle label={s.profileFields.smoke} value={draft.smokes} onChange={set('smokes')} />
+        <Toggle label={s.profileFields.havePets} value={draft.hasPets} onChange={set('hasPets')} />
       </View>
 
       <Toggle
-        label="Visible to people without an account"
-        hint="Off: only LocalBuddy members can see your profile. You can change this at any time."
+        label={s.profileFields.visible}
+        hint={s.profileFields.visibleHint}
         value={draft.profileVisibleToAnonymous}
         onChange={set('profileVisibleToAnonymous')}
       />

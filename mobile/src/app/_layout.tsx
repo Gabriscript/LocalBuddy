@@ -9,13 +9,15 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
 import { ApiError } from '@/api/client';
+import { LanguageProvider } from '@/i18n';
 import { AuthProvider } from '@/lib/auth';
 import { useColors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-/// The two providers the whole app needs, and nothing else. Server data lives in Query,
-/// the session lives in AuthProvider, and there is no third global store (ADR-0009).
+/// The providers the whole app needs, and nothing else. Server data lives in Query, the
+/// session lives in AuthProvider, and the language in LanguageProvider: the one setting that is
+/// not a copy of a server row (ADR-0009).
 export default function RootLayout() {
   const c = useColors();
   // Three faces, imported one weight at a time so the bundle carries three files rather
@@ -45,11 +47,13 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={client}>
-      <AuthProvider>
-        <StatusBar style="auto" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
-      </AuthProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={client}>
+        <AuthProvider>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
+        </AuthProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }

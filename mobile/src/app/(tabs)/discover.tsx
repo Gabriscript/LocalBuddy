@@ -16,13 +16,8 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
-
-const ROLES = [
-  { value: undefined, label: 'Everyone' },
-  { value: 'host', label: 'Hosts' },
-  { value: 'guest', label: 'Guests' },
-];
 
 /// Route params are strings; the query takes booleans and a list of times of day.
 type Params = {
@@ -45,6 +40,12 @@ export default function Discover() {
   const c = useColors();
   const clearance = useTabBarClearance();
   const router = useRouter();
+  const s = useStrings();
+  const roles = [
+    { value: undefined, label: s.discover.everyone },
+    { value: 'host', label: s.discover.hosts },
+    { value: 'guest', label: s.discover.guests },
+  ];
 
   // Filters live in the route, not in a store: they are already persisted, already shareable
   // as a deep link, and cost nothing to keep in sync (ADR-0009).
@@ -141,10 +142,10 @@ export default function Discover() {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text role="heading" style={[type.display, { color: c.text }]}>
-            Discover
+            {s.discover.title}
           </Text>
           <Text style={[type.body, { color: c.textMuted }]}>
-            People near you who want to show you their city.
+            {s.discover.subtitle}
           </Text>
         </View>
 
@@ -153,18 +154,18 @@ export default function Discover() {
           accessibilityRole="button"
           // The count is in the label too: "Filters (2)" read as "Filters" would hide that
           // the feed is already narrowed.
-          accessibilityLabel={active ? `Filters, ${active} active` : 'Filters'}
+          accessibilityLabel={active ? s.discover.filtersLabel(active) : s.discover.filters}
           style={({ pressed }) => [
             styles.filterButton,
             { borderColor: c.border, backgroundColor: c.surfaceMuted, opacity: pressed ? 0.7 : 1 },
           ]}>
           <Ionicons name="options-outline" size={18} color={c.text} aria-hidden />
-          <Text style={[type.label, { color: c.text }]}>{active ? `Filters (${active})` : 'Filters'}</Text>
+          <Text style={[type.label, { color: c.text }]}>{active ? s.discover.filtersCount(active) : s.discover.filters}</Text>
         </Pressable>
       </View>
 
-      <View style={styles.filters} role="radiogroup" aria-label="Who to show">
-        {ROLES.map((role) => (
+      <View style={styles.filters} role="radiogroup" aria-label={s.discover.whoToShow}>
+        {roles.map((role) => (
           <Chip
             key={role.label}
             as="radio"
@@ -189,14 +190,14 @@ export default function Discover() {
           items.length
             ? undefined
             : active
-              ? 'Nobody matches these filters right now.'
-              : 'Nobody new here right now. Come back later, or look at another city.'
+              ? s.discover.emptyFiltered
+              : s.discover.empty
         }
         // Telling somebody to widen their filters without handing them the filters is advice,
         // not a way out.
         emptyAction={
           <Button
-            title={active ? 'Change the filters' : 'Open the filters'}
+            title={active ? s.discover.changeFilters : s.discover.openFilters}
             variant="secondary"
             onPress={() => setFiltering(true)}
           />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useStrings } from '@/i18n';
 import { radius, space, useColors } from '@/theme';
 
 /// Blocks shaped like the content that is coming, instead of a spinner in the middle of an
@@ -49,10 +50,11 @@ function Block({ opacity, style }: { opacity: Animated.Value; style: StyleProp<V
 /// The discovery feed: the same card geometry, down to the 4:3 photo.
 export function FeedSkeleton() {
   const c = useColors();
+  const s = useStrings();
   const opacity = usePulse();
 
   return (
-    <View style={styles.feed} role="progressbar" aria-label="Loading profiles">
+    <View style={styles.feed} role="progressbar" aria-label={s.skeleton.profiles}>
       {[0, 1].map((card) => (
         <View key={card} style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
           <Block opacity={opacity} style={styles.photo} />
@@ -71,10 +73,11 @@ export function FeedSkeleton() {
 /// 48pt avatar and the 72pt height. A skeleton of a different shape is just a different jump.
 export function ChatListSkeleton() {
   const c = useColors();
+  const s = useStrings();
   const opacity = usePulse();
 
   return (
-    <View role="progressbar" aria-label="Loading conversations">
+    <View role="progressbar" aria-label={s.skeleton.conversations}>
       {[0, 1, 2, 3, 4].map((row) => (
         <View key={row} style={[styles.row, { borderBottomColor: c.border }]}>
           <Block opacity={opacity} style={styles.avatar} />

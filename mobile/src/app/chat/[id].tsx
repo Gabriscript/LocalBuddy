@@ -19,11 +19,13 @@ import { AuthedImage } from '@/components/AuthedImage';
 import { ReviewSheet } from '@/components/ReviewSheet';
 import { SafetySheet } from '@/components/SafetySheet';
 import { LoadingMore, Screen } from '@/components/Screen';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Chat() {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { items, isPending, error, refetch, loadMore, isFetchingNextPage } = useMessages(id);
   const send = useSendMessage(id);
@@ -53,7 +55,7 @@ export default function Chat() {
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Back to chats"
+          accessibilityLabel={s.chat.back}
           hitSlop={8}
           style={styles.iconButton}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
@@ -63,14 +65,14 @@ export default function Chat() {
           onPress={() => otherId && router.push({ pathname: '/user/[id]', params: { id: otherId } })}
           disabled={!otherId}
           accessibilityRole="button"
-          accessibilityLabel={other ? `${other.name}, open their profile` : 'Conversation'}
+          accessibilityLabel={other ? s.chat.openProfile(other.name!) : s.chat.conversation}
           style={styles.title}>
           <AuthedImage
             path={photo}
             style={[styles.titleAvatar, { backgroundColor: c.surfaceMuted }]}
           />
           <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
-            {other?.name ?? 'Conversation'}
+            {other?.name ?? s.chat.conversation}
           </Text>
         </Pressable>
 
@@ -78,7 +80,7 @@ export default function Chat() {
           onPress={() => setSheet('safety')}
           disabled={!other}
           accessibilityRole="button"
-          accessibilityLabel="Review, report or block"
+          accessibilityLabel={s.chat.moreActions}
           hitSlop={8}
           style={styles.iconButton}>
           <Ionicons name="ellipsis-horizontal" size={22} color={c.text} aria-hidden />
@@ -92,7 +94,7 @@ export default function Chat() {
           loading={isPending}
           error={error}
           onRetry={refetch}
-          empty={items.length ? undefined : 'No messages yet. Say hello.'}
+          empty={items.length ? undefined : s.chat.empty}
           emptyIcon="chatbubble-outline">
           <FlatList
             data={items}
@@ -112,7 +114,7 @@ export default function Chat() {
               return (
                 <View
                   accessible
-                  aria-label={`${mine ? 'You' : (other?.name ?? 'They')} said: ${item.content}`}
+                  aria-label={mine ? s.chat.youSaid(item.content) : s.chat.theySaid(other?.name, item.content)}
                   style={[
                     styles.bubble,
                     mine
@@ -136,9 +138,9 @@ export default function Chat() {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Message"
+            placeholder={s.chat.message}
             placeholderTextColor={c.textMuted}
-            accessibilityLabel="Message"
+            accessibilityLabel={s.chat.message}
             multiline
             style={[
               type.body,
@@ -150,7 +152,7 @@ export default function Chat() {
             onPress={submit}
             disabled={!canSend}
             accessibilityRole="button"
-            accessibilityLabel="Send message"
+            accessibilityLabel={s.chat.send}
             style={({ pressed }) => [
               styles.send,
               { backgroundColor: c.primary, opacity: !canSend ? 0.45 : pressed ? 0.75 : 1 },

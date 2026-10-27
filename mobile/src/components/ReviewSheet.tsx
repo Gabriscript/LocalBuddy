@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useCreateReview } from '@/api/hooks';
+import { useStrings } from '@/i18n';
 import { space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
 import { Field } from './Field';
+import { errorMessage } from './Screen';
 import { Sheet } from './Sheet';
 
 /// A review needs both sides to have written, and only one per person is allowed. The server
@@ -19,6 +21,7 @@ export function ReviewSheet({
   onClose: () => void;
 }) {
   const c = useColors();
+  const s = useStrings();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const create = useCreateReview(user.id);
@@ -26,16 +29,15 @@ export function ReviewSheet({
   if (create.isSuccess) {
     return (
       <Sheet
-        title="Review sent"
+        title={s.review.sent}
         onClose={onClose}
         footer={
           <View style={styles.grow}>
-            <Button title="Close" onPress={onClose} />
+            <Button title={s.common.close} onPress={onClose} />
           </View>
         }>
         <Text style={[type.body, { color: c.text }]}>
-          Thank you. It is on their profile now, and it counts towards what other people see
-          before they get in touch.
+          {s.review.sentBody}
         </Text>
       </Sheet>
     );
@@ -43,12 +45,12 @@ export function ReviewSheet({
 
   return (
     <Sheet
-      title={`Review ${user.name}`}
+      title={s.review.title(user.name)}
       onClose={onClose}
       footer={
         <View style={styles.grow}>
           <Button
-            title="Send review"
+            title={s.review.send}
             loading={create.isPending}
             disabled={!rating}
             onPress={() => create.mutate({ rating, comment: comment.trim() })}
@@ -56,15 +58,15 @@ export function ReviewSheet({
         </View>
       }>
       <View style={styles.group}>
-        <Text style={[type.label, { color: c.text }]}>How was it?</Text>
-        <View style={styles.stars} role="radiogroup" aria-label="Rating">
+        <Text style={[type.label, { color: c.text }]}>{s.review.howWasIt}</Text>
+        <View style={styles.stars} role="radiogroup" aria-label={s.review.rating}>
           {[1, 2, 3, 4, 5].map((star) => (
             <Pressable
               key={star}
               onPress={() => setRating(star)}
               role="radio"
               aria-checked={rating === star}
-              aria-label={star === 1 ? '1 star' : `${star} stars`}
+              aria-label={s.review.stars(star)}
               style={styles.star}>
               <Ionicons
                 name={star <= rating ? 'star' : 'star-outline'}
@@ -78,8 +80,8 @@ export function ReviewSheet({
       </View>
 
       <Field
-        label="Anything to add?"
-        hint="Optional. It stays on their profile, so write what the next person would want to know."
+        label={s.review.comment}
+        hint={s.review.commentHint}
         value={comment}
         onChangeText={setComment}
         multiline
@@ -89,7 +91,7 @@ export function ReviewSheet({
 
       {create.error ? (
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-          {create.error.message}
+          {errorMessage(create.error, s)}
         </Text>
       ) : null}
     </Sheet>

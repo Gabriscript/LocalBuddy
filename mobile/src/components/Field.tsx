@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 /// Label above, error below, both always visible. A placeholder is not a label: it vanishes
@@ -14,6 +15,7 @@ export function Field({
   ...rest
 }: TextInputProps & { label: string; error?: string; hint?: string }) {
   const c = useColors();
+  const s = useStrings();
   // A password field with no way to check what was typed is how people get locked out.
   const [revealed, setRevealed] = useState(false);
 
@@ -40,7 +42,7 @@ export function Field({
           <Pressable
             onPress={() => setRevealed((r) => !r)}
             accessibilityRole="button"
-            accessibilityLabel={revealed ? 'Hide password' : 'Show password'}
+            accessibilityLabel={revealed ? s.field.hidePassword : s.field.showPassword}
             hitSlop={12}
             style={styles.action}>
             <Ionicons name={revealed ? 'eye-off-outline' : 'eye-outline'} size={20} color={c.textMuted} />
