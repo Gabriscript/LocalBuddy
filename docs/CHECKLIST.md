@@ -43,7 +43,7 @@ Milestones:
 | | Item | Milestone | Check |
 |---|---|---|---|
 | [x] | 1:1 chat after a match or a paid unlock, paged history | Demo | chat screen |
-| [ ] | New-message refresh without reopening (polling or SignalR) | Demo | two devices |
+| [x] | New-message refresh without reopening (polling every 4 s in a chat, 15 s inbox; SignalR later) | Demo | tried with two accounts on the web preview; not on two devices |
 | [ ] | Icebreakers drawn from the other person's prompts (Hinge Convo Starters) | Beta | — |
 | [ ] | Photos in chat, with nudity blurred (Bumble Private Detector) | Later | — |
 | [ ] | Read receipts: decide, Bumble deliberately has none | Beta | decision in an ADR |
@@ -101,7 +101,7 @@ Milestones:
 | [x] | Screen-reader labels and roles on the web build | Demo | audit of 2026-09-22 |
 | [ ] | Same audit on Android TalkBack and iOS VoiceOver | Beta | a device |
 | [ ] | Run on a real phone: keyboard, safe areas, back gesture, photo picker | Demo | Gabriele's phone |
-| [ ] | Photo sizes for mobile: thumbnails instead of 2048 px originals (~2.5 MB) | Demo | network panel |
+| [x] | Photo sizes for mobile: `?size=thumb` (256 px) and `medium` (1080 px) instead of 2048 px originals (2.26 MB to 598 KB and 50 KB on a demo photo) | Demo | `PhotoUploadTests`; resized per request, no cache yet |
 | [ ] | Crash and error reporting (Sentry or similar) | Beta | — |
 | [ ] | End-to-end tests of the main flows (Maestro or Detox) | Beta | CI |
 

@@ -30,8 +30,11 @@ export function Button({
     secondary: c.surfaceMuted,
     quiet: 'transparent',
   };
-  const background = fills[variant];
-  const foreground = variant === 'primary' || variant === 'danger' ? c.onPrimary : c.text;
+  // A solid button that is switched off goes flat and neutral. Fading it instead left the lifted
+  // coral as a muddy burgundy with dark text on it in the dark theme.
+  const flat = !!disabled && (variant === 'primary' || variant === 'danger');
+  const background = flat ? c.surfaceMuted : fills[variant];
+  const foreground = flat ? c.textMuted : variant === 'primary' || variant === 'danger' ? c.onPrimary : c.text;
 
   return (
     <Pressable
@@ -48,7 +51,7 @@ export function Button({
           backgroundColor: background,
           borderColor: variant === 'quiet' ? 'transparent' : c.border,
           // Opacity, not scale: the bounds stay put, so nothing around the button jumps.
-          opacity: off ? 0.45 : pressed ? 0.75 : 1,
+          opacity: flat ? 1 : off ? 0.45 : pressed ? 0.75 : 1,
         },
       ]}>
       <View style={styles.content}>

@@ -34,8 +34,10 @@
   --text: #1c1a19;
   --text-muted: #6b6560;
   --hairline: #e6e1dc;
-  --ink: #1e3a5c;
-  --on-ink: #ffffff;
+  --ink: #032b43;
+  --on-ink: #f7f4f1;
+  --action: #c8324e;
+  --on-action: #ffffff;
 
   --step-sm: 8px;
   --step-md: 16px;
@@ -52,14 +54,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #141212;
-    --card: #1e1b1b;
-    --paper-sunk: #262222;
-    --text: #f5f2f0;
-    --text-muted: #a9a19b;
-    --hairline: #332e2e;
-    --ink: #a8c4ea;
-    --on-ink: #14243a;
+    --paper: #021c2c;
+    --card: #06283d;
+    --paper-sunk: #0b3248;
+    --text: #f2f6f8;
+    --text-muted: #9fb3c0;
+    --hairline: #16405a;
+    --ink: #174763;
+    --on-ink: #f7f4f1;
+    --action: #f45d73;
+    --on-action: #032b43;
   }
 }
 
@@ -139,8 +143,8 @@ a {
   z-index: 2;
   padding: 12px 16px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--action);
+  color: var(--on-action);
   text-decoration: none;
 }
 
@@ -208,8 +212,8 @@ section + section {
   display: inline-block;
   padding: 15px 28px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--action);
+  color: var(--on-action);
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
@@ -259,7 +263,7 @@ section + section {
   display: block;
   position: relative;
   height: 1.05em;
-  color: var(--ink);
+  color: var(--action);
 }
 
 .greeting-cycle > span {
@@ -354,7 +358,7 @@ section + section {
   gap: var(--step-sm);
   align-content: start;
   padding-top: var(--step-lg);
-  border-top: 2px solid var(--ink);
+  border-top: 2px solid var(--action);
 }
 
 .aside {
