@@ -1,27 +1,22 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
 import type { TimeOfDay } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { FilterSheet } from '@/components/FilterSheet';
+import { IconButton } from '@/components/IconButton';
 import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
+import { useTabBarClearance } from '@/components/TabBar';
+import { TabHeader } from '@/components/TabHeader';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
-
-const ROLES = [
-  { value: undefined, label: 'Everyone' },
-  { value: 'host', label: 'Hosts' },
-  { value: 'guest', label: 'Guests' },
-];
 
 /// Route params are strings; the query takes booleans and a list of times of day.
 type Params = {
@@ -42,7 +37,14 @@ const asParam = (value?: boolean) => (value === undefined ? undefined : String(v
 
 export default function Discover() {
   const c = useColors();
+  const clearance = useTabBarClearance();
   const router = useRouter();
+  const s = useStrings();
+  const roles = [
+    { value: undefined, label: s.discover.everyone },
+    { value: 'host', label: s.discover.hosts },
+    { value: 'guest', label: s.discover.guests },
+  ];
 
   // Filters live in the route, not in a store: they are already persisted, already shareable
   // as a deep link, and cost nothing to keep in sync (ADR-0009).
@@ -135,42 +137,52 @@ export default function Discover() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.page, { backgroundColor: c.background }]}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text role="heading" style={[type.display, { color: c.text }]}>
-            Discover
-          </Text>
-          <Text style={[type.body, { color: c.textMuted }]}>
-            People near you who want to show you their city.
-          </Text>
-        </View>
-
-        <Pressable
-          onPress={() => setFiltering(true)}
-          accessibilityRole="button"
-          // The count is in the label too: "Filters (2)" read as "Filters" would hide that
-          // the feed is already narrowed.
-          accessibilityLabel={active ? `Filters, ${active} active` : 'Filters'}
-          style={({ pressed }) => [
-            styles.filterButton,
-            { borderColor: c.border, backgroundColor: c.surfaceMuted, opacity: pressed ? 0.7 : 1 },
-          ]}>
-          <Ionicons name="options-outline" size={18} color={c.text} aria-hidden />
-          <Text style={[type.label, { color: c.text }]}>{active ? `Filters (${active})` : 'Filters'}</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.filters} role="radiogroup" aria-label="Who to show">
-        {ROLES.map((role) => (
-          <Chip
-            key={role.label}
-            as="radio"
-            label={role.label}
-            selected={params.role === role.value}
-            onPress={() => router.setParams({ role: role.value })}
+    <View style={[styles.page, { backgroundColor: c.background }]}>
+      <TabHeader
+        title={s.discover.title}
+        subtitle={s.discover.subtitle}
+        action={
+          <IconButton
+            name="options-outline"
+            // The count is in the label too: a badge read as "Filters" would hide that the feed
+            // is already narrowed.
+            label={active ? s.discover.filtersLabel(active) : s.discover.filters}
+            onPress={() => setFiltering(true)}
+            tint={c.onNight}
+            band
+            badge={active}
           />
-        ))}
+        }
+      />
+
+      {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
+          never the accent. */}
+      <View
+        style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
+        role="radiogroup"
+        aria-label={s.discover.whoToShow}>
+        {roles.map((role) => {
+          const selected = params.role === role.value;
+          return (
+            <Pressable
+              key={role.label}
+              role="radio"
+              aria-checked={selected}
+              onPress={() => router.setParams({ role: role.value })}
+              style={({ pressed }) => [
+                styles.segment,
+                {
+                  backgroundColor: selected ? c.surface : 'transparent',
+                  borderColor: selected ? c.border : 'transparent',
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}>
+              <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
+                {role.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
@@ -187,14 +199,14 @@ export default function Discover() {
           items.length
             ? undefined
             : active
-              ? 'Nobody matches these filters right now.'
-              : 'Nobody new here right now. Come back later, or look at another city.'
+              ? s.discover.emptyFiltered
+              : s.discover.empty
         }
         // Telling somebody to widen their filters without handing them the filters is advice,
         // not a way out.
         emptyAction={
           <Button
-            title={active ? 'Change the filters' : 'Open the filters'}
+            title={active ? s.discover.changeFilters : s.discover.openFilters}
             variant="secondary"
             onPress={() => setFiltering(true)}
           />
@@ -202,7 +214,8 @@ export default function Discover() {
         <FlatList
           data={items}
           keyExtractor={(card) => card.id!}
-          contentContainerStyle={styles.list}
+          // The last card clears the floating tab bar instead of hiding behind it.
+          contentContainerStyle={[styles.list, { paddingBottom: clearance }]}
           showsVerticalScrollIndicator={false}
           onRefresh={refetch}
           refreshing={isRefetching}
@@ -233,33 +246,28 @@ export default function Discover() {
           onClose={() => setMatch(null)}
         />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   page: { flex: 1 },
-  header: {
+  segments: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space.sm,
-    paddingHorizontal: space.md,
-    paddingTop: space.sm,
-  },
-  headerText: { flex: 1, gap: space.xs },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.xs,
-    minHeight: 44,
-    paddingHorizontal: space.md,
+    margin: space.md,
+    padding: space.xs,
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  // Wraps, because at the largest text size three chips no longer fit across a phone and a
-  // row that does not wrap simply runs off the side of the screen.
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, padding: space.md },
+  segment: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: space.sm,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   note: { marginHorizontal: space.md, marginBottom: space.md },
-  // The last card clears the tab bar instead of hiding behind it.
-  list: { paddingHorizontal: space.md, paddingBottom: space.xxl * 2, gap: space.lg },
+  list: { paddingHorizontal: space.md, gap: space.lg },
 });

@@ -9,8 +9,9 @@ import { useDeletePhoto, useMe, useSetAvailability, useUploadPhoto } from '@/api
 import { TIMES_OF_DAY, type TimeOfDay } from '@/api/labels';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
+import { errorMessage, Screen } from '@/components/Screen';
 import { StepPage } from '@/components/StepPage';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 type Me = components['schemas']['MyProfile'];
@@ -30,6 +31,7 @@ export default function ProfileSetup() {
 function PhotoAndTimes({ me }: { me: Me }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const upload = useUploadPhoto();
   const remove = useDeletePhoto();
   const saveTimes = useSetAvailability();
@@ -71,44 +73,45 @@ function PhotoAndTimes({ me }: { me: Me }) {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s04-the-message.jpg')}
       step={4}
       total={hosts ? 5 : 4}
-      title="Your photo and your time"
-      subtitle="A clear photo of your face, and when you are usually free."
-      cta={hosts ? 'Continue' : 'Finish'}
+      title={s.onboarding.photoTitle}
+      subtitle={s.onboarding.photoSubtitle}
+      cta={hosts ? s.common.continue : s.common.finish}
       loading={saveTimes.isPending}
       disabled={upload.isPending}
       onNext={submit}>
       <View style={styles.photoRow}>
         <View style={[styles.photo, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}>
           {photo ? (
-            <AuthedImage path={photo.url} style={StyleSheet.absoluteFill} accessibilityLabel="Your profile photo" />
+            <AuthedImage path={photo.url} size="medium" style={StyleSheet.absoluteFill} accessibilityLabel={s.common.yourPhoto} />
           ) : (
             <Ionicons name="person-outline" size={40} color={c.textMuted} aria-hidden />
           )}
         </View>
         <View style={styles.photoAction}>
           <Button
-            title={photo ? 'Change photo' : 'Add a photo'}
+            title={photo ? s.onboarding.changePhoto : s.onboarding.addPhoto}
             variant="secondary"
             loading={upload.isPending || remove.isPending}
             onPress={pickPhoto}
           />
           <Text style={[type.caption, { color: c.textMuted }]}>
-            Your photo is stripped of location data before anyone sees it.
+            {s.onboarding.photoPrivacy}
           </Text>
         </View>
       </View>
 
       <View style={styles.group}>
-        <Text style={[type.label, { color: c.text }]}>When are you usually free?</Text>
+        <Text style={[type.label, { color: c.text }]}>{s.onboarding.whenFree}</Text>
         <View style={styles.chips}>
           {TIMES_OF_DAY.map((time) => {
-            const on = times.includes(time.value);
+            const on = times.includes(time);
             return (
               <Pressable
-                key={time.value}
-                onPress={() => toggleTime(time.value)}
+                key={time}
+                onPress={() => toggleTime(time)}
                 role="checkbox"
                 aria-checked={on}
                 style={({ pressed }) => [
@@ -119,17 +122,17 @@ function PhotoAndTimes({ me }: { me: Me }) {
                     opacity: pressed ? 0.7 : 1,
                   },
                 ]}>
-                <Text style={[type.label, { color: on ? c.background : c.text }]}>{time.label}</Text>
+                <Text style={[type.label, { color: on ? c.background : c.text }]}>{s.timeOfDay[time]}</Text>
               </Pressable>
             );
           })}
         </View>
-        <Text style={[type.caption, { color: c.textMuted }]}>Pick as many as fit. You can change them later.</Text>
+        <Text style={[type.caption, { color: c.textMuted }]}>{s.onboarding.pickTimes}</Text>
       </View>
 
       {error ? (
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-          {error.message}
+          {errorMessage(error, s)}
         </Text>
       ) : null}
     </StepPage>

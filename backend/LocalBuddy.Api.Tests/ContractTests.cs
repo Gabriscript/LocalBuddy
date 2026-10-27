@@ -49,7 +49,7 @@ public class OpenApiDocumentTests(WebApplicationFactory<Program> app) : IClassFi
         Assert.Contains("\"timeOfDay\":\"evening\"", JsonSerializer.Serialize(slot, responses));
     }
 
-    static string BackendDirectory()
+    internal static string BackendDirectory()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "LocalBuddy.slnx"))) dir = dir.Parent;
@@ -67,13 +67,31 @@ public class JwtOptionsTests
     [InlineData("localbuddy", "too-short")] // key below the HMAC minimum
     public void Refuses_an_incomplete_configuration(string issuer, string key)
         => Assert.Throws<InvalidOperationException>(
-            () => new JwtOptions { Issuer = issuer, Key = key }.Validated());
+            () => new JwtOptions { Issuer = issuer, Key = key }.Validated(developmentKeyAllowed: true));
 
     [Fact]
     public void Accepts_a_complete_configuration()
     {
         var options = new JwtOptions { Issuer = "localbuddy", Key = LongEnoughKey };
-        Assert.Same(options, options.Validated());
+        Assert.Same(options, options.Validated(developmentKeyAllowed: false));
+    }
+
+    /// Demo runs on a public host: the key everyone can read in the repository must stop it at boot.
+    [Fact]
+    public void Refuses_the_committed_development_key_outside_Development()
+    {
+        var options = new JwtOptions { Issuer = "localbuddy-demo", Key = JwtOptions.DevelopmentKey };
+        Assert.Same(options, options.Validated(developmentKeyAllowed: true));
+        Assert.Throws<InvalidOperationException>(() => options.Validated(developmentKeyAllowed: false));
+    }
+
+    /// The constant is only a guard while it matches the key actually committed.
+    [Fact]
+    public void The_guarded_key_is_the_committed_one()
+    {
+        var path = Path.Combine(OpenApiDocumentTests.BackendDirectory(), "LocalBuddy.Api", "appsettings.Development.json");
+        var key = JsonDocument.Parse(File.ReadAllText(path)).RootElement.GetProperty("Jwt").GetProperty("Key").GetString();
+        Assert.Equal(JwtOptions.DevelopmentKey, key);
     }
 }
 

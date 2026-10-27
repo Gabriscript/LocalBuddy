@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { radius, space, type, useColors } from '@/theme';
 
 /// A choice you can see all of at once. Selection is a tonal inversion, never the accent:
-/// ink stays with the primary action of the screen (DESIGN.md).
+/// coral stays with the primary action of the screen (DESIGN.md).
 export function Chip({
   label,
   selected,

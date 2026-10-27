@@ -1,0 +1,2 @@
+# The real secrets file. Never commit it.
+.env

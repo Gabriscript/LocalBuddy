@@ -7,6 +7,7 @@ import { useBlock, useBlocks } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
 import { LoadingMore, Screen } from '@/components/Screen';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 /// The only screen a blocked member still appears on. Everywhere else they are gone, which is
@@ -14,6 +15,7 @@ import { radius, space, type, useColors } from '@/theme';
 export default function Blocked() {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const { items, isPending, error, refetch, loadMore, isFetchingNextPage } = useBlocks();
   const { unblock } = useBlock();
 
@@ -23,13 +25,13 @@ export default function Blocked() {
         <Pressable
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/me'))}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={s.common.goBack}
           hitSlop={8}
           style={styles.iconButton}>
           <Ionicons name="chevron-back" size={24} color={c.text} />
         </Pressable>
         <Text role="heading" style={[type.title, { color: c.text }]}>
-          Blocked members
+          {s.blocked.title}
         </Text>
       </View>
 
@@ -37,11 +39,7 @@ export default function Blocked() {
         loading={isPending}
         error={error}
         onRetry={refetch}
-        empty={
-          items.length
-            ? undefined
-            : 'Nobody is blocked. Blocking hides two people from each other, and this is where it can be undone.'
-        }
+        empty={items.length ? undefined : s.blocked.empty}
         emptyIcon="shield-outline">
         <FlatList
           data={items}
@@ -54,6 +52,7 @@ export default function Blocked() {
               {/* Decorative: the name is read out right after it. */}
               <AuthedImage
                 path={item.photoUrl}
+                size="thumb"
                 aria-hidden
                 style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
               />
@@ -66,7 +65,7 @@ export default function Blocked() {
                 </Text>
               </View>
               <Button
-                title="Unblock"
+                title={s.blocked.unblock}
                 variant="secondary"
                 loading={unblock.isPending && unblock.variables === item.id}
                 onPress={() => unblock.mutate(item.id!)}

@@ -1,0 +1,9 @@
+# Snippet for the server's existing Caddyfile. demo-api.EXAMPLE.TLD is a PLACEHOLDER: replace it
+# with the real hostname, whose DNS A/AAAA record must point at the server before the reload
+# (Caddy fetches the certificate on first use).
+#
+# 8080 is API_PORT from .env. Caddy sends X-Forwarded-For and X-Forwarded-Proto on its own.
+
+demo-api.EXAMPLE.TLD {
+	reverse_proxy 127.0.0.1:8080
+}

@@ -30,6 +30,10 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
     /// Longest side of what is stored. Plenty for a phone screen, a fraction of the disk and data.
     const int MaxSide = 2048;
 
+    /// Longest side of the copies Content can serve instead of the original.
+    const int MediumSide = 1080;
+    const int ThumbSide = 256;
+
     /// Only what a phone or a browser hands over. Every other decoder ImageSharp ships is attack
     /// surface this endpoint has no use for, and the TIFF one has a known denial of service.
     static readonly Configuration Formats =
@@ -41,7 +45,7 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AllowAnonymous]
-    public async Task<IActionResult> Content(Guid id)
+    public async Task<IActionResult> Content(Guid id, PhotoSize size = PhotoSize.Full)
     {
         var photo = await db.Photos.FindAsync(id);
         if (photo is null) return NotFound();
@@ -61,8 +65,24 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
 
         var content = await storage.OpenReadAsync(photo.Url, HttpContext.RequestAborted);
         if (content is null) return NotFound();
+        if (size == PhotoSize.Full) return File(content, "image/jpeg");
 
-        return File(content, "image/jpeg");
+        // A feed of 2048 px originals is ~2.5 MB a card; a card needs a phone's width, an avatar a
+        // fraction of it. shortcut: resized on every request, no cache; keep the result next to the
+        // original when Discover gets real traffic.
+        await using (content)
+        {
+            using var image = await Image.LoadAsync(Formats, content, HttpContext.RequestAborted);
+            var side = size == PhotoSize.Thumb ? ThumbSide : MediumSide;
+            // Never enlarged: Max would stretch a small photo up to the box.
+            if (Math.Max(image.Width, image.Height) > side)
+                image.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(side, side), Mode = ResizeMode.Max }));
+
+            var jpeg = new MemoryStream();
+            await image.SaveAsync(jpeg, new JpegEncoder(), HttpContext.RequestAborted);
+            jpeg.Position = 0;
+            return File(jpeg, "image/jpeg");
+        }
     }
 
     [HttpPost]
@@ -164,3 +184,6 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
 
     ObjectResult NotAnImage() => this.Invalid("not_an_image", "That file is not a readable image.");
 }
+
+/// Which copy of a photo `GET content` serves. Sent by name, like every enum on the wire.
+public enum PhotoSize { Full, Medium, Thumb }

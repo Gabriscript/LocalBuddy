@@ -34,8 +34,11 @@
   --text: #1c1a19;
   --text-muted: #6b6560;
   --hairline: #e6e1dc;
-  --ink: #1e3a5c;
-  --on-ink: #ffffff;
+  --ink: #032b43;
+  --on-ink: #f7f4f1;
+  --action: #c8324e;
+  --on-action: #ffffff;
+  --wordmark-local: #032b43;
 
   --step-sm: 8px;
   --step-md: 16px;
@@ -52,14 +55,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #141212;
-    --card: #1e1b1b;
-    --paper-sunk: #262222;
-    --text: #f5f2f0;
-    --text-muted: #a9a19b;
-    --hairline: #332e2e;
-    --ink: #a8c4ea;
-    --on-ink: #14243a;
+    --paper: #021c2c;
+    --card: #06283d;
+    --paper-sunk: #0b3248;
+    --text: #f2f6f8;
+    --text-muted: #9fb3c0;
+    --hairline: #16405a;
+    --ink: #174763;
+    --on-ink: #f7f4f1;
+    --action: #f45d73;
+    --on-action: #032b43;
+    --wordmark-local: #f7f4f1;
   }
 }
 
@@ -139,8 +145,8 @@ a {
   z-index: 2;
   padding: 12px 16px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--action);
+  color: var(--on-action);
   text-decoration: none;
 }
 
@@ -156,9 +162,37 @@ a {
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--display);
   font-size: 1.35rem;
   text-decoration: none;
+}
+
+.wordmark .mark {
+  width: 28px;
+  height: auto;
+  margin-right: 8px;
+}
+
+/* The brand's two halves: Local in night, Buddy in coral; on the dark scheme night is the page, so
+   Local turns to paper. */
+@media (prefers-color-scheme: dark) {
+  /* The mark's right-hand figure is night: on a night page it needs a paper tile behind it. */
+  .wordmark .mark {
+    box-sizing: content-box;
+    padding: 4px 5px;
+    border-radius: 9px;
+    background: #f7f4f1;
+  }
+}
+
+.w-local {
+  color: var(--wordmark-local);
+}
+
+.w-buddy {
+  color: var(--action);
 }
 
 .site nav {
@@ -208,8 +242,8 @@ section + section {
   display: inline-block;
   padding: 15px 28px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--action);
+  color: var(--on-action);
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
@@ -259,7 +293,7 @@ section + section {
   display: block;
   position: relative;
   height: 1.05em;
-  color: var(--ink);
+  color: var(--action);
 }
 
 .greeting-cycle > span {
@@ -334,6 +368,7 @@ section + section {
   border-radius: 20px;
   aspect-ratio: 4 / 5;
   object-fit: cover;
+  object-position: 50% 62%; /* the three people sit low in the photo; the barman behind them does not */
 }
 
 /* Two routes, two columns. No cards: a rule above each one does the same work with less
@@ -354,7 +389,7 @@ section + section {
   gap: var(--step-sm);
   align-content: start;
   padding-top: var(--step-lg);
-  border-top: 2px solid var(--ink);
+  border-top: 2px solid var(--action);
 }
 
 .aside {

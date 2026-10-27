@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 import { AuthedImage } from './AuthedImage';
@@ -50,6 +51,7 @@ export function MatchBurst({
   onClose: () => void;
 }) {
   const c = useColors();
+  const s = useStrings();
   const [progress] = useState(() => new Animated.Value(0));
   const [still, setStill] = useState(false);
 
@@ -90,11 +92,11 @@ export function MatchBurst({
   };
 
   const actions = [
-    { icon: 'chatbubble-outline' as const, label: 'Say hello', onPress: onSayHello },
+    { icon: 'chatbubble-outline' as const, label: s.match.sayHello, onPress: onSayHello },
     ...(onSeeProfile
-      ? [{ icon: 'person-outline' as const, label: 'Their profile', onPress: onSeeProfile }]
+      ? [{ icon: 'person-outline' as const, label: s.match.theirProfile, onPress: onSeeProfile }]
       : []),
-    { icon: 'time-outline' as const, label: 'Later', onPress: onClose },
+    { icon: 'time-outline' as const, label: s.match.later, onPress: onClose },
   ];
 
   // The ring turns as it opens and unwinds as it closes; each satellite turns the other way, so
@@ -107,7 +109,7 @@ export function MatchBurst({
       <View
         role="dialog"
         aria-modal
-        aria-label={`You and ${name} both said yes`}
+        aria-label={s.match.dialog(name)}
         style={[styles.backdrop, { backgroundColor: c.scrimStrong }]}>
         {/* The stage is a fixed 320pt: turn a phone on its side, or raise the text size, and
             without somewhere to scroll the actions fall off the bottom of the screen. */}
@@ -116,10 +118,10 @@ export function MatchBurst({
           showsVerticalScrollIndicator={false}>
           <View style={styles.headline}>
             <Text role="heading" style={[type.display, styles.centred, { color: c.onOverlay }]}>
-              You both said yes
+              {s.match.headline}
             </Text>
             <Text style={[type.body, styles.centred, { color: c.onOverlay }]}>
-              The chat with {name} is open, and nobody paid for it.
+              {s.match.body(name)}
             </Text>
           </View>
 
@@ -172,8 +174,9 @@ export function MatchBurst({
 
             <AuthedImage
               path={photoPath}
+              size="medium"
               style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
-              accessibilityLabel={`Photo of ${name}`}
+              accessibilityLabel={s.common.photoOf(name)}
             />
           </View>
         </ScrollView>

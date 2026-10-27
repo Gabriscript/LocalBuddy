@@ -5,8 +5,9 @@ import { Text } from 'react-native';
 import type { components } from '@/api/generated';
 import { useMe, useUpdateProfile } from '@/api/hooks';
 import { draftFrom, ProfileFields } from '@/components/ProfileFields';
-import { Screen } from '@/components/Screen';
+import { errorMessage, Screen } from '@/components/Screen';
 import { StepPage } from '@/components/StepPage';
+import { useStrings } from '@/i18n';
 import { type, useColors } from '@/theme';
 
 type Me = components['schemas']['MyProfile'];
@@ -27,6 +28,7 @@ export default function About() {
 function AboutForm({ me }: { me: Me }) {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const save = useUpdateProfile();
   const hosts = me.role !== 'guest';
 
@@ -42,11 +44,12 @@ function AboutForm({ me }: { me: Me }) {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s02-local-shows.jpg')}
       step={3}
       total={hosts ? 5 : 4}
-      title="About you"
-      subtitle="A few short answers do more than a long bio: they tell a stranger what a day with you looks like."
-      cta="Continue"
+      title={s.onboarding.aboutTitle}
+      subtitle={s.onboarding.aboutSubtitle}
+      cta={s.common.continue}
       loading={save.isPending}
       disabled={!draft.whatWeWillDo.trim()}
       onNext={submit}>
@@ -54,7 +57,7 @@ function AboutForm({ me }: { me: Me }) {
 
       {save.error ? (
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-          {save.error.message}
+          {errorMessage(save.error, s)}
         </Text>
       ) : null}
     </StepPage>

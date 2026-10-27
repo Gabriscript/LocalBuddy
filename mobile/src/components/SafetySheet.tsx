@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useBlock, useReport } from '@/api/hooks';
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
 import { Field } from './Field';
+import { errorMessage } from './Screen';
 import { Sheet } from './Sheet';
 
 type Step = 'menu' | 'report' | 'sent' | 'block';
@@ -28,6 +30,7 @@ export function SafetySheet({
   onReview?: () => void;
 }) {
   const c = useColors();
+  const s = useStrings();
   const [step, setStep] = useState<Step>('menu');
   const [reason, setReason] = useState('');
   const report = useReport();
@@ -35,9 +38,9 @@ export function SafetySheet({
 
   const titles: Record<Step, string> = {
     menu: user.name,
-    report: `Report ${user.name}`,
-    sent: 'Report sent',
-    block: `Block ${user.name}`,
+    report: s.safety.report(user.name),
+    sent: s.safety.sent,
+    block: s.safety.block(user.name),
   };
 
   const error = report.error ?? block.error;
@@ -51,10 +54,10 @@ export function SafetySheet({
         footer={
           <View style={styles.grow}>
             {sent ? (
-              <Button title="Close" onPress={onClose} />
+              <Button title={s.common.close} onPress={onClose} />
             ) : (
               <Button
-                title="Send report"
+                title={s.safety.sendReport}
                 loading={report.isPending}
                 disabled={!reason.trim()}
                 onPress={() =>
@@ -69,14 +72,13 @@ export function SafetySheet({
         }>
         {sent ? (
           <Text style={[type.body, { color: c.text }]}>
-            Thank you. A moderator reads every report. You will not hear back about this one, and
-            nobody is told who sent it.
+            {s.safety.sentBody}
           </Text>
         ) : (
           <>
             <Field
-              label="What happened?"
-              hint="Write it as you would tell a person. A moderator reads this, not a machine."
+              label={s.safety.whatHappened}
+              hint={s.safety.whatHappenedHint}
               value={reason}
               onChangeText={setReason}
               multiline
@@ -84,12 +86,11 @@ export function SafetySheet({
               autoCapitalize="sentences"
             />
             <Text style={[type.caption, { color: c.textMuted }]}>
-              Reporting does not block anyone. If you also want them gone from your feed and your
-              inbox, block them.
+              {s.safety.reportNotBlock}
             </Text>
           </>
         )}
-        {error ? <Problem message={error.message} /> : null}
+        {error ? <Problem message={errorMessage(error, s)} /> : null}
       </Sheet>
     );
   }
@@ -102,11 +103,11 @@ export function SafetySheet({
         footer={
           <>
             <View style={styles.grow}>
-              <Button title="Cancel" variant="quiet" onPress={() => setStep('menu')} />
+              <Button title={s.safety.cancel} variant="quiet" onPress={() => setStep('menu')} />
             </View>
             <View style={styles.grow}>
               <Button
-                title="Block"
+                title={s.safety.blockAction}
                 variant="danger"
                 loading={block.isPending}
                 onPress={() => block.mutate(user.id, { onSuccess: onBlocked })}
@@ -115,24 +116,23 @@ export function SafetySheet({
           </>
         }>
         <Text style={[type.body, { color: c.text }]}>
-          {user.name} will not see your profile and you will not see theirs. Any conversation
-          between you closes in both directions.
+          {s.safety.blockBody(user.name)}
         </Text>
         <Text style={[type.caption, { color: c.textMuted }]}>
-          You can undo this later from Blocked members, in your own profile.
+          {s.safety.undoLater}
         </Text>
-        {error ? <Problem message={error.message} /> : null}
+        {error ? <Problem message={errorMessage(error, s)} /> : null}
       </Sheet>
     );
   }
 
   return (
     <Sheet title={titles.menu} onClose={onClose}>
-      {onReview ? <Action icon="star-outline" label="Leave a review" onPress={onReview} /> : null}
-      <Action icon="flag-outline" label={`Report ${user.name}`} onPress={() => setStep('report')} />
+      {onReview ? <Action icon="star-outline" label={s.safety.leaveReview} onPress={onReview} /> : null}
+      <Action icon="flag-outline" label={titles.report} onPress={() => setStep('report')} />
       <Action
         icon="remove-circle-outline"
-        label={`Block ${user.name}`}
+        label={titles.block}
         tone="danger"
         onPress={() => setStep('block')}
       />

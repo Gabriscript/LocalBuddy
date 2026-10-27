@@ -1,21 +1,24 @@
 import { Geist_400Regular } from '@expo-google-fonts/geist/400Regular';
 import { Geist_600SemiBold } from '@expo-google-fonts/geist/600SemiBold';
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display/600SemiBold';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { ApiError } from '@/api/client';
+import { LanguageProvider } from '@/i18n';
 import { AuthProvider } from '@/lib/auth';
 import { useColors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-/// The two providers the whole app needs, and nothing else. Server data lives in Query,
-/// the session lives in AuthProvider, and there is no third global store (ADR-0009).
+/// The providers the whole app needs, and nothing else. Server data lives in Query, the
+/// session lives in AuthProvider, and the language in LanguageProvider: the one setting that is
+/// not a copy of a server row (ADR-0009).
 export default function RootLayout() {
   const c = useColors();
   // Three faces, imported one weight at a time so the bundle carries three files rather
@@ -41,15 +44,24 @@ export default function RootLayout() {
     if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded]);
 
+  // Query has no idea what a phone's background is: without this its polling keeps running
+  // there, and coming back to the app would not refresh anything.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => focusManager.setFocused(state === 'active'));
+    return () => sub.remove();
+  }, []);
+
   // Held on the splash rather than rendering a frame in a fallback face and reflowing.
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={client}>
-      <AuthProvider>
-        <StatusBar style="auto" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
-      </AuthProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={client}>
+        <AuthProvider>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
+        </AuthProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }

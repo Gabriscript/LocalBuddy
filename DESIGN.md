@@ -2,22 +2,27 @@
 name: LocalBuddy
 description: A cultural exchange between travellers and locals, never a paid guide service.
 colors:
-  ink: "#1E3A5C"
-  ink-lifted: "#A8C4EA"
+  coral: "#C8324E"
+  coral-lifted: "#F45D73"
+  night: "#032B43"
+  night-raised: "#174763"
+  sky: "#CFE6EF"
   paper: "#F7F4F1"
   card: "#FEFDFC"
   paper-sunk: "#EFEAE5"
   text: "#1C1A19"
   text-muted: "#6B6560"
   hairline: "#E6E1DC"
-  night: "#141212"
-  night-card: "#1E1B1B"
-  night-sunk: "#262222"
-  night-text: "#F5F2F0"
-  night-text-muted: "#A9A19B"
-  night-hairline: "#332E2E"
+  dark-page: "#021C2C"
+  dark-card: "#06283D"
+  dark-sunk: "#0B3248"
+  dark-text: "#F2F6F8"
+  dark-text-muted: "#9FB3C0"
+  dark-hairline: "#16405A"
   verified: "#0B6E20"
+  verified-dark: "#5CD37B"
   refusal: "#DC2626"
+  refusal-dark: "#F87171"
 typography:
   display:
     fontFamily: "PlayfairDisplay_600SemiBold"
@@ -53,7 +58,7 @@ spacing:
   xxl: "48px"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
+    backgroundColor: "{colors.coral}"
     textColor: "#FFFFFF"
     typography: "{typography.label}"
     rounded: "{rounded.pill}"
@@ -116,46 +121,50 @@ components:
 
 **Creative North Star: "The Letter of Introduction"**
 
-Hospitality networks ran on letters long before they ran on apps. Servas members carried one from 1949 onwards: paper, a name written out in full, a stranger vouched for. LocalBuddy is that letter, on a phone. The surface is warm paper, the names are set in a serif that belongs on printed matter, and the only saturated thing on any screen is the photograph of a person or a street.
+Hospitality networks ran on letters long before they ran on apps. Servas members carried one from 1949 onwards: paper, a name written out in full, a stranger vouched for. LocalBuddy is that letter, on a phone. The surface is warm paper, the names are set in a serif that belongs on printed matter, and apart from one coral control and the Night band at the top of a tab, the only saturated thing on a screen is the photograph of a person or a street.
 
-The system is quiet on purpose, because of what the product is not. Paying for the experience itself is forbidden by law in Italy (GUIDELINES section 2), so nothing may look like a marketplace: no price tags, no urgency, no booking chrome. The match is mutual and free, so nothing may look like dating: no rose accent, no heart, no flame. Both readings attract exactly the wrong person to a service where a stranger walks you around their neighbourhood and sometimes puts you up for the night.
+The system is quiet on purpose, because of what the product is not. Paying for the experience itself is forbidden by law in Italy (GUIDELINES section 2), so nothing may look like a marketplace: no price tags, no urgency, no booking chrome. The match is mutual and free, so nothing may look like dating: no blush glow, no heart, no flame. Both readings attract exactly the wrong person to a service where a stranger walks you around their neighbourhood and sometimes puts you up for the night.
 
 Density is low and the rhythm is generous. A discovery card shows one person at a time, at a size that makes reading their answer to "what would we do together" the natural next move rather than swiping past it.
 
 **Key Characteristics:**
 - Warm paper neutrals, never white, never black.
-- One accent, ink, on the primary action and nothing else.
+- One accent, coral, on the primary action and nothing else, as a flat fill.
 - Playfair for names, Geist for everything a finger touches.
 - Flat by default: depth comes from paper against card, not from shadow.
 - Photography is the only colour the interface allows itself.
 
 ## 2. Colors
 
-Paper and ink, with the saturation left to the photographs.
+Paper and coral under a Night band, with the rest of the saturation left to the photographs.
 
 ### Primary
-- **Ink** (`#1E3A5C`): the primary action, and only that. The filled button, the active tab, the tick that says "I would like to meet you". Deep enough to read as a considered mark rather than a notification. In dark mode it lifts to **Lifted Ink** (`#A8C4EA`) so it stays legible on a dark surface instead of sinking into it.
+- **Coral** (`#C8324E`): the primary action, and only that. The filled button, the active tab, the tick that says "I would like to meet you". White on it is 5.22:1; as a label it is 5.14:1 on Card and 4.76:1 on Paper. In dark mode it lifts to **Lifted Coral** (`#F45D73`) with a Night label (4.66:1), so it stays legible on navy instead of sinking into it (5.53:1 on Dark Page, 4.83:1 on Dark Card). Always a flat fill: no glow, no gradient.
+
+### Brand
+- **Night** (`#032B43`): brand surfaces only. The header band of the three tab screens, the splash, the app icon. The same in both themes. Paper on it is 13.40:1. A control laid on the band is **Night Raised** (`#174763`), Paper on it 9.05:1.
+- **Sky** (`#CFE6EF`): decoration. The circles on the band and on the icon. As text it appears only on Night (the line under a band's title, 11.34:1), and it is never the background of body copy.
 
 ### Neutral
 - **Paper** (`#F7F4F1`): the page. Warm off-white, so a card laid on it is visible without a shadow.
 - **Card** (`#FEFDFC`): anything laid on the page. Cards, sheets, the tab bar.
-- **Sunk Paper** (`#EFEAE5`): anything you type into or toggle. Inputs, chips at rest, chat bubbles, skeleton blocks.
+- **Sunk Paper** (`#EFEAE5`): anything you type into or toggle. Inputs, chips at rest, the other person's chat bubbles, skeleton blocks.
 - **Text** (`#1C1A19`): body and headings. Warm near-black, never `#000000`.
 - **Muted Text** (`#6B6560`): captions, secondary lines, placeholders. 4.87:1 against Sunk Paper, so it stays readable on the darkest neutral it can land on.
 - **Hairline** (`#E6E1DC`): every border in the app is one hairline of this.
-- Dark mode re-tones the same roles: **Night** (`#141212`), **Night Card** (`#1E1B1B`), **Night Sunk** (`#262222`), **Night Text** (`#F5F2F0`), **Night Muted** (`#A9A19B`), **Night Hairline** (`#332E2E`).
+- Dark mode re-tones the same roles onto navy rather than warm black, so the page reads as the band's own colour turned down: **Dark Page** (`#021C2C`), **Dark Card** (`#06283D`), **Dark Sunk** (`#0B3248`), **Dark Text** (`#F2F6F8`, 12.35:1 on Dark Sunk), **Dark Muted** (`#9FB3C0`, 6.19:1 on Dark Sunk), **Dark Hairline** (`#16405A`).
 
 ### Tertiary
-- **Verified** (`#0B6E20`): the identity badge, and nothing else. Green means "this person showed a document", never "success" in general.
-- **Refusal** (`#DC2626`): validation errors and destructive confirmations only.
+- **Verified** (`#0B6E20`): the identity badge, and nothing else. Green means "this person showed a document", never "success" in general. Dark mode `#5CD37B` (7.07:1 on Dark Sunk).
+- **Refusal** (`#DC2626`): validation errors and destructive confirmations only. Dark mode `#F87171` (4.85:1 on Dark Sunk; a Night label on it is 5.31:1).
 
 ### Named Rules
 
-**The Quiet Accent Rule.** Ink appears on the primary action of a screen and nowhere else. If two things on one screen are ink, one of them is wrong. Selection state is carried by Text on Paper (the filled chip), not by the accent.
+**The Quiet Accent Rule.** One coral element at a time: the primary action of a screen, or the raised Discover circle while Discover is active, and nothing else. If two controls in view are coral, one of them is wrong. The coral circle on the band is decoration on a brand surface, not a control, and does not count. Selection state is carried by Text on Paper (the filled chip), not by the accent.
 
-**The Not A Dating App Rule.** No rose, no red, no pink as an accent. No heart, no flame, no spark. The mechanic is mutual interest; the visual language is an introduction, not a courtship.
+**The Not A Dating App Rule.** Coral is a flat accent on a control, never a mood: no glow, no gradient, no blush wash over a photograph, no pink-to-red ramp. No heart, no flame, no spark. The mechanic is mutual interest; the visual language is an introduction, not a courtship.
 
-**The Photographs Carry The Colour Rule.** The interface contributes paper, ink and one green badge. Everything else chromatic on the screen is a photograph of a person or a place.
+**The Photographs Carry The Colour Rule.** The interface contributes paper, one coral accent, the Night band with its two circles, and one green badge. Everything else chromatic on the screen is a photograph of a person or a place.
 
 ## 3. Typography
 
@@ -183,7 +192,7 @@ The system is flat. There is not one `shadowOffset` in the app and there should 
 
 This is why the neutrals are warm rather than white. On a pure white page a card can only be drawn by its border, which is how an interface ends up as a stack of rectangles. On warm paper the card is lighter than its surroundings and needs no outline to exist.
 
-Two surfaces float over content rather than sitting in it: the filter sheet and the profile action bar. Both are anchored to an edge, both carry a hairline on the side that faces the content, and neither uses a shadow to announce itself.
+Three things float over content rather than sitting in it: the filter sheet, the profile's action row and the chat composer. The sheet is anchored to an edge and carries a hairline on the side that faces the content; the action row and the composer have no bar behind them at all, only their own controls, each a surface with its own hairline or Coral fill. None of them uses a shadow to announce itself.
 
 ### Named Rules
 
@@ -193,8 +202,8 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 
 ### Buttons
 - **Shape:** fully rounded (pill, 999px), 52px tall, 24px of horizontal padding. 52 clears the 44pt minimum with room for larger type before anything clips.
-- **Primary:** Ink fill, white label. One per screen.
-- **Secondary:** Sunk Paper fill, Text label. The companion action, such as "Pass" beside "Show interest".
+- **Primary:** Coral fill, white label (Lifted Coral with a Night label in dark mode). One per screen.
+- **Secondary:** Sunk Paper fill, Text label. The companion action, such as "Try again" under an error.
 - **Quiet:** no fill, no border, Text label. For anything deliberately understated, such as signing out or the paid unlock.
 - **Danger:** Refusal fill, white label. Only for confirming something that takes away: blocking a member, and one day deleting an account. Never for an ordinary action that happens to feel serious.
 - **States:** pressed drops opacity to 0.75, disabled to 0.45, and neither moves the bounds, so nothing around the button jumps. A loading button shows a spinner beside its label and reports `aria-busy`.
@@ -203,12 +212,23 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Style:** pill, 44px tall, Sunk Paper fill with a hairline at rest.
 - **Selected:** Text fill, Paper label. Selection is a tonal inversion, not the accent.
 - **Roles:** a single choice group is `role="radio"` inside `role="radiogroup"`; a multiple choice group is `role="checkbox"`. Never a plain button with a colour change, which says nothing to a screen reader.
+- **Segmented:** the one exception to chips, for who the feed shows. A full-pill Sunk Paper track with a hairline, the chosen option a Card thumb with a hairline and a Text label, the others Muted Text. Still a `radiogroup` of `radio`s.
 
 ### Cards
 - **Corner Style:** 20px, the largest radius in the system, reserved for the thing that holds a person.
 - **Background:** Card, on Paper, with one hairline border and clipped corners so the photograph reaches them.
+- **Headline:** the name in Playfair with the Verified badge on the right, only for a verified identity; under it the city, the role and the rating in Muted Text.
 - **Photo:** 4:3, declared as a ratio so the row keeps its height before the image arrives. Taller, and the name, the pills and the two decisions fall below the fold.
 - **Composition:** photograph, then name and city, then pills, then the one line that matters. The two round decision buttons are siblings of the card body, never nested inside it: a tappable card wrapping tappable buttons is ambiguous about what a tap meant.
+
+### Profile
+- The primary photo runs full width from the top edge, with round Card buttons over it for back and for report or block. The home photos follow the words as a row of 12px thumbnails.
+- The two decisions float at the bottom with no bar behind them: a round Card button with a hairline to pass, and the Coral capsule to show interest. The paid unlock sits at the end of the profile as a quiet button, away from both.
+
+### Conversation
+- The header is Card with a hairline below it: back, a small round photo, the name and the city.
+- Their bubbles are Sunk Paper; mine are Card with a hairline. Coral belongs to the send button alone. 18px corners, with the corner on the sender's side cut to 6px as the tail.
+- The composer floats above the bottom inset: a Sunk Paper capsule with a hairline and a round Coral send button.
 
 ### Inputs
 - **Style:** Sunk Paper fill, hairline border, 12px radius, 52px tall to match a button.
@@ -217,11 +237,16 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Multiline:** 104px, text starting at the top rather than floating in the middle of the box.
 
 ### Navigation
-- Three tabs, each with an icon and a word. An icon alone is a guess. The active tab is Ink, the rest are Muted Text. Icons inside a labelled control are always `aria-hidden`, or a screen reader reads the tab as an empty string followed by its name.
+- A floating bar: one capsule of Card with a hairline all round, 16px in from each side and 8px above the bottom safe area. It floats over the content, so every tab screen ends its scroll with enough room for the last item to clear it.
+- Three destinations, each with an icon and a word. An icon alone is a guess. Discover sits in the middle, raised: a 56px circle centred on the capsule's top edge, so half of it stands above the bar, set in a 6px ring of Paper so it reads as cut out of the bar rather than stuck on it. Its word sits on the same line as the other two.
+- The active destination is Coral: the word and the filled icon at the sides, the whole circle in the middle. At rest the sides are Muted Text with an outline icon, and the circle is Sunk Paper with a hairline. Only one thing in the bar is ever Coral.
+- The three tab screens open under a **header band** of Night, from the top edge under a light status bar, in both themes. The screen's name in Display, Paper; an optional line under it in Sky; at most one control on the right, a round Night Raised button with a Paper icon (the Discover filters). A Coral circle bleeds off the top-right corner with a Sky circle partly behind it: flat, `aria-hidden`, and never under the title or the control. The control column stays reserved on screens without one, so a long title wraps before it reaches the circles. The band ends on a straight edge, and everything else (the role switch, the feed, the list) starts on the page below it. One component, `TabHeader`, draws it for all three.
+- No shadow, no glow, no glass. The bar is a surface like any other, separated by tone and a hairline.
+- The bar is a `tablist` and each destination a `tab` with `aria-selected`. Icons inside it are always `aria-hidden`, or a screen reader reads each tab as an empty string followed by its name.
 
 ### The curved menu (landing page only)
 - Below 860px the four header links give way to one button, and the menu opens as a circle growing out of that button: the curve is the movement, not a shape drawn around the panel. Above 860px the links stay where they can be seen — hiding four of them where there is room to show them costs more than it buys.
-- Ink panel, Paper text, and in dark mode the same pair the other way round. The sections are a numbered list whose numbers are drawn by a CSS counter, so the order cannot disagree with the list. The language link sits below and outside it: it leaves the page rather than moving you down it, so it is neither numbered nor set in the display face.
+- Ink panel (`#1E3A5C`: the landing page has not taken the Coral and Night palette yet), Paper text, and in dark mode the same pair the other way round. The sections are a numbered list whose numbers are drawn by a CSS counter, so the order cannot disagree with the list. The language link sits below and outside it: it leaves the page rather than moving you down it, so it is neither numbered nor set in the display face.
 - The letters rise one after another, each waiting on the one before it. This happens on opening, not only on hover: the menu exists only below 860px, and most of what is below 860px has no pointer at all. Hover repeats it for anyone who has one.
 - It is a modal dialog with a name. Everything behind it is `inert` while it is open, Escape closes it, and focus returns to the button that opened it. None of it moves when the system asks for less motion, and all of it still works.
 
@@ -254,8 +279,8 @@ Two surfaces float over content rather than sitting in it: the filter sheet and 
 - **Do** check both themes before calling anything finished.
 
 ### Don't:
-- **Don't** introduce a second accent. One ink, one verified green, one refusal red, and nothing else.
-- **Don't** use rose, a heart, a flame or a countdown. This is not a dating app and not a marketplace.
+- **Don't** introduce a second accent. One coral, one verified green, one refusal red, and nothing else. Night and Sky are brand surfaces, not accents.
+- **Don't** use a glow, a gradient, a heart, a flame or a countdown. This is not a dating app and not a marketplace.
 - **Don't** put a price, a discount or scarcity language anywhere near the experience itself. Paying for it is illegal (GUIDELINES section 2); the only thing that can be paid for is skipping the match.
 - **Don't** use `#FFFFFF` or `#000000`. Paper and warm near-black exist for this reason.
 - **Don't** set body text in the system face. The app read as iOS on a phone and as Windows in a browser before Geist landed.

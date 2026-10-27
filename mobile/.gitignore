@@ -44,3 +44,6 @@ example
 
 # local preview screenshots
 .preview/
+
+# copies made by the local backup hook
+backup/

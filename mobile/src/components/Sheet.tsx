@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 /// The panel that slides up from the bottom edge: filters, safety actions, a review. Rendered
@@ -21,6 +22,7 @@ export function Sheet({
 }) {
   const c = useColors();
   const insets = useSafeAreaInsets();
+  const s = useStrings();
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -46,7 +48,7 @@ export function Sheet({
             accessibilityRole="button"
             // Just "Close": the dialog already carries its own name, and some titles are a
             // person, which made this read as "Close alice".
-            accessibilityLabel="Close"
+            accessibilityLabel={s.common.close}
             hitSlop={8}
             style={styles.close}>
             <Ionicons name="close" size={24} color={c.text} aria-hidden />

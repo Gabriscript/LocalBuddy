@@ -8,8 +8,9 @@
       name="description"
       content="LocalBuddy fa incontrare chi viaggia e chi vive in un posto e ha voglia di mostrarlo. La giornata insieme non si paga mai. Il contatto si apre solo se lo vogliono tutti e due."
     />
+    <link rel="icon" href="../logo-mark.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#F7F4F1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#141212" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#021C2C" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:title" content="LocalBuddy, conosci qualcuno che ci vive" />
     <meta
@@ -17,8 +18,9 @@
       content="Chi viaggia e chi abita, presentati. La giornata insieme non si paga mai."
     />
     <meta property="og:type" content="website" />
-    <!-- [SHARE IMAGE HERE]: og:image (1200x630) and og:image:alt come back with a real
-         photograph. A random one would go out described as a street in an Italian city. -->
+    <!-- og:image needs an absolute address, so the tag waits for the domain. The picture is ready:
+         share-street.jpg, 1200x630, alt "Una donna del posto e un viaggiatore con la valigia
+         che parlano camminando in una via di ciottoli al sole". -->
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="alternate" hreflang="en" href="../index.html" />
@@ -43,7 +45,7 @@
     <a class="skip" href="#main">Vai al contenuto</a>
 
     <header class="site">
-      <a class="wordmark" href="#main">LocalBuddy</a>
+      <a class="wordmark" href="#main"><img class="mark" src="../logo-mark.svg" alt="" width="28" height="31" /><span class="w-local">Local</span><span class="w-buddy">Buddy</span></a>
 
       <!-- Above 860px these four fit, so they stay where they can be seen. -->
       <nav class="sections" aria-label="Sezioni">
@@ -104,7 +106,7 @@
         <figure class="hero-figure">
           <!-- Meant to be a narrow street in an Italian city in the late afternoon: a real
                photograph, 1200x1500, fetchpriority="high", and an alt that says what it shows. -->
-          <div class="slot">[HERO PHOTO HERE]</div>
+          <img src="../hero-bar.jpg" alt="Tre giovani che parlano davanti a un caffè, al bancone di un bar italiano" width="1080" height="1907" fetchpriority="high" />
         </figure>
       </section>
 
@@ -138,26 +140,24 @@
           essere una tariffa.
         </p>
         <p class="statement-note">
-          È la differenza fra uno scambio culturale e il turismo organizzato, e in Italia quella
-          linea è la legge (L. 190/2023). Un host che chiede di essere pagato per il suo tempo
-          viene rimosso.
+          È la differenza fra uno scambio culturale e il turismo organizzato. Un host che chiede
+          di essere pagato per il suo tempo viene rimosso.
         </p>
       </section>
 
       <section id="who" class="who">
         <figure>
-          <!-- Meant to be a market stall in the morning: a real photograph, 1000x1200,
-               loading="lazy", and an alt that says what it shows. -->
-          <div class="slot">[MARKET PHOTO HERE]</div>
+          <img src="../market-morning.jpg" alt="Un venditore al mercato passa un sacchetto di verdure a un viaggiatore sorridente con lo zaino" width="1000" height="1200" loading="lazy" />
         </figure>
         <div class="who-copy">
           <h2>Due ruoli, e puoi averli tutti e due</h2>
           <dl>
             <dt>Ospitare</dt>
             <dd>
-              Vivi in una città italiana e hai un pomeriggio libero. Decidi tu chi, quando, e se.
-              Qualcuno offre anche un letto, e lì arrivano obblighi veri verso la Questura, scritti
-              chiaramente prima che quell'opzione si possa attivare.
+              Vivi in una città europea e hai un pomeriggio libero. Decidi tu chi, quando, e se:
+              un caffè, una passeggiata, un letto per la notte, o solo una chiacchierata. Qualcuno
+              offre anche un letto, e lì arrivano obblighi di legge che cambiano da paese a paese,
+              scritti chiaramente prima che quell'opzione si possa attivare.
             </dd>
             <dt>Essere ospitato</dt>
             <dd>
@@ -195,10 +195,10 @@
       </section>
 
       <section id="waitlist" class="waitlist">
-        <h2>Si comincia da Milano</h2>
+        <h2>In tutta Europa</h2>
         <p>
-          Gli host si registrano in Italia, l'unico paese di cui abbiamo verificato le regole. Chi
-          viaggia può arrivare da ovunque.
+          Mettiamo le persone in contatto. Quello che succede dopo, un caffè, un soggiorno o solo
+          una conversazione, lo decidono loro due.
         </p>
         <!-- The same invitation button as the hero's, once it has somewhere real to go. -->
         <p class="cta-row"><span class="slot">[INVITATION DESTINATION HERE]</span></p>

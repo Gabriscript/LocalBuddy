@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { DiscoveryFilters } from '@/api/hooks';
 import { TIMES_OF_DAY, type TimeOfDay } from '@/api/labels';
+import { useStrings } from '@/i18n';
 import { space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -23,6 +24,7 @@ export function FilterSheet({
   onApply: (next: DiscoveryFilters) => void;
 }) {
   const c = useColors();
+  const s = useStrings();
   const [draft, setDraft] = useState(value);
 
   const set =
@@ -36,51 +38,51 @@ export function FilterSheet({
 
   return (
     <Sheet
-      title="Filters"
+      title={s.filters.title}
       onClose={onClose}
       footer={
         <>
           <View style={styles.footerItem}>
-            <Button title="Clear" variant="quiet" onPress={() => setDraft({})} />
+            <Button title={s.filters.clear} variant="quiet" onPress={() => setDraft({})} />
           </View>
           <View style={styles.footerItem}>
-            <Button title="Show results" onPress={() => onApply(draft)} />
+            <Button title={s.filters.showResults} onPress={() => onApply(draft)} />
           </View>
         </>
       }>
       <Field
-        label="City"
-        placeholder="Anywhere"
+        label={s.common.city}
+        placeholder={s.filters.anywhere}
         value={draft.city ?? ''}
         onChangeText={set('city')}
         autoCapitalize="words"
       />
 
       <View style={styles.group}>
-        <Text style={[type.label, { color: c.text }]}>When they are free</Text>
+        <Text style={[type.label, { color: c.text }]}>{s.filters.whenFree}</Text>
         <View style={styles.chips}>
           {TIMES_OF_DAY.map((time) => (
             <Chip
-              key={time.value}
+              key={time}
               as="checkbox"
-              label={time.label}
-              selected={times.includes(time.value)}
-              onPress={() => toggleTime(time.value)}
+              label={s.timeOfDay[time]}
+              selected={times.includes(time)}
+              onPress={() => toggleTime(time)}
             />
           ))}
         </View>
       </View>
 
       <Toggle
-        label="Can host overnight"
+        label={s.common.canHostOvernight}
         value={!!draft.offersOvernight}
         // Off means "no preference", not "must not host": false would drop every host.
         onChange={(on) => set('offersOvernight')(on || undefined)}
       />
 
-      <Tri label="Has a car" value={draft.hasCar} onChange={set('hasCar')} />
-      <Tri label="Smokes" value={draft.smokes} onChange={set('smokes')} />
-      <Tri label="Has pets" value={draft.hasPets} onChange={set('hasPets')} />
+      <Tri label={s.common.hasCar} value={draft.hasCar} onChange={set('hasCar')} />
+      <Tri label={s.common.smokes} value={draft.smokes} onChange={set('smokes')} />
+      <Tri label={s.filters.hasPets} value={draft.hasPets} onChange={set('hasPets')} />
     </Sheet>
   );
 }
@@ -97,13 +99,14 @@ function Tri({
   onChange: (next?: boolean) => void;
 }) {
   const c = useColors();
+  const s = useStrings();
   return (
     <View style={styles.group}>
       <Text style={[type.label, { color: c.text }]}>{label}</Text>
       <View style={styles.chips} role="radiogroup" aria-label={label}>
-        <Chip as="radio" label="Any" selected={value === undefined} onPress={() => onChange(undefined)} />
-        <Chip as="radio" label="Yes" selected={value === true} onPress={() => onChange(true)} />
-        <Chip as="radio" label="No" selected={value === false} onPress={() => onChange(false)} />
+        <Chip as="radio" label={s.filters.any} selected={value === undefined} onPress={() => onChange(undefined)} />
+        <Chip as="radio" label={s.filters.yes} selected={value === true} onPress={() => onChange(true)} />
+        <Chip as="radio" label={s.filters.no} selected={value === false} onPress={() => onChange(false)} />
       </View>
     </View>
   );

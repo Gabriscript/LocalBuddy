@@ -2,7 +2,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Text } from 'react-native';
 
 import { useMe, useVerify } from '@/api/hooks';
+import { errorMessage } from '@/components/Screen';
 import { StepPage } from '@/components/StepPage';
+import { useStrings } from '@/i18n';
 import { type, useColors } from '@/theme';
 
 /// Step 2: identity and 18+ check through the external provider, then POST users/me/verify.
@@ -18,6 +20,7 @@ import { type, useColors } from '@/theme';
 export default function Verify() {
   const c = useColors();
   const router = useRouter();
+  const s = useStrings();
   const { from } = useLocalSearchParams<{ from?: string }>();
   const verify = useVerify();
   const guest = useMe().data?.role === 'guest';
@@ -33,17 +36,18 @@ export default function Verify() {
 
   return (
     <StepPage
+      image={require('../../../assets/images/scenes/s03-bar-counter.jpg')}
       step={onboarding ? 2 : undefined}
       total={guest ? 4 : 5}
-      title="Verify it's you"
-      subtitle="A quick document check, once. Nobody can contact another member without it, which is what keeps this a place for meeting strangers safely."
-      cta="Start verification"
+      title={s.onboarding.verifyTitle}
+      subtitle={s.onboarding.verifySubtitle}
+      cta={s.onboarding.verifyCta}
       loading={verify.isPending}
       onNext={() => verify.mutate(undefined, { onSuccess: done })}>
       {verify.error ? (
-        // Under 18, or an identity already banned: the backend explains which, in plain words.
+        // Under 18, or an identity already banned: the code says which, in plain words.
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
-          {verify.error.message}
+          {errorMessage(verify.error, s)}
         </Text>
       ) : null}
     </StepPage>

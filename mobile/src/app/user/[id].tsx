@@ -5,15 +5,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
+import { roleName } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
+import { IconButton } from '@/components/IconButton';
 import { MatchBurst } from '@/components/MatchBurst';
 import { Pill } from '@/components/Pill';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
 import { UnlockSheet } from '@/components/UnlockSheet';
+import { useLanguage, useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
+
+const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 /// The expanded profile, and the only place the paid unlock appears: keeping it off the
 /// discovery card is what stops an accidental charge mid-scroll (GUIDELINES §11.2).
@@ -22,6 +27,8 @@ export default function Profile() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const c = useColors();
+  const s = useStrings();
+  const { language } = useLanguage();
 
   const { data, isPending, error, refetch } = useProfile(id);
   const { interest, pass } = useDecide();
@@ -47,59 +54,52 @@ export default function Profile() {
   }
 
   const photos = data?.photos ?? [];
+  // The face leads; the home photos follow the words, as a row of thumbnails.
+  const hero = photos.find((p) => p.type === 'profile') ?? photos[0];
+  const others = photos.filter((p) => p !== hero);
 
   return (
     <Screen loading={isPending} error={error} onRetry={refetch}>
       <View style={[styles.page, { backgroundColor: c.background }]}>
-        {/* First in the tree, so a screen reader reaches it before the whole profile rather
-            than after it. zIndex keeps it drawn above the photo it floats on. */}
-        <Pressable
-          onPress={goBack}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
-          <Ionicons name="chevron-back" size={24} color={c.text} />
-        </Pressable>
-
-        {/* Reporting and blocking live here rather than in the action bar: they are not a
-            third choice next to pass and interest, they are what you reach for when something
-            is wrong. */}
-        <Pressable
-          onPress={() => setSafety(true)}
-          disabled={!data}
-          accessibilityRole="button"
-          accessibilityLabel="Report or block"
-          style={[
-            styles.more,
-            { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border },
-          ]}>
-          <Ionicons name="ellipsis-horizontal" size={22} color={c.text} aria-hidden />
-        </Pressable>
-
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 140 }}
+          // The last line clears the floating action row: its 56pt, the inset under it, and
+          // room for the refusal note that can appear above it.
+          contentContainerStyle={{ paddingBottom: insets.bottom + 56 + space.xxl + space.lg }}
           showsVerticalScrollIndicator={false}>
-          <AuthedImage
-            path={photos[0]?.url}
-            style={[styles.hero, { backgroundColor: c.surfaceMuted }]}
-            accessibilityLabel={`Photo of ${data?.name}`}
-          />
+          <View>
+            {/* Part of the hero, so they scroll away with the photo instead of sitting on the name.
+                First in the tree, so a screen reader reaches them before the whole profile. zIndex
+                keeps them drawn above the photo. */}
+            <Pressable
+              onPress={goBack}
+              accessibilityRole="button"
+              accessibilityLabel={s.common.goBack}
+              style={[styles.back, { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border }]}>
+              <Ionicons name="chevron-back" size={24} color={c.text} />
+            </Pressable>
 
-          {photos.length > 1 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.strip}>
-              {photos.slice(1).map((photo) => (
-                <AuthedImage
-                  key={photo.id}
-                  path={photo.url}
-                  style={[styles.thumb, { backgroundColor: c.surfaceMuted }]}
-                  accessibilityLabel={`Another photo of ${data?.name}`}
-                />
-              ))}
-            </ScrollView>
-          ) : null}
+            {/* Reporting and blocking live here rather than in the action bar: they are not a
+                third choice next to pass and interest, they are what you reach for when something
+                is wrong. */}
+            <Pressable
+              onPress={() => setSafety(true)}
+              disabled={!data}
+              accessibilityRole="button"
+              accessibilityLabel={s.profile.reportOrBlock}
+              style={[
+                styles.more,
+                { top: insets.top + space.sm, backgroundColor: c.surface, borderColor: c.border },
+              ]}>
+              <Ionicons name="ellipsis-horizontal" size={22} color={c.text} aria-hidden />
+            </Pressable>
+
+            <AuthedImage
+              path={hero?.url}
+              size="medium"
+              style={[styles.hero, { backgroundColor: c.surfaceMuted }]}
+              accessibilityLabel={s.common.photoOf(data?.name ?? '')}
+            />
+          </View>
 
           <View style={styles.body}>
             <View>
@@ -107,66 +107,92 @@ export default function Profile() {
                 {data?.name}
               </Text>
               <Text style={[type.body, { color: c.textMuted }]}>
-                {data?.city} · {data?.role}
+                {data?.city} · {roleName(data?.role, s)}
               </Text>
-            </View>
-
-            <View style={styles.pills}>
               {data?.identityVerified ? (
-                <Pill icon="shield-checkmark-outline" label="Verified" tone="positive" />
+                <View style={styles.verified}>
+                  <Ionicons name="shield-checkmark-outline" size={16} color={c.success} aria-hidden />
+                  <Text style={[type.label, { color: c.success }]}>{s.common.verified}</Text>
+                </View>
               ) : null}
-              {typeof data?.rating === 'number' ? (
-                <Pill icon="star-outline" label={`${data.rating.toFixed(1)} rating`} />
-              ) : null}
-              {data?.listing?.offersOvernight ? <Pill icon="bed-outline" label="Can host overnight" /> : null}
-              {data?.hasCar ? <Pill icon="car-outline" label="Has a car" /> : null}
-              {data?.hasPets ? <Pill icon="paw-outline" label="Pets" /> : null}
-              {data?.smokes ? <Pill icon="flame-outline" label="Smokes" /> : null}
             </View>
 
-            <Section title="What we'll do" body={data?.whatWeWillDo} />
-            <Section title="Why I host" body={data?.whyIHost} />
-            <Section title="Languages" body={data?.languagesSpoken} />
+            {/* Left out when empty: an empty row would still take a gap's worth of height. */}
+            {typeof data?.rating === 'number' ||
+            data?.listing?.offersOvernight ||
+            data?.hasCar ||
+            data?.hasPets ||
+            data?.smokes ? (
+              <View style={styles.pills}>
+                {typeof data?.rating === 'number' ? (
+                  <Pill icon="star-outline" label={s.profile.rating(data.rating.toLocaleString(language, ONE_DECIMAL))} />
+                ) : null}
+                {data?.listing?.offersOvernight ? <Pill icon="bed-outline" label={s.common.canHostOvernight} /> : null}
+                {data?.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
+                {data?.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
+                {data?.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
+              </View>
+            ) : null}
+
+            <Section title={s.profile.whatWeDo} body={data?.whatWeWillDo} />
+            <Section title={s.profile.whyHost} body={data?.whyIHost} />
+            <Section title={s.profile.languages} body={data?.languagesSpoken} />
+
+            {others.length ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.strip}>
+                {others.map((photo) => (
+                  <AuthedImage
+                    key={photo.id}
+                    path={photo.url}
+                    size="medium"
+                    style={[styles.thumb, { backgroundColor: c.surfaceMuted }]}
+                    accessibilityLabel={s.profile.anotherPhotoOf(data?.name ?? '')}
+                  />
+                ))}
+              </ScrollView>
+            ) : null}
+
             <Reviews userId={id} />
+
+            {/* Deliberately away from the free actions and visually quieter: paying is a
+                separate decision, not a third button of equal weight. */}
+            <Button
+              title={s.profile.unlock}
+              variant="quiet"
+              disabled={busy || !data}
+              onPress={() => setUnlocking(true)}
+            />
           </View>
         </ScrollView>
 
-        <View
-          style={[
-            styles.bar,
-            { paddingBottom: insets.bottom + space.md, backgroundColor: c.surface, borderTopColor: c.border },
-          ]}>
+        {/* Floats over the profile with no bar behind it: the two controls carry their own
+            surfaces, Card with a hairline and Coral. */}
+        <View style={[styles.bar, { paddingBottom: insets.bottom + space.md }]}>
           {/* With the buttons that failed, not on a screen of its own: the profile behind it
               is still perfectly readable. */}
           <ActionError error={interest.error ?? pass.error} />
 
           <View style={styles.barRow}>
+            <IconButton
+              name="close"
+              label={s.profileCard.passOn(data?.name ?? '')}
+              tint={c.textMuted}
+              disabled={busy}
+              onPress={() => pass.mutate(id, { onSuccess: goBack })}
+            />
             <View style={styles.barItem}>
-              <Button
-                title="Pass"
-                variant="secondary"
-                disabled={busy}
-                onPress={() => pass.mutate(id, { onSuccess: goBack })}
-              />
-            </View>
-            <View style={styles.barItem}>
-              <Button title="Show interest" loading={interest.isPending} disabled={busy} onPress={showInterest} />
+              <Button title={s.profile.showInterest} loading={interest.isPending} disabled={busy} onPress={showInterest} />
             </View>
           </View>
-          {/* Deliberately below the free actions and visually quieter: paying is a separate
-              decision, not a third button of equal weight. */}
-          <Button
-            title="Unlock the chat without a match"
-            variant="quiet"
-            disabled={busy || !data}
-            onPress={() => setUnlocking(true)}
-          />
         </View>
 
         {matched && data ? (
           <MatchBurst
             name={data.name!}
-            photoPath={photos[0]?.url}
+            photoPath={hero?.url}
             onSayHello={() =>
               router.replace({ pathname: '/chat/[id]', params: { id: matched } })
             }
@@ -202,19 +228,21 @@ export default function Profile() {
 /// of these carry a name.
 function Reviews({ userId }: { userId: string }) {
   const c = useColors();
+  const s = useStrings();
+  const { language } = useLanguage();
   const { items, hasNextPage, isFetchingNextPage, loadMore } = useReviews(userId);
   if (!items.length) return null;
 
   return (
     <View style={styles.section}>
       <Text role="heading" style={[type.title, { color: c.text }]}>
-        What people say
+        {s.profile.reviews}
       </Text>
       {items.map((review) => (
         <View key={review.id} style={[styles.review, { borderTopColor: c.border }]}>
           {/* role="img": five hidden glyphs that together mean one thing, and a bare label on
               a plain container is announced by nothing. */}
-          <View role="img" aria-label={`Rated ${review.rating} out of 5`} style={styles.stars}>
+          <View role="img" aria-label={s.profile.ratedOutOf5(Number(review.rating))} style={styles.stars}>
             {[1, 2, 3, 4, 5].map((star) => (
               <Ionicons
                 key={star}
@@ -225,7 +253,7 @@ function Reviews({ userId }: { userId: string }) {
               />
             ))}
             <Text style={[type.caption, { color: c.textMuted }]}>
-              {new Date(review.createdAt).toLocaleDateString()}
+              {new Date(review.createdAt).toLocaleDateString(language)}
             </Text>
           </View>
           {review.comment ? (
@@ -238,7 +266,7 @@ function Reviews({ userId }: { userId: string }) {
           and a second scrolling region inside the first one fights it. */}
       {hasNextPage ? (
         <Button
-          title="More reviews"
+          title={s.profile.moreReviews}
           variant="quiet"
           loading={isFetchingNextPage}
           onPress={loadMore}
@@ -264,7 +292,8 @@ function Section({ title, body }: { title: string; body?: string | null }) {
 const styles = StyleSheet.create({
   page: { flex: 1 },
   hero: { width: '100%', aspectRatio: 4 / 3 },
-  strip: { gap: space.sm, padding: space.md },
+  verified: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs },
+  strip: { gap: space.sm },
   thumb: { width: 96, height: 96, borderRadius: radius.md },
   body: { padding: space.md, gap: space.lg },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
@@ -298,10 +327,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: space.md,
+    paddingHorizontal: space.md,
     gap: space.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  barRow: { flexDirection: 'row', gap: space.sm },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   barItem: { flex: 1 },
 });

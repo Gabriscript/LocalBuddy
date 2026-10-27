@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
+import { useStrings, type Strings } from '@/i18n';
 import { space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -33,6 +34,7 @@ export function Screen({
   children: ReactNode;
 }) {
   const c = useColors();
+  const s = useStrings();
 
   if (loading) {
     return (
@@ -48,8 +50,8 @@ export function Screen({
     return (
       <Centered>
         <Ionicons name="cloud-offline-outline" size={40} color={c.textMuted} aria-hidden />
-        <Text style={[type.body, styles.centeredText, { color: c.text }]}>{errorMessage(error)}</Text>
-        {onRetry ? <Button title="Try again" variant="secondary" onPress={onRetry} /> : null}
+        <Text style={[type.body, styles.centeredText, { color: c.text }]}>{errorMessage(error, s)}</Text>
+        {onRetry ? <Button title={s.common.tryAgain} variant="secondary" onPress={onRetry} /> : null}
       </Centered>
     );
   }
@@ -87,9 +89,13 @@ export function LoadingMore({ visible }: { visible?: boolean }) {
 
 /// What a member is told when something failed. Exported because the full-screen state and the
 /// note beside a single failed action have to say the same thing about the same error.
-export function errorMessage(error: unknown) {
-  // ApiError carries the stable `code`; showing `detail` is fine, branching on it is not.
-  return error instanceof ApiError ? error.message : 'Something went wrong.';
+/// A code the dictionary knows is said in the member's language; any other keeps the server's
+/// own `detail`, which is better than a generic line.
+export function errorMessage(error: unknown, s: Strings) {
+  if (!(error instanceof ApiError)) return s.common.somethingWrong;
+  return Object.prototype.hasOwnProperty.call(s.errors, error.code)
+    ? s.errors[error.code as keyof Strings['errors']]
+    : error.message;
 }
 
 const styles = StyleSheet.create({

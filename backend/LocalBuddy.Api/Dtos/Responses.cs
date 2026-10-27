@@ -55,6 +55,9 @@ public record AuthResult(string Token, Guid UserId);
 /// Outcome of expressing interest in somebody.
 public record InterestResult(bool Matched, Guid? ConversationId);
 
+/// How many requests are waiting, for a badge that should not have to load the list.
+public record RequestCount(int Count);
+
 /// Outcome of a paid unlock. `Charged` is a fixed token, never prose:
 /// one-time | credits | subscription | none.
 public record UnlockResult(Guid ConversationId, string Charged);

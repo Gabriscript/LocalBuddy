@@ -1,0 +1,9 @@
+<!-- Splash mark: the heart on a Paper tile, because its right-hand figure is Night and the splash paints Night behind it. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="46" fill="#F7F4F1"/>
+  <g transform="translate(40 34)" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="35" cy="15" r="11" fill="#C8324E"/><circle cx="85" cy="15" r="11" fill="#032B43"/>
+<path d="M35 40C4 42 2 82 60 124" stroke="#C8324E" stroke-width="17"/>
+<path d="M85 40C116 42 118 82 60 124" stroke="#032B43" stroke-width="17"/>
+<path d="M32 54C56 50 68 86 92 62" stroke="#C8324E" stroke-width="9"/>
+<path d="M88 54C64 50 52 86 28 62" stroke="#032B43" stroke-width="9"/></g>
+</svg>
