@@ -103,7 +103,7 @@ Milestones:
 | [ ] | Run on a real phone: keyboard, safe areas, back gesture, photo picker | Demo | Gabriele's phone |
 | [x] | Photo sizes for mobile: `?size=thumb` (256 px) and `medium` (1080 px) instead of 2048 px originals (2.26 MB to 598 KB and 50 KB on a demo photo) | Demo | `PhotoUploadTests`; resized per request, no cache yet |
 | [ ] | Crash and error reporting (Sentry or similar) | Beta | — |
-| [ ] | End-to-end tests of the main flows (Maestro or Detox) | Beta | CI |
+| [~] | End-to-end tests of the main flows (Maestro or Detox) | Beta | CI; for now a scripted web walk, `.claude/tools/e2e.mjs`, 17 steps pass (request, accept, match, chat, polling) |
 
 ## 9. Brand and release
 
@@ -111,12 +111,26 @@ Milestones:
 |---|---|---|---|
 | [x] | App icon, adaptive icon, splash, favicon: "arch that speaks", night and coral | Demo | `mobile/assets/brand/`; not yet seen on a launcher |
 | [~] | Backend demo mode, Dockerfile, compose behind Caddy | Demo | ADR-0010 (proposed); `docker build` passes, `docker compose up` on an empty database not run yet |
-| [ ] | Landing page in the new palette (still ink `#1E3A5C`) | Beta | `web/` |
+| [x] | Landing page in the new palette (night and coral, new wordmark and logo mark) | Beta | `web/`, seen in light and dark |
 | [ ] | Deploy to Hetzner (needs Gabriele's go-ahead and domain) | Demo | `curl` on the public URL |
 | [~] | APK through EAS `preview` profile | Demo | `eas build -p android --profile preview` (Gabriele's Expo login) |
-| [ ] | Landing page: real photos, invitation destination, domain for hreflang | Beta | `web/` |
+| [~] | Landing page: hero and market photos done, share image ready (`share-street.jpg`, tag waits for the domain); still the invitation destination and the domain for hreflang | Beta | `web/` |
+| [x] | App icon, splash and launcher icons redrawn from the new two-person heart logo | Demo | `mobile/assets/brand/*.svg` to `mobile/assets/images/`; not yet seen on a launcher |
 | [ ] | Play Store and App Store listings, screenshots, data-safety form | Launch | — |
 | [ ] | Production config: `KnownProxies`, no dev JWT key, CORS closed | Launch | startup check |
+
+## 10. Legal and compliance (parked on 2026-10-27, to come after function and look)
+
+The product is for the whole of Europe: LocalBuddy introduces people, and they decide between a
+coffee, a stay or only a chat. The code and the older texts still assume Italy.
+
+| | Item | Milestone | Check |
+|---|---|---|---|
+| [ ] | Overnight obligations per country: the app only knows Alloggiati Web and the Questura (`obligationRegistered`, `cannotSend`, four languages) | Beta | a host in another country is not told something false |
+| [ ] | Landing: "obligations spelled out before that option can be switched on" is true for Italy only; check or reword | Beta | `web/` |
+| [ ] | Country on the profile, so rules and texts can follow it | Beta | profile field |
+| [ ] | The no-fee rule (host paid = removed): what each country says about hospitality versus a paid service | Beta | legal read |
+| [ ] | Revisit ADRs and docs that assume Italy | Beta | `docs/adr/` |
 
 ## Sources
 
