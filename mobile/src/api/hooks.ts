@@ -37,11 +37,13 @@ type PageOf<T> = { items: T[]; hasMore: boolean };
 /// `number | string`. One helper for all five paged lists, so none of them can drift.
 function usePages<T extends { id?: string }>(
   queryKey: readonly unknown[],
-  load: (page: number) => Promise<PageOf<T>>
+  load: (page: number) => Promise<PageOf<T>>,
+  refetchInterval?: number
 ) {
   const query = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) => load(pageParam),
+    refetchInterval,
     initialPageParam: 0,
     getNextPageParam: (last, _pages, lastPageParam) =>
       last.hasMore ? lastPageParam + 1 : undefined,
@@ -92,10 +94,17 @@ export function useProfile(id: string | undefined) {
   });
 }
 
+/// How often the screens that wait for somebody else's action ask again. Polling, not a socket:
+/// the backend has no push channel yet (Beta, docs/CHECKLIST.md). Query pauses it while the app
+/// is in the background (see RootLayout), so it costs nothing when nobody is looking.
+const POLL = { messages: 4_000, inbox: 15_000, requests: 20_000 };
+
 /// People waiting for my answer to their interest. Accepting and declining go through useDecide.
 export function useRequests() {
-  return usePages(keys.requests, async (page) =>
-    unwrap(await api.GET('/api/v1/users/me/requests', { params: { query: { page } } }))
+  return usePages(
+    keys.requests,
+    async (page) => unwrap(await api.GET('/api/v1/users/me/requests', { params: { query: { page } } })),
+    POLL.requests
   );
 }
 
@@ -107,12 +116,15 @@ export function useRequestCount(enabled = true) {
     // The generated type allows a string for an int32; the server always sends a number.
     queryFn: async () => Number(unwrap(await api.GET('/api/v1/users/me/requests/count')).count),
     enabled,
+    refetchInterval: POLL.requests,
   });
 }
 
 export function useConversations() {
-  return usePages(keys.conversations, async (page) =>
-    unwrap(await api.GET('/api/v1/conversations', { params: { query: { page } } }))
+  return usePages(
+    keys.conversations,
+    async (page) => unwrap(await api.GET('/api/v1/conversations', { params: { query: { page } } })),
+    POLL.inbox
   );
 }
 
@@ -130,12 +142,15 @@ export function useConversation(id: string) {
 /// Page 0 is the newest messages, which is why the list showing them is inverted: reaching the
 /// visual top is reaching the end of the data, and asks for the page before.
 export function useMessages(id: string) {
-  return usePages(keys.messages(id), async (page) =>
-    unwrap(
-      await api.GET('/api/v1/conversations/{id}/messages', {
-        params: { path: { id }, query: { page } },
-      })
-    )
+  return usePages(
+    keys.messages(id),
+    async (page) =>
+      unwrap(
+        await api.GET('/api/v1/conversations/{id}/messages', {
+          params: { path: { id }, query: { page } },
+        })
+      ),
+    POLL.messages
   );
 }
 

@@ -1,12 +1,13 @@
 import { Geist_400Regular } from '@expo-google-fonts/geist/400Regular';
 import { Geist_600SemiBold } from '@expo-google-fonts/geist/600SemiBold';
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display/600SemiBold';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { LanguageProvider } from '@/i18n';
@@ -42,6 +43,13 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded]);
+
+  // Query has no idea what a phone's background is: without this its polling keeps running
+  // there, and coming back to the app would not refresh anything.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => focusManager.setFocused(state === 'active'));
+    return () => sub.remove();
+  }, []);
 
   // Held on the splash rather than rendering a frame in a fallback face and reflowing.
   if (!fontsLoaded) return null;
