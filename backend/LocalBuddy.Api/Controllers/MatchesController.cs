@@ -74,6 +74,60 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
                        new InterestResult(true, conversation.Id));
     }
 
+    /// The other half of the interest above: people who said they would like to meet me and
+    /// have no answer from me yet. Accepting is an interest back, declining is a pass, and the
+    /// requester is told about neither until there is a match. Same cards as the feed.
+    [HttpGet("me/requests")]
+    [ProducesResponseType<Page<ProfileCard>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<Page<ProfileCard>>> Requests(int page = 0, int pageSize = Page<ProfileCard>.DefaultSize)
+    {
+        (page, pageSize) = Page<ProfileCard>.Clamp(page, pageSize);
+
+        var rows = await (
+                from m in PendingRequestsTo(User.Id())
+                join u in db.Users on m.InitiatorId equals u.Id
+                // Version 7 ids are time-ordered, so this is newest request first without a
+                // timestamp column. The id is unique, so pages cannot overlap either.
+                orderby m.Id descending
+                select u)
+            .Skip(page * pageSize)
+            .Take(pageSize + 1)
+            .Select(u => new
+            {
+                User = u,
+                PhotoId = db.Photos.Where(p => p.UserId == u.Id && p.Type == PhotoType.Profile)
+                                   .Select(p => (Guid?)p.Id).FirstOrDefault(),
+                Rating = db.Reviews.Where(r => r.SubjectId == u.Id).Average(r => (double?)r.Rating)
+            })
+            .ToListAsync();
+
+        var cards = rows.Select(r => new ProfileCard(
+            PublicProfile.From(r.User),
+            r.PhotoId is null ? null : PhotoDto.UrlFor(r.PhotoId.Value),
+            r.Rating)).ToList();
+
+        return Page<ProfileCard>.From(cards, page, pageSize);
+    }
+
+    /// For the badge on the Chats tab, which should not have to load a page of cards to count.
+    [HttpGet("me/requests/count")]
+    [ProducesResponseType<RequestCount>(StatusCodes.Status200OK)]
+    public async Task<RequestCount> RequestsCount()
+        => new(await PendingRequestsTo(User.Id()).CountAsync());
+
+    /// One definition for the list and the count, so the badge cannot disagree with the screen.
+    /// Hidden: anyone I have already answered (interest, pass or match), anyone blocked in either
+    /// direction, and banned accounts (ADR-0005).
+    IQueryable<Match> PendingRequestsTo(Guid me)
+    {
+        var blocked = db.BlockedIdsFor(me);
+        var answered = db.Matches.Where(m => m.InitiatorId == me).Select(m => m.TargetId);
+        return db.Matches.Where(m => m.TargetId == me && m.Status == MatchStatus.Pending
+                                     && !answered.Contains(m.InitiatorId)
+                                     && !blocked.Contains(m.InitiatorId)
+                                     && db.Users.Any(u => u.Id == m.InitiatorId && u.BannedAt == null));
+    }
+
     [HttpPost("{targetId:guid}/pass")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

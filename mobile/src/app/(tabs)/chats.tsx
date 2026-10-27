@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
-import { useConversations, useProfile } from '@/api/hooks';
+import { useConversations, useProfile, useRequestCount, useRequests } from '@/api/hooks';
 import { AuthedImage } from '@/components/AuthedImage';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
@@ -13,6 +13,7 @@ import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 type Conversation = components['schemas']['ConversationSummary'];
+type Card = components['schemas']['ProfileCard'];
 
 export default function Chats() {
   const c = useColors();
@@ -20,10 +21,13 @@ export default function Chats() {
   const s = useStrings();
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
     useConversations();
+  const requests = useRequests();
+  const requestCount = useRequestCount();
 
   return (
     <View style={[styles.page, { backgroundColor: c.background }]}>
       <TabHeader title={s.chats.title} />
+      <RequestStrip cards={requests.items} count={requestCount.data ?? 0} />
 
       <Screen
         loading={isPending}
@@ -37,7 +41,11 @@ export default function Chats() {
           keyExtractor={(conversation) => conversation.id!}
           contentContainerStyle={{ paddingBottom: clearance }}
           // The inbox is the one list people come back to expecting it to have changed.
-          onRefresh={refetch}
+          onRefresh={() => {
+            refetch();
+            requests.refetch();
+            requestCount.refetch();
+          }}
           refreshing={isRefetching}
           onEndReached={loadMore}
           onEndReachedThreshold={0.6}
@@ -45,6 +53,51 @@ export default function Chats() {
           renderItem={({ item }) => <ChatRow conversation={item} />}
         />
       </Screen>
+    </View>
+  );
+}
+
+const STRIP = 8;
+
+/// Who is waiting for an answer, as a row of faces above the inbox. Nothing at all when nobody
+/// is: the empty state belongs to the requests screen. The header is the one control for
+/// assistive technology; the faces are a bigger target for the same place.
+function RequestStrip({ cards, count }: { cards: Card[]; count: number }) {
+  const c = useColors();
+  const router = useRouter();
+  const s = useStrings();
+  if (!count || !cards.length) return null;
+
+  const open = () => router.push('/requests');
+  return (
+    <View style={[styles.requests, { borderBottomColor: c.border }]}>
+      <Pressable
+        onPress={open}
+        accessibilityRole="button"
+        accessibilityLabel={`${s.requests.title}, ${s.requests.count(count)}`}
+        style={({ pressed }) => [styles.requestsHead, { opacity: pressed ? 0.7 : 1 }]}>
+        <Text style={[type.label, { color: c.text }]}>{s.requests.title}</Text>
+        <Text style={[type.label, styles.figure, { color: c.textMuted }]}>{count}</Text>
+      </Pressable>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.faces}>
+        {cards.slice(0, STRIP).map((card) => (
+          <Pressable
+            key={card.id}
+            onPress={open}
+            aria-hidden
+            focusable={false}
+            style={({ pressed }) => [styles.face, { opacity: pressed ? 0.7 : 1 }]}>
+            <AuthedImage
+              path={card.photoUrl}
+              aria-hidden
+              style={[styles.facePhoto, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
+            />
+            <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
+              {card.name?.split(' ')[0]}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -107,5 +160,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   avatar: { width: 48, height: 48, borderRadius: radius.pill },
+  requests: { paddingVertical: space.md, gap: space.sm, borderBottomWidth: StyleSheet.hairlineWidth },
+  requestsHead: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.md,
+  },
+  figure: { fontVariant: ['tabular-nums'] },
+  faces: { paddingHorizontal: space.md, gap: space.md },
+  face: { width: 56, alignItems: 'center', gap: space.xs },
+  facePhoto: { width: 56, height: 56, borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth },
   rowText: { flex: 1, gap: 2 },
 });

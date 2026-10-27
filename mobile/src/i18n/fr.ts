@@ -157,6 +157,13 @@ export const fr: Strings = {
     unlocked: 'Débloquée',
   },
 
+  requests: {
+    title: 'Demandes',
+    subtitle: 'Ces personnes aimeraient vous rencontrer. Seul un match ouvre la conversation.',
+    empty: 'Pas encore de demande',
+    count: (n) => (n === 1 ? '1 demande' : `${n} demandes`),
+  },
+
   chat: {
     back: 'Retour aux messages',
     openProfile: (name) => `${name}, ouvrir son profil`,

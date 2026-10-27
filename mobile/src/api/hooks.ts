@@ -22,6 +22,9 @@ export const keys = {
   messages: (id: string) => ['messages', id] as const,
   reviews: (id: string) => ['reviews', id] as const,
   blocks: ['blocks'] as const,
+  /// The count shares the prefix, so invalidating `requests` refreshes the badge with the list.
+  requests: ['requests'] as const,
+  requestCount: ['requests', 'count'] as const,
   paymentOptions: ['payment-options'] as const,
 };
 
@@ -89,6 +92,24 @@ export function useProfile(id: string | undefined) {
   });
 }
 
+/// People waiting for my answer to their interest. Accepting and declining go through useDecide.
+export function useRequests() {
+  return usePages(keys.requests, async (page) =>
+    unwrap(await api.GET('/api/v1/users/me/requests', { params: { query: { page } } }))
+  );
+}
+
+/// For the badge on the Chats tab. `enabled` because the tab layout renders once before its
+/// redirect to sign-in, and a request without a token would only collect a 401.
+export function useRequestCount(enabled = true) {
+  return useQuery({
+    queryKey: keys.requestCount,
+    // The generated type allows a string for an int32; the server always sends a number.
+    queryFn: async () => Number(unwrap(await api.GET('/api/v1/users/me/requests/count')).count),
+    enabled,
+  });
+}
+
 export function useConversations() {
   return usePages(keys.conversations, async (page) =>
     unwrap(await api.GET('/api/v1/conversations', { params: { query: { page } } }))
@@ -138,10 +159,14 @@ export function useSendMessage(id: string) {
 }
 
 /// Interest and pass both remove the target from discovery, so both drop the whole
-/// discovery cache regardless of which filters produced it.
+/// discovery cache regardless of which filters produced it. Either one may also be the answer
+/// to a request, so the requests and their badge go too.
 export function useDecide() {
   const client = useQueryClient();
-  const forget = () => client.invalidateQueries({ queryKey: ['discovery'] });
+  const forget = () => {
+    client.invalidateQueries({ queryKey: ['discovery'] });
+    client.invalidateQueries({ queryKey: keys.requests });
+  };
 
   const interest = useMutation({
     mutationFn: async (targetId: string) =>
@@ -277,6 +302,7 @@ export function useBlock() {
     // A block takes the conversation out of reach one by one as well as in the list.
     client.invalidateQueries({ queryKey: ['conversation'] });
     client.invalidateQueries({ queryKey: keys.blocks });
+    client.invalidateQueries({ queryKey: keys.requests });
   };
 
   const block = useMutation({

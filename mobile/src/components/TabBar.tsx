@@ -51,7 +51,7 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
             key={route.key}
             role="tab"
             aria-selected={focused}
-            aria-label={title}
+            aria-label={options.tabBarAccessibilityLabel ?? title}
             onPress={onPress}
             onLongPress={onLongPress}
             style={({ pressed }) => [centre ? styles.centre : styles.side, pressed && styles.pressed]}>
@@ -68,7 +68,16 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
                 </View>
               </View>
             ) : (
-              options.tabBarIcon?.({ focused, color: tint, size: 24 })
+              <View>
+                {options.tabBarIcon?.({ focused, color: tint, size: 24 })}
+                {options.tabBarBadge !== undefined ? (
+                  <View aria-hidden style={[styles.badge, { backgroundColor: c.primary, borderColor: c.surface }]}>
+                    <Text style={[type.caption, styles.badgeText, { color: c.onPrimary }]}>
+                      {options.tabBarBadge}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
             )}
             <Text style={[type.label, { color: tint }]} numberOfLines={1}>
               {title}
@@ -123,5 +132,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // On the icon's top-right corner, clear of the label underneath. The ring in the bar's own
+  // colour keeps it apart from the icon, which is coral too while Chats is the active tab.
+  badge: {
+    position: 'absolute',
+    top: -8,
+    left: 12,
+    minWidth: 22,
+    height: 22,
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: { fontSize: 11, lineHeight: 14, fontVariant: ['tabular-nums'] },
   pressed: { opacity: 0.75 },
 });

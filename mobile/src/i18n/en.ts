@@ -153,6 +153,13 @@ export const en = {
     unlocked: 'Unlocked',
   },
 
+  requests: {
+    title: 'Requests',
+    subtitle: "They'd like to meet you. Only a match opens the chat.",
+    empty: 'No requests yet',
+    count: (n: number) => (n === 1 ? '1 request' : `${n} requests`),
+  },
+
   chat: {
     back: 'Back to chats',
     openProfile: (name: string) => `${name}, open their profile`,

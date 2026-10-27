@@ -153,6 +153,13 @@ export const it: Strings = {
     unlocked: 'Sbloccata',
   },
 
+  requests: {
+    title: 'Richieste',
+    subtitle: 'Vorrebbero conoscerti. Solo un match apre la chat.',
+    empty: 'Ancora nessuna richiesta',
+    count: (n) => (n === 1 ? '1 richiesta' : `${n} richieste`),
+  },
+
   chat: {
     back: 'Torna alle chat',
     openProfile: (name) => `${name}, apri il suo profilo`,
