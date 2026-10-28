@@ -34,7 +34,8 @@ const auth: Middleware = {
     // The access token is a 30-day JWT with no refresh flow (ADR-0009). A 401 means it
     // expired or the account is gone: there is nothing to retry with, so end the session.
     if (response.status === 401) onUnauthorized();
-    return response;
+    // No return: on a device fetch() yields a Response that fails openapi-fetch's
+    // `instanceof Response` check, which throws if a middleware hands one back.
   },
 };
 
