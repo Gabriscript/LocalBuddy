@@ -49,6 +49,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "365aa008-26d2-4f94-aaf5-d1ff9f4a0f80"
+      }
+    },
+    "owner": "gabri100s-team"
   }
 }
