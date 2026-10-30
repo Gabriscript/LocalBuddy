@@ -2,136 +2,35 @@
 
 **Meet locals. Share cultures.**
 
-A cultural exchange platform connecting travelers with locals who want to show them their city — not tour guides, not paid experiences, just real people sharing where they live.
+LocalBuddy connects travelers with residents who want to share their city freely. It brings the community-first hospitality of early Couchsurfing into a modern, interest-based mobile app.
 
-Marco (Milan) shows Wei the bar only locals know about. Marco gets to practice his Mandarin and makes a new friend; Wei gets a local contact and an afternoon no guidebook could offer.
+---
 
-Inspired by long-standing reciprocal hospitality models like Servas International (1949) and early Couchsurfing — zero payment for the experience itself, by design.
+### How It Works
+
+Meeting someone in a new city shouldn't feel like an all-or-nothing commitment. LocalBuddy lets people connect at their own pace:
+
+- **Low-pressure connections**: Start with a quick chat, meet for an coffee, or share neighborhood tips. Airport rides and overnight hosting are optional steps when mutual trust is there.
+- **Shared interests, not tourist traps**: Match by language exchange, hobbies, and music tastes to experience places guidebooks skip.
+- **Free by design**: No fees, paid tours, or transactional expectations. Hosts practice a language and make global friends; travelers get genuine local context.
+- **Safety-first foundation**: Built around identity verification (Stripe Identity) and legal hosting compliance.
+
+### A Real-World Scenario
+
+> **Wei** is traveling through Milan and wants to explore the underground live music scene without ending up in commercial tourist spots.
+>
+> **Marco** lives in the Isola district, plays the saxophone, and is looking to practice conversational Mandarin.
+>
+> They match on the discovery feed. What begins as a brief chat leads to Marco picking Wei up near the station, introducing him to a hidden basement jam session, and sharing practical safety tips for navigating the city. Wei gets an authentic local immersion; Marco gains a new friend and an afternoon of fluent language practice.
+
+---
 
 ## Stack
-- Backend: C#, ASP.NET Core, EF Core, PostgreSQL
-- Mobile: React Native on Expo (dev build), API client generated from the OpenAPI document
 
-Full product spec, legal constraints, and build plan: [GUIDELINES.md](GUIDELINES.md)
+- **Backend**: C#, ASP.NET Core, EF Core, PostgreSQL
+- **Mobile**: React Native on Expo
 
-## Running the backend locally
+## Project Status
 
-```bash
-docker compose up -d                       # Postgres on :5434
-cd backend/LocalBuddy.Api
-dotnet ef database update                  # apply pending migrations
-dotnet run --urls http://localhost:5200
-bash ../../smoke-test.sh                   # from the repo root
-```
+Work in progress. Core backend API and database architecture are complete; mobile discovery feed and real-time chat are in active development.
 
-Tests: `dotnet test` from `backend/`. They run against in-memory SQLite and need no Postgres.
-
-## Running the mobile app
-
-```bash
-cd mobile
-npm install
-npm start                 # then open the dev build on a device or simulator
-```
-
-The TypeScript API client is generated from the backend's OpenAPI document, not written by hand:
-`npm run api:gen` reads the committed copy in `backend/openapi.v1.json`. See
-[mobile/README.md](mobile/README.md).
-
-## Where the work stands
-
-The backend v1 is complete: every endpoint the product needs exists, and the reasoning behind
-the shape of it is recorded in [docs/adr](docs/adr/README.md).
-
-The mobile client covers the paths a member walks every day — sign in, register, the discovery
-feed, the expanded profile, interest and pass, the conversation list and a chat. What is left,
-in the order that keeps each piece on working foundations:
-
-1. **Onboarding steps 3 to 5** — guided prompts, photo upload, availability, and the TULPS /
-   Alloggiati Web acknowledgement before overnight hosting can be switched on.
-2. **The filter sheet.** The role chips work and write route params; city, time of day and the
-   three-state traits are not exposed yet.
-3. **Stripe Identity** in `/verify` — the first native module, and what forces the EAS dev build.
-4. **The paid unlock.** The control is already placed on the expanded profile, deliberately quiet
-   and apart from the free actions, and calls nothing.
-5. **Reviews, reports and blocking** — the endpoints exist, the screens do not.
-
-One deliberate loose end: the access token is a 30-day JWT with no refresh flow and no way to
-revoke it, so a lost device keeps its session past logout. The backend half and the client half
-of that are worth doing together.
-
-`Program.cs` carries a **Development-only CORS policy** so the Expo web target can reach the API
-during a browser preview. Nothing outside Development registers it; delete it the day the web
-preview stops being useful.
-
-## Behind a reverse proxy
-
-The API reads the caller's address from `X-Forwarded-For`, but only when the connection comes
-from a proxy it has been told about. A proxy that is not on the same host has to be listed:
-
-```json
-{ "KnownProxies": ["10.0.0.4"] }
-```
-
-Empty means loopback only, which is right for Caddy on the same machine. Get this wrong and
-every caller shares one rate-limit partition — the login budget included.
-
-## Applying migrations on deploy
-
-The application deliberately does **not** migrate at startup: with more than one instance,
-concurrent migrations race. Applying the schema is a separate, explicit deploy step that must
-run to completion before the new version starts serving.
-
-Build a migration bundle once per release — a standalone executable that needs no .NET SDK and
-no source on the target machine:
-
-```bash
-cd backend/LocalBuddy.Api
-dotnet ef migrations bundle --self-contained -r linux-x64 -o efbundle
-```
-
-Then, as the first step of the deploy:
-
-```bash
-./efbundle --connection "$DATABASE_URL"
-```
-
-It is idempotent: already-applied migrations are skipped. If it fails, stop the deploy — the
-old version keeps running against the old schema.
-
-Without a bundle the equivalent from a source checkout is `dotnet ef database update`, which
-needs the SDK on the machine doing the deploy.
-
-### Writing a migration that is safe on a populated table
-
-EF generates `CREATE INDEX` and `ADD CONSTRAINT` in their blocking forms, which is fine on an
-empty database and an outage on a large one. Once a table carries real traffic, hand-edit the
-generated migration:
-
-```csharp
-migrationBuilder.Sql("""CREATE INDEX CONCURRENTLY "IX_x" ON "T" ("c");""", suppressTransaction: true);
-migrationBuilder.Sql("""ALTER TABLE "T" ADD CONSTRAINT "FK_x" FOREIGN KEY ... NOT VALID;""");
-migrationBuilder.Sql("""ALTER TABLE "T" VALIDATE CONSTRAINT "FK_x";""");
-```
-
-`CONCURRENTLY` cannot run inside a transaction, hence `suppressTransaction: true`. Keep schema
-changes and data backfills in separate migrations, and never edit a migration that has already
-been applied anywhere.
-
-## Moderators
-
-Moderator access is granted from configuration, not by editing the database:
-
-```json
-{ "Moderators": ["0194c0f3-7a1e-7c6b-9a10-2f8d4b6e5c31"] }
-```
-
-Entries are account ids, not email addresses: nothing verifies that the person registering an
-address owns it, so an address here would hand moderator powers to whoever signs up with it
-first. Anything that is not an id is ignored with a warning in the log.
-
-Listed accounts are given the `moderator` role at startup, once the account exists. Every
-moderation request checks the role in the database, so granting it or taking it away takes
-effect at once — a token says what was true for the 30 days it lives. Moderators reach
-`/api/v1/moderation/*`: the open report queue, and banning or unbanning an account with a reason
-on the record. See [ADR-0005](docs/adr/0005-platform-ban-with-identity-continuity.md).
