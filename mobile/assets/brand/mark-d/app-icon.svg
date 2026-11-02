@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>LocalBuddy</title>
+  <rect width="1024" height="1024" fill="#032B43"/>
+  <g transform="translate(512 505) scale(2.9) translate(-128 -128)"><path fill="#F7F4F1" fill-rule="evenodd" d="M24 236V124a104 104 0 0 1 208 0V236H196V124a68 68 0 0 0-136 0V236Z"/><circle cx="128" cy="128" r="28" fill="#F45D73"/><path fill="#F45D73" d="M76 236a52 52 0 0 1 104 0Z"/></g>
+</svg>

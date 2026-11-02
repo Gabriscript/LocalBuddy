@@ -170,23 +170,13 @@ a {
 }
 
 .wordmark .mark {
-  width: 28px;
-  height: auto;
+  width: 30px;
+  height: 30px;
   margin-right: 8px;
 }
 
 /* The brand's two halves: Local in night, Buddy in coral; on the dark scheme night is the page, so
    Local turns to paper. */
-@media (prefers-color-scheme: dark) {
-  /* The mark's right-hand figure is night: on a night page it needs a paper tile behind it. */
-  .wordmark .mark {
-    box-sizing: content-box;
-    padding: 4px 5px;
-    border-radius: 9px;
-    background: #f7f4f1;
-  }
-}
-
 .w-local {
   color: var(--wordmark-local);
 }

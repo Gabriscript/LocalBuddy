@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 0 860 230">
+  <title>LocalBuddy</title>
+  <style>@font-face { font-family: 'Playfair Display'; font-weight: 600; src: url('../../../../web/fonts/playfair-display-latin-600-normal.woff2') format('woff2'); } text { font-family: 'Playfair Display', serif; font-weight: 600; }</style>
+  <g transform="translate(0 13) scale(0.75)"><path fill="#032B43" fill-rule="evenodd" d="M24 236V124a104 104 0 0 1 208 0V236H196V124a68 68 0 0 0-136 0V236Z"/><circle cx="128" cy="128" r="28" fill="#C8324E"/><path fill="#C8324E" d="M76 236a52 52 0 0 1 104 0Z"/></g>
+  <text x="210" y="190" font-size="118"><tspan fill="#032B43">Local</tspan><tspan fill="#C8324E">Buddy</tspan></text>
+</svg>
