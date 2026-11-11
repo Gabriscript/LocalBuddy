@@ -30,6 +30,8 @@ export default function Login() {
     } catch (e) {
       // invalid_credentials and account_banned are the two codes this endpoint returns, and
       // each one's wording already says what to do next.
+      // The message for anything else is deliberately vague; in development the real cause goes to the console.
+      if (__DEV__ && !(e instanceof ApiError)) console.warn(e);
       setError(e instanceof ApiError ? errorMessage(e, s) : s.auth.signInFailed);
     } finally {
       setBusy(false);

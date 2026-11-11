@@ -26,47 +26,48 @@ export const es: Strings = {
     stepOf: (step, total) => `Paso ${step} de ${total}`,
   },
 
-  roles: { host: 'Anfitrión', guest: 'Huésped', entrambi: 'Ambos' },
-  roleShown: { host: 'Anfitrión', guest: 'Huésped', entrambi: 'Anfitrión y huésped' },
+  roles: { host: 'Anfitrión', guest: 'Viajero', entrambi: 'Ambos' },
+  roleShown: { host: 'Anfitrión', guest: 'Viajero', entrambi: 'Anfitrión y viajero' },
 
   tabs: { discover: 'Descubrir', chats: 'Chats', me: 'Perfil' },
 
   timeOfDay: { morning: 'Mañana', afternoon: 'Tarde', evening: 'Anochecer', night: 'Noche' },
 
   auth: {
-    tagline: 'Conoce a gente local. Comparte culturas.',
+    tagline: 'Conoce a alguien que vive allí.',
     signIn: 'Iniciar sesión',
-    noAccount: '¿Aún no tienes cuenta? Regístrate',
-    haveAccount: '¿Ya tienes cuenta? Inicia sesión',
-    signInFailed: 'No se ha podido iniciar sesión. Comprueba tu conexión.',
+    noAccount: '¿Primera vez aquí? Regístrate',
+    haveAccount: '¿Ya eres miembro? Inicia sesión',
+    signInFailed: 'No hemos podido iniciar tu sesión. Prueba otra vez en un momento.',
     createAccount: 'Crear cuenta',
-    passwordHint: 'Al menos 8 caracteres.',
-    changeLater: 'Puedes cambiarlo más adelante.',
-    registerFailed: 'No se ha podido completar el registro. Comprueba tu conexión.',
+    passwordHint: 'Al menos 8 caracteres: mayúsculas y minúsculas, un número y un símbolo.',
+    changeLater: 'Puedes cambiarlo cuando quieras.',
+    registerFailed: 'No hemos podido crear tu cuenta. Prueba otra vez en un momento.',
   },
 
   onboarding: {
-    aboutTitle: 'Sobre ti',
+    aboutTitle: 'Un poco sobre ti',
     aboutSubtitle:
-      'Unas pocas respuestas cortas dicen más que una biografía larga: le cuentan a un desconocido cómo es un día contigo.',
-    photoTitle: 'Tu foto y tu tiempo',
-    photoSubtitle: 'Una foto clara de tu cara, y cuándo sueles tener tiempo libre.',
+      'Las respuestas cortas ganan a una biografía larga. Le enseñan a un desconocido cómo es un día contigo.',
+    photoTitle: 'Tu cara, tu tiempo libre',
+    photoSubtitle:
+      'La gente dice que sí a una cara. Sube una foto clara y cuéntanos cuándo tienes tiempo libre.',
     changePhoto: 'Cambiar foto',
     addPhoto: 'Añadir una foto',
     photoPrivacy: 'Antes de que nadie la vea, se eliminan de tu foto los datos de ubicación.',
     whenFree: '¿Cuándo sueles tener tiempo libre?',
-    pickTimes: 'Elige todos los que encajen. Puedes cambiarlos más adelante.',
+    pickTimes: 'Elige todos los que encajen. Los planes cambian, y esto también.',
     verifyTitle: 'Verifica que eres tú',
     verifySubtitle:
-      'Una comprobación rápida del documento, una sola vez. Sin ella nadie puede contactar con otro miembro, y eso es lo que hace de esto un lugar para conocer a desconocidos con seguridad.',
-    verifyCta: 'Empezar la verificación',
-    listingTitle: 'Qué ofreces',
+      'Una comprobación rápida del documento, una sola vez. Sin ella nadie puede escribir a nadie, y así este sigue siendo un sitio seguro para conocer a desconocidos.',
+    verifyCta: 'Empezar la comprobación',
+    listingTitle: 'Qué puedes compartir',
     listingSubtitle:
-      'Una tarde fuera, un sitio donde dormir, o las dos cosas. Puedes cambiarlo más adelante.',
-    experience: 'Una experiencia',
-    experienceHint: 'Enseñarle tu ciudad a alguien: un paseo, una comida, una tarde.',
-    overnight: 'Un sitio donde dormir',
-    overnightHint: 'Alojar a alguien por la noche en tu casa.',
+      'Una tarde fuera, una cama para la noche, o las dos cosas. Puedes cambiarlo más adelante.',
+    experience: 'Una tarde fuera',
+    experienceHint: 'Un paseo, una comida, el bar al que llevarías a un amigo.',
+    overnight: 'Una cama para la noche',
+    overnightHint: 'Un viajero pasa la noche en tu casa.',
     obligationsTitle: 'Alojar a alguien por la noche conlleva obligaciones legales',
     obligationRegistered:
       'Estoy registrado/a en el portal Alloggiati Web ante la Questura de mi zona.',
@@ -87,7 +88,7 @@ export const es: Strings = {
     whyHost: '¿Por qué recibes a viajeros?',
     languages: 'Idiomas que hablas',
     languagesHint: 'Por ejemplo: italiano, inglés, un poco de español.',
-    facts: 'Algunos datos',
+    facts: 'Lo práctico',
     haveCar: 'Tengo coche',
     smoke: 'Fumo',
     havePets: 'Tengo mascotas',
@@ -98,15 +99,15 @@ export const es: Strings = {
 
   discover: {
     title: 'Descubrir',
-    subtitle: 'Gente cerca de ti que quiere enseñarte su ciudad.',
+    subtitle: 'Quién hay cerca, y la tarde que tienen en mente.',
     everyone: 'Todos',
     hosts: 'Anfitriones',
     guests: 'Viajeros',
-    whoToShow: 'A quién mostrar',
+    whoToShow: 'A quién quieres conocer',
     filters: 'Filtros',
     filtersLabel: (n) => (n === 1 ? 'Filtros, 1 activo' : `Filtros, ${n} activos`),
-    emptyFiltered: 'Ahora mismo nadie coincide con estos filtros.',
-    empty: 'Ahora mismo no hay nadie nuevo aquí. Vuelve más tarde, o mira otra ciudad.',
+    emptyFiltered: 'Ahora mismo nadie encaja con todos. Prueba a quitar alguno.',
+    empty: 'Ya has visto a todos los de por aquí. Vuelve pronto, o prueba otra ciudad.',
     changeFilters: 'Cambiar los filtros',
     openFilters: 'Abrir los filtros',
   },
@@ -114,7 +115,7 @@ export const es: Strings = {
   filters: {
     title: 'Filtros',
     clear: 'Borrar',
-    showResults: 'Ver resultados',
+    showResults: 'Ver gente',
     anywhere: 'Cualquier sitio',
     whenFree: 'Cuándo tienen tiempo',
     hasPets: 'Tiene mascotas',
@@ -143,22 +144,22 @@ export const es: Strings = {
     languages: 'Idiomas',
     reviews: 'Lo que dice la gente',
     ratedOutOf5: (n) => `Valoración: ${n} de 5`,
-    moreReviews: 'Más reseñas',
+    moreReviews: 'Leer más reseñas',
     showInterest: 'Mostrar interés',
-    unlock: 'Desbloquear el chat sin match',
+    unlock: 'Abrir el chat sin esperar',
   },
 
   chats: {
     title: 'Chats',
-    empty: 'Aún no hay conversaciones. Un chat se abre cuando el interés es mutuo.',
+    empty: 'Aún no hay chats. Cuando los dos digáis que sí, todo empieza aquí.',
     sayHello: 'Saluda',
     unlocked: 'Desbloqueado',
   },
 
   requests: {
     title: 'Solicitudes',
-    subtitle: 'Les gustaría conocerte. Solo un match abre el chat.',
-    empty: 'Aún no hay solicitudes',
+    subtitle: 'Quieren conocerte. Di que sí y se abre el chat.',
+    empty: 'Nadie espera tu respuesta.',
     count: (n) => (n === 1 ? '1 solicitud' : `${n} solicitudes`),
   },
 
@@ -167,10 +168,10 @@ export const es: Strings = {
     openProfile: (name) => `${name}, abrir su perfil`,
     conversation: 'Conversación',
     moreActions: 'Reseñar, denunciar o bloquear',
-    empty: 'Aún no hay mensajes. Saluda.',
+    empty: 'Aún no hay nada. Alguien tiene que saludar primero.',
     youSaid: (text) => `Has escrito: ${text}`,
     theySaid: (name, text) => `${name ?? 'La otra persona'} ha escrito: ${text}`,
-    message: 'Mensaje',
+    message: 'Escribe un mensaje',
     send: 'Enviar mensaje',
   },
 
@@ -191,7 +192,7 @@ export const es: Strings = {
   blocked: {
     title: 'Miembros bloqueados',
     empty:
-      'No hay nadie bloqueado. Bloquear oculta a dos personas entre sí, y aquí es donde se puede deshacer.',
+      'No has bloqueado a nadie. Si algún día lo haces, aquí podrás deshacerlo.',
     unblock: 'Desbloquear',
   },
 
@@ -223,7 +224,7 @@ export const es: Strings = {
   review: {
     sent: 'Reseña enviada',
     sentBody:
-      'Gracias. Ya está en su perfil, y cuenta para lo que otras personas ven antes de ponerse en contacto.',
+      'Gracias. Ya está en su perfil, donde la próxima persona la leerá antes de escribirle.',
     title: (name) => `Reseñar a ${name}`,
     send: 'Enviar reseña',
     howWasIt: '¿Qué tal fue?',
@@ -245,7 +246,7 @@ export const es: Strings = {
     ctaCredits: (n) => (n === 1 ? 'Usar 1 crédito' : `Usar ${n} créditos`),
     ctaMoney: (price) => `Pagar ${price}`,
     body: (name) =>
-      `Esto abre una conversación con ${name} enseguida, en lugar de esperar a que te devuelva el interés.`,
+      `Esto abre un chat con ${name} ahora, sin esperar a que te devuelva el interés.`,
     note: 'Pagas la presentación, y nada más. El tiempo que pasáis juntos nunca se paga, por ninguno de los dos.',
   },
 
@@ -255,7 +256,7 @@ export const es: Strings = {
     body: (name) => `El chat con ${name} está abierto, y nadie ha pagado por él.`,
     sayHello: 'Saludar',
     theirProfile: 'Su perfil',
-    later: 'Más tarde',
+    later: 'Ahora no',
   },
 
   skeleton: {
@@ -285,7 +286,7 @@ export const es: Strings = {
     identity_verification_required: 'Verifica tu identidad antes de contactar con otros miembros.',
     image_too_large: 'Esa imagen tiene demasiados píxeles. Las fotos hechas con el teléfono están bien.',
     invalid_credentials:
-      'El correo o la contraseña no son correctos. Tras 5 intentos fallidos, el acceso se bloquea durante 15 minutos.',
+      'El correo y la contraseña no coinciden. Tras 5 intentos fallidos, el acceso se pausa durante 15 minutos.',
     invalid_slot:
       'Cada franja de disponibilidad necesita un momento del día válido y una temporada que termine después de empezar.',
     moderator_only: 'Solo los moderadores pueden hacer esto.',
@@ -293,8 +294,8 @@ export const es: Strings = {
       'Solo puedes reseñar a alguien cuando los dos os habéis escrito en la misma conversación.',
     not_a_resolution: 'Una denuncia solo se puede cerrar como revisada o descartada.',
     not_an_image: 'Ese archivo no es una imagen legible.',
-    rate_limited: 'Demasiadas solicitudes. Espera un minuto y vuelve a intentarlo.',
-    registration_failed: 'No se ha podido completar el registro.',
+    rate_limited: 'Demasiados intentos seguidos. Espera un minuto y vuelve a intentarlo.',
+    registration_failed: 'No hemos podido crear tu cuenta. Revisa los datos e inténtalo de nuevo.',
     self_target: 'No puedes hacer esto con tu propio perfil.',
     target_not_verified:
       'Esta persona aún no ha verificado su identidad, así que el chat no se puede desbloquear.',

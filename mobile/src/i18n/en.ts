@@ -27,53 +27,53 @@ export const en = {
   },
 
   /// The role choice, as a chip.
-  roles: { host: 'Host', guest: 'Guest', entrambi: 'Both' },
+  roles: { host: 'Host', guest: 'Traveller', entrambi: 'Both' },
   /// The role shown under a member's name, where "Both" on its own would say nothing.
-  roleShown: { host: 'Host', guest: 'Guest', entrambi: 'Host and guest' },
+  roleShown: { host: 'Host', guest: 'Traveller', entrambi: 'Host and traveller' },
 
   tabs: { discover: 'Discover', chats: 'Chats', me: 'Me' },
 
   timeOfDay: { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' },
 
   auth: {
-    tagline: 'Meet locals. Share cultures.',
+    tagline: 'Meet someone who lives there.',
     signIn: 'Sign in',
-    noAccount: 'No account yet? Register',
-    haveAccount: 'Already have an account? Sign in',
-    signInFailed: 'Could not sign in. Check your connection.',
+    noAccount: 'New here? Register',
+    haveAccount: 'Already a member? Sign in',
+    signInFailed: "We couldn't sign you in. Try again in a moment.",
     createAccount: 'Create account',
-    passwordHint: 'At least 8 characters.',
-    changeLater: 'You can change this later.',
-    registerFailed: 'Could not register. Check your connection.',
+    passwordHint: 'At least 8 characters: upper and lower case, a number and a symbol.',
+    changeLater: 'You can switch any time.',
+    registerFailed: "We couldn't create your account. Try again in a moment.",
   },
 
   onboarding: {
-    aboutTitle: 'About you',
+    aboutTitle: 'A bit about you',
     aboutSubtitle:
-      'A few short answers do more than a long bio: they tell a stranger what a day with you looks like.',
-    photoTitle: 'Your photo and your time',
-    photoSubtitle: 'A clear photo of your face, and when you are usually free.',
+      'Short answers beat a long bio. They show a stranger what a day with you looks like.',
+    photoTitle: 'Your face, your free time',
+    photoSubtitle: 'People say yes to a face. Add a clear photo, and tell us when you are free.',
     changePhoto: 'Change photo',
     addPhoto: 'Add a photo',
     photoPrivacy: 'Your photo is stripped of location data before anyone sees it.',
     whenFree: 'When are you usually free?',
-    pickTimes: 'Pick as many as fit. You can change them later.',
+    pickTimes: 'Pick all that fit. Plans change, and so can these.',
     verifyTitle: "Verify it's you",
     verifySubtitle:
-      'A quick document check, once. Nobody can contact another member without it, which is what keeps this a place for meeting strangers safely.',
-    verifyCta: 'Start verification',
-    listingTitle: 'What you offer',
-    listingSubtitle: 'An afternoon out, a place to stay, or both. You can change this later.',
-    experience: 'An experience',
-    experienceHint: 'Showing someone your city: a walk, a meal, an afternoon.',
-    overnight: 'A place to stay',
-    overnightHint: 'Hosting someone overnight in your home.',
+      'One quick document check, done once. Nobody can write to anyone without it, which keeps this a safe place to meet strangers.',
+    verifyCta: 'Start the check',
+    listingTitle: 'What you can share',
+    listingSubtitle: 'An afternoon out, a bed for the night, or both. You can change this later.',
+    experience: 'An afternoon out',
+    experienceHint: 'A walk, a meal, the bar you would take a friend to.',
+    overnight: 'A bed for the night',
+    overnightHint: 'A traveller stays the night in your home.',
     obligationsTitle: 'Hosting overnight comes with legal obligations',
     obligationRegistered: 'I am registered on the Alloggiati Web portal with my local Questura.',
     obligationCheck:
-      "I will check each guest's identity document in person on arrival. A remote check-in is not enough.",
+      "I will check each traveller's identity document in person on arrival. A remote check-in is not enough.",
     obligationSend:
-      "I will send each guest's details within 24 hours of arrival, or within 6 hours for stays shorter than a day.",
+      "I will send each traveller's details within 24 hours of arrival, or within 6 hours for stays shorter than a day.",
     cannotSend: 'LocalBuddy cannot send these details for you: it takes your own Questura login.',
     confirmAll: 'I confirm all three',
     chooseOne: 'Choose at least one to finish.',
@@ -85,7 +85,7 @@ export const en = {
     whyHost: 'Why do you host?',
     languages: 'Languages you speak',
     languagesHint: 'For example: Italian, English, a little Spanish.',
-    facts: 'A few facts',
+    facts: 'The practical bits',
     haveCar: 'I have a car',
     smoke: 'I smoke',
     havePets: 'I have pets',
@@ -95,15 +95,15 @@ export const en = {
 
   discover: {
     title: 'Discover',
-    subtitle: 'People near you who want to show you their city.',
+    subtitle: "Who's nearby, and the afternoon they have in mind.",
     everyone: 'Everyone',
     hosts: 'Hosts',
     guests: 'Travellers',
-    whoToShow: 'Who to show',
+    whoToShow: 'Who you want to meet',
     filters: 'Filters',
     filtersLabel: (n: number) => `Filters, ${n} active`,
-    emptyFiltered: 'Nobody matches these filters right now.',
-    empty: 'Nobody new here right now. Come back later, or look at another city.',
+    emptyFiltered: 'Nobody fits all of these right now. Try loosening one.',
+    empty: 'You have seen everyone nearby. Check back soon, or try another city.',
     changeFilters: 'Change the filters',
     openFilters: 'Open the filters',
   },
@@ -111,9 +111,9 @@ export const en = {
   filters: {
     title: 'Filters',
     clear: 'Clear',
-    showResults: 'Show results',
+    showResults: 'Show people',
     anywhere: 'Anywhere',
-    whenFree: 'When they are free',
+    whenFree: "When they're free",
     hasPets: 'Has pets',
     any: 'Any',
     yes: 'Yes',
@@ -141,22 +141,22 @@ export const en = {
     languages: 'Languages',
     reviews: 'What people say',
     ratedOutOf5: (n: number) => `Rated ${n} out of 5`,
-    moreReviews: 'More reviews',
+    moreReviews: 'Read more reviews',
     showInterest: 'Show interest',
-    unlock: 'Unlock the chat without a match',
+    unlock: 'Skip the wait and unlock the chat',
   },
 
   chats: {
     title: 'Chats',
-    empty: 'No conversations yet. A chat opens when interest is mutual.',
+    empty: 'No chats yet. When you both say yes, this is where it starts.',
     sayHello: 'Say hello',
     unlocked: 'Unlocked',
   },
 
   requests: {
     title: 'Requests',
-    subtitle: "They'd like to meet you. Only a match opens the chat.",
-    empty: 'No requests yet',
+    subtitle: "They'd like to meet you. Say yes back and the chat opens.",
+    empty: 'Nobody is waiting for your answer.',
     count: (n: number) => (n === 1 ? '1 request' : `${n} requests`),
   },
 
@@ -165,11 +165,11 @@ export const en = {
     openProfile: (name: string) => `${name}, open their profile`,
     conversation: 'Conversation',
     moreActions: 'Review, report or block',
-    empty: 'No messages yet. Say hello.',
+    empty: 'Nothing here yet. Someone has to say hello first.',
     youSaid: (text: string) => `You said: ${text}`,
     /// The name is missing until the other member's profile has loaded.
     theySaid: (name: string | undefined, text: string) => `${name ?? 'They'} said: ${text}`,
-    message: 'Message',
+    message: 'Write a message',
     send: 'Send message',
   },
 
@@ -191,7 +191,7 @@ export const en = {
   blocked: {
     title: 'Blocked members',
     empty:
-      'Nobody is blocked. Blocking hides two people from each other, and this is where it can be undone.',
+      'You have not blocked anyone. If you ever do, this is where you can undo it.',
     unblock: 'Unblock',
   },
 
@@ -222,7 +222,7 @@ export const en = {
   review: {
     sent: 'Review sent',
     sentBody:
-      'Thank you. It is on their profile now, and it counts towards what other people see before they get in touch.',
+      'Thank you. It is on their profile now, where the next person will read it before getting in touch.',
     title: (name: string) => `Review ${name}`,
     send: 'Send review',
     howWasIt: 'How was it?',
@@ -244,7 +244,7 @@ export const en = {
     ctaCredits: (n: number) => (n === 1 ? 'Use 1 credit' : `Use ${n} credits`),
     ctaMoney: (price: string) => `Pay ${price}`,
     body: (name: string) =>
-      `This opens a conversation with ${name} straight away, instead of waiting for them to show interest back.`,
+      `This opens a chat with ${name} now, without waiting for them to show interest back.`,
     note: 'It pays for the introduction, and for nothing else. The time you spend together is never paid for, by either of you.',
   },
 
@@ -254,7 +254,7 @@ export const en = {
     body: (name: string) => `The chat with ${name} is open, and nobody paid for it.`,
     sayHello: 'Say hello',
     theirProfile: 'Their profile',
-    later: 'Later',
+    later: 'Not now',
   },
 
   skeleton: {
@@ -284,15 +284,15 @@ export const en = {
     identity_verification_required: 'Verify your identity before contacting other members.',
     image_too_large: 'That image has too many pixels. Photos from a phone camera are fine.',
     invalid_credentials:
-      'The email or the password is not right. After 5 wrong attempts, signing in is paused for 15 minutes.',
+      "That email and password don't match. After 5 wrong attempts, signing in pauses for 15 minutes.",
     invalid_slot:
       'Each availability slot needs a known time of day, and a season that ends after it starts.',
     moderator_only: 'Only moderators can do this.',
     no_exchange: 'You can review someone only after you have both written in the same conversation.',
     not_a_resolution: 'A report can only be closed as reviewed or dismissed.',
     not_an_image: 'That file is not a readable image.',
-    rate_limited: 'Too many requests. Wait a minute and try again.',
-    registration_failed: 'Registration could not be completed.',
+    rate_limited: 'Too many tries in a row. Wait a minute and try again.',
+    registration_failed: "We couldn't create your account. Check your details and try again.",
     self_target: 'You cannot do that to your own profile.',
     target_not_verified:
       'This member has not verified their identity yet, so the chat cannot be unlocked.',
