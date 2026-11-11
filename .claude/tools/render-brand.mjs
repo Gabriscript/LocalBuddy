@@ -20,6 +20,9 @@ const jobs = [
   ['android-icon-monochrome.svg', 'android-icon-monochrome.png', 432, 432],
   // 3x the 184 dp imageWidth in app.json; the viewBox is square (mark above wordmark, inside the 192 dp circle)
   ['splash-icon.svg', 'splash-icon.png', 552, 552],
+  // the sign-in screen draws the mark as an image, one per theme
+  ['mark-e/mark-small.svg', '../brand/mark-e/png/mark.png', 512, 512],
+  ['mark-e/mark-small-dark.svg', '../brand/mark-e/png/mark-dark.png', 512, 512],
 ];
 const port = 9334;
 const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', [

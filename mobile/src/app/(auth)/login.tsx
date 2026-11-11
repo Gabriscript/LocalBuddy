@@ -50,8 +50,8 @@ export default function Login() {
             style={styles.mark}
             source={
               scheme === 'dark'
-                ? require('../../../assets/brand/mark-d/png/mark-dark.png')
-                : require('../../../assets/brand/mark-d/png/mark.png')
+                ? require('../../../assets/brand/mark-e/png/mark-dark.png')
+                : require('../../../assets/brand/mark-e/png/mark.png')
             }
           />
           <Text role="heading" style={[type.display, { color: c.text }]}>
