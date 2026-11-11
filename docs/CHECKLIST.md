@@ -66,7 +66,7 @@ Milestones:
 
 | | Item | Milestone | Check |
 |---|---|---|---|
-| [ ] | In-app badge for new requests and messages | Demo | requests done on the Chats tab; unread messages still open |
+| [x] | In-app badge for new requests and messages | Demo | `RequestTests`, `UnreadTests`; count on the chat row and on the Chats tab, cleared when the chat opens (web preview, real Postgres); not seen on a device |
 | [ ] | Push notifications (Expo Notifications, FCM/APNs) | Beta | a device receives one |
 | [ ] | Email for account events (verification, password reset) | Beta | — |
 | [ ] | Password reset | Beta | — |
@@ -118,7 +118,7 @@ Milestones:
 | [x] | Landing page in the new palette (night and coral, mark and wordmark in the header, favicon from the mark) | Beta | `web/`, seen in light and dark |
 | [ ] | Deploy to Hetzner (needs Gabriele's go-ahead and domain) | Demo | `curl` on the public URL |
 | [~] | APK through EAS `preview` profile | Demo | `eas build -p android --profile preview` (Gabriele's Expo login) |
-| [~] | Landing page: hero and market photos done, share image ready (`share-street.jpg`, tag waits for the domain); still the invitation destination and the domain for hreflang | Beta | `web/` |
+| [~] | Landing page: hero and market photos done, share image ready (`share-street.jpg`, tag waits for the domain); the invitation button opens an email to MadHat (2026-11-11, no signup endpoint yet); still the domain for hreflang, and the page is not published anywhere | Beta | `web/` |
 | [ ] | Play Store and App Store listings, screenshots, data-safety form | Launch | — |
 | [ ] | Production config: `KnownProxies`, no dev JWT key, CORS closed | Launch | startup check |
 
