@@ -22,7 +22,7 @@ public record MessageDto(Guid Id, Guid ConversationId, Guid SenderId, string Con
 }
 
 public record ConversationSummary(
-    Guid Id, Guid OtherUserId, bool UnlockedByPayment, DateTime CreatedAt, string? LastMessage);
+    Guid Id, Guid OtherUserId, bool UnlockedByPayment, DateTime CreatedAt, string? LastMessage, int UnreadCount);
 
 public record ReviewDto(Guid Id, Guid AuthorId, Guid SubjectId, int Rating, string Comment, DateTime CreatedAt)
 {

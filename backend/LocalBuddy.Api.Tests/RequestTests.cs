@@ -27,6 +27,9 @@ public class RequestTests
         using var t = new TestDb();
         var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
         await Matches(t, bruno).Interest(anna);
+        // The order comes from version 7 ids, which sort by the millisecond: two requests inside
+        // the same one have no order to assert.
+        await Task.Delay(2);
         await Matches(t, carla).Interest(anna);
 
         Assert.Equal([carla, bruno], await RequestsOf(t, anna));

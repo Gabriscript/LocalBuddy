@@ -61,6 +61,8 @@ export function Field({
   );
 }
 
+const MULTILINE_PADDING = space.sm + 4;
+
 const styles = StyleSheet.create({
   field: { gap: space.xs + 2 },
   inputRow: { justifyContent: 'center' },
@@ -72,7 +74,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
   },
   inputWithAction: { paddingRight: space.xxl },
-  // Room for three lines, and text that starts at the top instead of floating mid-box.
-  multiline: { minHeight: 104, paddingTop: space.sm + 4, paddingBottom: space.sm + 4, textAlignVertical: 'top' },
+  // Exactly four whole lines (a partial line reads as cut-off text), and text that starts at the
+  // top instead of floating mid-box.
+  multiline: {
+    minHeight: 4 * type.body.lineHeight + 2 * MULTILINE_PADDING,
+    paddingTop: MULTILINE_PADDING,
+    paddingBottom: MULTILINE_PADDING,
+    textAlignVertical: 'top',
+  },
   action: { position: 'absolute', right: space.md, height: 44, width: 44, alignItems: 'center', justifyContent: 'center' },
 });

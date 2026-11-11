@@ -35,40 +35,40 @@ export const fr: Strings = {
   timeOfDay: { morning: 'Matin', afternoon: 'Après-midi', evening: 'Soirée', night: 'Nuit' },
 
   auth: {
-    tagline: 'Rencontrez des gens du coin. Partagez vos cultures.',
+    tagline: "Rencontrez quelqu'un du coin.",
     signIn: 'Se connecter',
-    noAccount: 'Pas encore de compte ? Inscrivez-vous',
-    haveAccount: 'Vous avez déjà un compte ? Connectez-vous',
-    signInFailed: 'Impossible de vous connecter. Vérifiez votre réseau.',
+    noAccount: 'Pas encore membre ? Inscrivez-vous',
+    haveAccount: 'Déjà membre ? Connectez-vous',
+    signInFailed: "Nous n'avons pas pu vous connecter. Réessayez dans un instant.",
     createAccount: 'Créer un compte',
-    passwordHint: 'Au moins 8 caractères.',
-    changeLater: 'Vous pourrez le changer plus tard.',
-    registerFailed: 'Inscription impossible. Vérifiez votre réseau.',
+    passwordHint: 'Au moins 8 caractères : majuscules et minuscules, un chiffre et un symbole.',
+    changeLater: 'Vous pourrez en changer à tout moment.',
+    registerFailed: "Nous n'avons pas pu créer votre compte. Réessayez dans un instant.",
   },
 
   onboarding: {
-    aboutTitle: 'À propos de vous',
+    aboutTitle: 'Un mot sur vous',
     aboutSubtitle:
-      "Quelques réponses courtes en disent plus qu'une longue bio : elles montrent à un inconnu à quoi ressemble une journée avec vous.",
-    photoTitle: 'Votre photo et votre temps',
-    photoSubtitle: 'Une photo nette de votre visage, et quand vous êtes libre en général.',
+      "Des réponses courtes valent mieux qu'une longue bio. Elles montrent à un inconnu à quoi ressemble une journée avec vous.",
+    photoTitle: 'Votre visage, votre temps libre',
+    photoSubtitle: 'On dit oui à un visage. Ajoutez une photo nette, et dites-nous quand vous êtes libre.',
     changePhoto: 'Changer de photo',
     addPhoto: 'Ajouter une photo',
     photoPrivacy:
       'Les données de localisation sont retirées de votre photo avant que quiconque la voie.',
     whenFree: 'Quand êtes-vous libre en général ?',
-    pickTimes: 'Choisissez tous ceux qui conviennent. Vous pourrez les changer plus tard.',
+    pickTimes: 'Choisissez tout ce qui vous convient. Les projets changent, vos choix aussi.',
     verifyTitle: "Vérifiez que c'est bien vous",
     verifySubtitle:
-      "Un contrôle rapide de votre pièce d'identité, une seule fois. Sans lui, personne ne peut contacter un autre membre, et c'est ce qui permet de rencontrer des inconnus en toute sécurité.",
+      "Un contrôle rapide de votre pièce d'identité, une seule fois. Sans lui, personne ne peut écrire à personne : c'est ce qui permet de rencontrer des inconnus en toute sécurité.",
     verifyCta: 'Lancer la vérification',
-    listingTitle: 'Ce que vous proposez',
+    listingTitle: 'Ce que vous pouvez partager',
     listingSubtitle:
-      'Un après-midi dehors, un endroit où dormir, ou les deux. Vous pourrez le changer plus tard.',
-    experience: 'Une expérience',
-    experienceHint: 'Faire découvrir votre ville : une balade, un repas, un après-midi.',
-    overnight: 'Un endroit où dormir',
-    overnightHint: "Héberger quelqu'un pour la nuit chez vous.",
+      'Un après-midi dehors, un lit pour la nuit, ou les deux. Vous pourrez le changer plus tard.',
+    experience: 'Un après-midi dehors',
+    experienceHint: 'Une balade, un repas, le bar où vous emmèneriez un ami.',
+    overnight: 'Un lit pour la nuit',
+    overnightHint: 'Un voyageur passe la nuit chez vous.',
     obligationsTitle: 'Héberger pour la nuit implique des obligations légales',
     obligationRegistered:
       'Je suis inscrit(e) sur le portail Alloggiati Web auprès de la Questura dont je dépends.',
@@ -89,7 +89,7 @@ export const fr: Strings = {
     whyHost: 'Pourquoi accueillez-vous des voyageurs ?',
     languages: 'Langues que vous parlez',
     languagesHint: "Par exemple : italien, anglais, un peu d'espagnol.",
-    facts: 'Quelques informations',
+    facts: 'Le côté pratique',
     haveCar: "J'ai une voiture",
     smoke: 'Je fume',
     havePets: "J'ai des animaux",
@@ -100,15 +100,15 @@ export const fr: Strings = {
 
   discover: {
     title: 'Découvrir',
-    subtitle: 'Des gens près de chez vous qui veulent vous montrer leur ville.',
+    subtitle: "Qui est près de vous, et l'après-midi qu'ils ont en tête.",
     everyone: 'Tout le monde',
     hosts: 'Hôtes',
     guests: 'Voyageurs',
-    whoToShow: 'Qui afficher',
+    whoToShow: 'Qui aimeriez-vous rencontrer ?',
     filters: 'Filtres',
     filtersLabel: (n) => (n <= 1 ? `Filtres, ${n} actif` : `Filtres, ${n} actifs`),
-    emptyFiltered: 'Personne ne correspond à ces filtres pour le moment.',
-    empty: 'Personne de nouveau ici pour le moment. Revenez plus tard, ou regardez une autre ville.',
+    emptyFiltered: "Personne ne coche toutes ces cases pour l'instant. Essayez d'en retirer une.",
+    empty: 'Vous avez vu tout le monde dans le coin. Repassez bientôt, ou essayez une autre ville.',
     changeFilters: 'Modifier les filtres',
     openFilters: 'Ouvrir les filtres',
   },
@@ -116,7 +116,7 @@ export const fr: Strings = {
   filters: {
     title: 'Filtres',
     clear: 'Effacer',
-    showResults: 'Voir les résultats',
+    showResults: 'Voir les personnes',
     anywhere: 'Partout',
     whenFree: 'Quand ils sont libres',
     hasPets: 'A des animaux',
@@ -145,22 +145,23 @@ export const fr: Strings = {
     languages: 'Langues',
     reviews: "Ce qu'on en dit",
     ratedOutOf5: (n) => `Note : ${n} sur 5`,
-    moreReviews: "Plus d'avis",
+    moreReviews: "Lire plus d'avis",
     showInterest: "Montrer de l'intérêt",
-    unlock: 'Débloquer la conversation sans match',
+    unlock: 'Débloquer la conversation sans attendre',
   },
 
   chats: {
     title: 'Messages',
-    empty: "Pas encore de conversation. Une conversation s'ouvre quand l'intérêt est réciproque.",
+    empty: "Aucune conversation pour l'instant. Quand vous dites oui tous les deux, c'est ici que tout commence.",
     sayHello: 'Dites bonjour',
     unlocked: 'Débloquée',
+    unread: (n) => (n === 1 ? '1 nouveau message' : `${n} nouveaux messages`),
   },
 
   requests: {
     title: 'Demandes',
-    subtitle: 'Ces personnes aimeraient vous rencontrer. Seul un match ouvre la conversation.',
-    empty: 'Pas encore de demande',
+    subtitle: 'Ils aimeraient vous rencontrer. Un oui, et vous discutez.',
+    empty: "Personne n'attend votre réponse.",
     count: (n) => (n === 1 ? '1 demande' : `${n} demandes`),
   },
 
@@ -169,10 +170,10 @@ export const fr: Strings = {
     openProfile: (name) => `${name}, ouvrir son profil`,
     conversation: 'Conversation',
     moreActions: 'Laisser un avis, signaler ou bloquer',
-    empty: 'Pas encore de message. Dites bonjour.',
+    empty: "Rien pour l'instant. Il faut bien que quelqu'un dise bonjour en premier.",
     youSaid: (text) => `Vous avez écrit : ${text}`,
     theySaid: (name, text) => `${name ?? "L'autre personne"} a écrit : ${text}`,
-    message: 'Message',
+    message: 'Écrire un message',
     send: 'Envoyer le message',
   },
 
@@ -193,7 +194,7 @@ export const fr: Strings = {
   blocked: {
     title: 'Membres bloqués',
     empty:
-      "Personne n'est bloqué. Bloquer cache deux personnes l'une à l'autre, et c'est ici qu'on peut l'annuler.",
+      "Vous n'avez bloqué personne. Si cela arrive un jour, c'est ici que vous pourrez l'annuler.",
     unblock: 'Débloquer',
   },
 
@@ -225,7 +226,7 @@ export const fr: Strings = {
   review: {
     sent: 'Avis envoyé',
     sentBody:
-      'Merci. Il est maintenant sur son profil, et compte dans ce que les autres voient avant de prendre contact.',
+      'Merci. Il est maintenant sur son profil, où la prochaine personne le lira avant de prendre contact.',
     title: (name) => `Donner un avis sur ${name}`,
     send: "Envoyer l'avis",
     howWasIt: "Comment ça s'est passé ?",
@@ -247,7 +248,7 @@ export const fr: Strings = {
     ctaCredits: (n) => (n <= 1 ? `Utiliser ${n} crédit` : `Utiliser ${n} crédits`),
     ctaMoney: (price) => `Payer ${price}`,
     body: (name) =>
-      `Cela ouvre tout de suite une conversation avec ${name}, sans attendre que cette personne vous montre de l'intérêt en retour.`,
+      `Cela ouvre la conversation avec ${name} dès maintenant, sans attendre son intérêt en retour.`,
     note: "Vous payez la présentation, et rien d'autre. Le temps passé ensemble n'est jamais payé, ni par vous ni par l'autre.",
   },
 
@@ -257,7 +258,7 @@ export const fr: Strings = {
     body: (name) => `La conversation avec ${name} est ouverte, et personne ne l'a payée.`,
     sayHello: 'Dire bonjour',
     theirProfile: 'Son profil',
-    later: 'Plus tard',
+    later: 'Pas maintenant',
   },
 
   skeleton: {
@@ -287,7 +288,7 @@ export const fr: Strings = {
     identity_verification_required: "Vérifiez votre identité avant de contacter d'autres membres.",
     image_too_large: 'Cette image a trop de pixels. Les photos prises avec un téléphone conviennent.',
     invalid_credentials:
-      "L'e-mail ou le mot de passe est incorrect. Après 5 essais manqués, la connexion est bloquée pendant 15 minutes.",
+      'Cet e-mail et ce mot de passe ne correspondent pas. Après 5 essais manqués, la connexion est suspendue pendant 15 minutes.',
     invalid_slot:
       'Chaque créneau de disponibilité doit avoir un moment de la journée valide, et une saison qui se termine après son début.',
     moderator_only: 'Seuls les modérateurs peuvent faire cela.',
@@ -295,8 +296,8 @@ export const fr: Strings = {
       "Vous ne pouvez laisser un avis qu'après vous être écrit tous les deux dans la même conversation.",
     not_a_resolution: 'Un signalement ne peut être clos que comme examiné ou classé.',
     not_an_image: "Ce fichier n'est pas une image lisible.",
-    rate_limited: 'Trop de demandes. Attendez une minute et réessayez.',
-    registration_failed: "L'inscription n'a pas pu aboutir.",
+    rate_limited: "Trop d'essais d'affilée. Attendez une minute et réessayez.",
+    registration_failed: "Nous n'avons pas pu créer votre compte. Vérifiez vos informations et réessayez.",
     self_target: 'Vous ne pouvez pas faire cela sur votre propre profil.',
     target_not_verified:
       "Cette personne n'a pas encore vérifié son identité, la conversation ne peut donc pas être débloquée.",

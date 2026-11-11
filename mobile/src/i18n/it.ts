@@ -23,49 +23,49 @@ export const it: Strings = {
     smokes: 'Fuma',
     canHostOvernight: 'Può ospitare per la notte',
     progress: 'Avanzamento',
-    stepOf: (step, total) => `Passo ${step} di ${total}`,
+    stepOf: (step, total) => `Passaggio ${step} di ${total}`,
   },
 
-  roles: { host: 'Host', guest: 'Ospite', entrambi: 'Entrambi' },
-  roleShown: { host: 'Host', guest: 'Ospite', entrambi: 'Host e ospite' },
+  roles: { host: 'Host', guest: 'Viaggiatore', entrambi: 'Entrambi' },
+  roleShown: { host: 'Host', guest: 'Viaggiatore', entrambi: 'Host e viaggiatore' },
 
   tabs: { discover: 'Scopri', chats: 'Chat', me: 'Profilo' },
 
   timeOfDay: { morning: 'Mattina', afternoon: 'Pomeriggio', evening: 'Sera', night: 'Notte' },
 
   auth: {
-    tagline: 'Incontra chi vive qui. Scambia culture.',
+    tagline: 'Conosci qualcuno che ci vive.',
     signIn: 'Accedi',
-    noAccount: 'Non hai un account? Registrati',
+    noAccount: 'Prima volta qui? Registrati',
     haveAccount: 'Hai già un account? Accedi',
-    signInFailed: 'Accesso non riuscito. Controlla la connessione.',
+    signInFailed: 'Non siamo riusciti a farti entrare. Riprova tra poco.',
     createAccount: 'Crea un account',
-    passwordHint: 'Almeno 8 caratteri.',
-    changeLater: 'Puoi cambiarlo più avanti.',
-    registerFailed: 'Registrazione non riuscita. Controlla la connessione.',
+    passwordHint: 'Almeno 8 caratteri: una maiuscola, una minuscola, un numero e un simbolo.',
+    changeLater: 'Puoi cambiarlo quando vuoi.',
+    registerFailed: 'Non siamo riusciti a creare il tuo account. Riprova tra poco.',
   },
 
   onboarding: {
-    aboutTitle: 'Su di te',
+    aboutTitle: 'Due parole su di te',
     aboutSubtitle:
-      "Poche risposte brevi dicono più di una lunga bio: raccontano a uno sconosciuto com'è una giornata con te.",
-    photoTitle: 'La tua foto e il tuo tempo',
-    photoSubtitle: 'Una foto chiara del tuo viso, e quando hai di solito del tempo libero.',
+      "Meglio qualche risposta breve che una lunga bio. Fanno vedere a uno sconosciuto com'è una giornata con te.",
+    photoTitle: 'La tua faccia, il tuo tempo libero',
+    photoSubtitle: 'Dire sì è più facile davanti a una faccia. Metti una foto chiara e dicci quando hai tempo.',
     changePhoto: 'Cambia foto',
     addPhoto: 'Aggiungi una foto',
-    photoPrivacy: 'Prima che qualcuno la veda, dalla tua foto vengono tolti i dati sulla posizione.',
-    whenFree: 'Quando hai di solito del tempo libero?',
-    pickTimes: 'Scegli tutti quelli che vanno bene. Puoi cambiarli più avanti.',
+    photoPrivacy: 'Prima che qualcuno la veda, togliamo dalla tua foto i dati sulla posizione.',
+    whenFree: 'Quando hai tempo, di solito?',
+    pickTimes: 'Scegli tutti quelli che ti vanno bene. I programmi cambiano, e questi pure.',
     verifyTitle: 'Verifica che sei tu',
     verifySubtitle:
-      'Un controllo veloce del documento, una volta sola. Senza, nessuno può contattare un altro iscritto: è questo che rende LocalBuddy un posto dove incontrare sconosciuti in sicurezza.',
-    verifyCta: 'Avvia la verifica',
-    listingTitle: 'Cosa offri',
-    listingSubtitle: 'Un pomeriggio fuori, un posto per dormire, o tutti e due. Puoi cambiarlo più avanti.',
-    experience: "Un'esperienza",
-    experienceHint: 'Mostrare a qualcuno la tua città: una passeggiata, un pasto, un pomeriggio.',
-    overnight: 'Un posto per dormire',
-    overnightHint: 'Ospitare qualcuno per la notte a casa tua.',
+      'Un controllo veloce del documento, una volta sola. Senza, nessuno può scrivere a nessuno. È così che qui puoi incontrare sconosciuti in sicurezza.',
+    verifyCta: 'Inizia il controllo',
+    listingTitle: 'Cosa puoi condividere',
+    listingSubtitle: 'Un pomeriggio fuori, un letto per la notte, o tutti e due. Puoi cambiarlo più avanti.',
+    experience: 'Un pomeriggio fuori',
+    experienceHint: 'Una passeggiata, una cena, il bar dove porteresti un amico.',
+    overnight: 'Un letto per la notte',
+    overnightHint: 'Un viaggiatore passa la notte a casa tua.',
     obligationsTitle: 'Ospitare per la notte comporta obblighi di legge',
     obligationRegistered: 'Sono registrato/a sul portale Alloggiati Web presso la mia Questura.',
     obligationCheck:
@@ -85,26 +85,26 @@ export const it: Strings = {
     whyHost: 'Perché ospiti?',
     languages: 'Lingue che parli',
     languagesHint: "Per esempio: italiano, inglese, un po' di spagnolo.",
-    facts: 'Qualche informazione',
+    facts: 'Le cose pratiche',
     haveCar: "Ho l'auto",
     smoke: 'Fumo',
     havePets: 'Ho animali',
     visible: 'Visibile a chi non ha un account',
     visibleHint:
-      'Spento: solo gli iscritti a LocalBuddy possono vedere il tuo profilo. Puoi cambiarlo quando vuoi.',
+      'Se lo spegni, solo gli iscritti a LocalBuddy possono vedere il tuo profilo. Puoi cambiarlo quando vuoi.',
   },
 
   discover: {
     title: 'Scopri',
-    subtitle: 'Persone vicino a te che vogliono mostrarti la loro città.',
+    subtitle: "Chi c'è vicino, e il pomeriggio che hanno in mente.",
     everyone: 'Tutti',
     hosts: 'Host',
     guests: 'Viaggiatori',
-    whoToShow: 'Chi mostrare',
+    whoToShow: 'Chi vuoi conoscere',
     filters: 'Filtri',
     filtersLabel: (n) => (n === 1 ? 'Filtri, 1 attivo' : `Filtri, ${n} attivi`),
-    emptyFiltered: 'Per ora nessuno corrisponde a questi filtri.',
-    empty: "Per ora non c'è nessuno di nuovo. Torna più tardi, o guarda un'altra città.",
+    emptyFiltered: 'Per ora nessuno corrisponde a tutti questi filtri. Prova ad allargarne uno.',
+    empty: "Hai già visto tutti quelli qui vicino. Ripassa tra un po', o prova un'altra città.",
     changeFilters: 'Cambia i filtri',
     openFilters: 'Apri i filtri',
   },
@@ -112,7 +112,7 @@ export const it: Strings = {
   filters: {
     title: 'Filtri',
     clear: 'Azzera',
-    showResults: 'Mostra i risultati',
+    showResults: 'Mostra le persone',
     anywhere: 'Ovunque',
     whenFree: 'Quando hanno tempo',
     hasPets: 'Ha animali',
@@ -141,22 +141,23 @@ export const it: Strings = {
     languages: 'Lingue',
     reviews: 'Cosa dicono',
     ratedOutOf5: (n) => `Valutazione ${n} su 5`,
-    moreReviews: 'Altre recensioni',
+    moreReviews: 'Leggi altre recensioni',
     showInterest: 'Mostra interesse',
-    unlock: 'Sblocca la chat senza match',
+    unlock: 'Sblocca subito la chat',
   },
 
   chats: {
     title: 'Chat',
-    empty: "Ancora nessuna conversazione. Una chat si apre quando l'interesse è reciproco.",
+    empty: 'Ancora nessuna chat. Quando dite sì tutti e due, si comincia da qui.',
     sayHello: 'Saluta',
     unlocked: 'Sbloccata',
+    unread: (n) => (n === 1 ? '1 messaggio nuovo' : `${n} messaggi nuovi`),
   },
 
   requests: {
     title: 'Richieste',
-    subtitle: 'Vorrebbero conoscerti. Solo un match apre la chat.',
-    empty: 'Ancora nessuna richiesta',
+    subtitle: "Vorrebbero conoscerti. Di' sì anche tu e la chat si apre.",
+    empty: 'Nessuno aspetta una tua risposta.',
     count: (n) => (n === 1 ? '1 richiesta' : `${n} richieste`),
   },
 
@@ -165,10 +166,10 @@ export const it: Strings = {
     openProfile: (name) => `${name}, apri il suo profilo`,
     conversation: 'Conversazione',
     moreActions: 'Recensisci, segnala o blocca',
-    empty: 'Ancora nessun messaggio. Saluta.',
+    empty: 'Ancora niente. Qualcuno deve pur salutare per primo.',
     youSaid: (text) => `Hai scritto: ${text}`,
     theySaid: (name, text) => `${name ?? "L'altra persona"} ha scritto: ${text}`,
-    message: 'Messaggio',
+    message: 'Scrivi un messaggio',
     send: 'Invia il messaggio',
   },
 
@@ -189,7 +190,7 @@ export const it: Strings = {
   blocked: {
     title: 'Iscritti bloccati',
     empty:
-      "Nessuno è bloccato. Bloccare nasconde due persone l'una all'altra, e qui si può annullare.",
+      'Non hai bloccato nessuno. Se mai lo farai, qui potrai annullarlo.',
     unblock: 'Sblocca',
   },
 
@@ -221,7 +222,7 @@ export const it: Strings = {
   review: {
     sent: 'Recensione inviata',
     sentBody:
-      'Grazie. Ora è sul suo profilo, e conta per quello che gli altri vedono prima di mettersi in contatto.',
+      'Grazie. Ora è sul suo profilo, e la prossima persona la leggerà prima di farsi viva.',
     title: (name) => `Recensisci ${name}`,
     send: 'Invia la recensione',
     howWasIt: "Com'è andata?",
@@ -235,7 +236,7 @@ export const it: Strings = {
   unlock: {
     title: 'Sblocca la chat',
     checking: 'Sto controllando quanto ti costa.',
-    subscription: 'È incluso nel tuo abbonamento, senza altro da pagare.',
+    subscription: 'È compreso nel tuo abbonamento. Non paghi altro.',
     credits: (have, cost) =>
       `Hai ${have === 1 ? '1 credito guadagnato' : `${have} crediti guadagnati`} ospitando. Questo ne usa ${cost}.`,
     money: (price) => `${price}, una volta sola, per questa persona.`,
@@ -243,7 +244,7 @@ export const it: Strings = {
     ctaCredits: (n) => (n === 1 ? 'Usa 1 credito' : `Usa ${n} crediti`),
     ctaMoney: (price) => `Paga ${price}`,
     body: (name) =>
-      `Si apre subito una conversazione con ${name}, invece di aspettare che ricambi l'interesse.`,
+      `Si apre subito una chat con ${name}, senza aspettare che ricambi l'interesse.`,
     note: "Paghi la presentazione, e nient'altro. Il tempo che passate insieme non si paga mai, per nessuno dei due.",
   },
 
@@ -253,7 +254,7 @@ export const it: Strings = {
     body: (name) => `La chat con ${name} è aperta, e nessuno l'ha pagata.`,
     sayHello: 'Saluta',
     theirProfile: 'Il suo profilo',
-    later: 'Più tardi',
+    later: 'Non ora',
   },
 
   skeleton: {
@@ -282,7 +283,7 @@ export const it: Strings = {
     identity_verification_required: 'Verifica la tua identità prima di contattare altri iscritti.',
     image_too_large: 'Questa immagine ha troppi pixel. Le foto scattate col telefono vanno bene.',
     invalid_credentials:
-      "Email o password non corrette. Dopo 5 tentativi sbagliati, l'accesso si blocca per 15 minuti.",
+      "Email e password non corrispondono. Dopo 5 tentativi sbagliati, l'accesso si blocca per 15 minuti.",
     invalid_slot:
       "Ogni fascia di disponibilità richiede un momento della giornata valido, e una stagione che finisce dopo l'inizio.",
     moderator_only: 'Solo i moderatori possono farlo.',
@@ -290,8 +291,8 @@ export const it: Strings = {
       'Puoi recensire qualcuno solo dopo che vi siete scritti tutti e due nella stessa conversazione.',
     not_a_resolution: 'Una segnalazione si può chiudere solo come esaminata o archiviata.',
     not_an_image: "Questo file non è un'immagine leggibile.",
-    rate_limited: 'Troppe richieste. Aspetta un minuto e riprova.',
-    registration_failed: 'Non è stato possibile completare la registrazione.',
+    rate_limited: 'Troppi tentativi di fila. Aspetta un minuto e riprova.',
+    registration_failed: 'Non siamo riusciti a creare il tuo account. Controlla i dati e riprova.',
     self_target: 'Non puoi farlo sul tuo stesso profilo.',
     target_not_verified:
       'Questa persona non ha ancora verificato la sua identità, quindi la chat non si può sbloccare.',

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useConversation, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
+import { useConversation, useMarkRead, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
 import { ActionError } from '@/components/ActionError';
-import { AuthedImage } from '@/components/AuthedImage';
+import { Avatar } from '@/components/Avatar';
 import { ReviewSheet } from '@/components/ReviewSheet';
 import { SafetySheet } from '@/components/SafetySheet';
 import { LoadingMore, Screen } from '@/components/Screen';
@@ -42,6 +42,13 @@ export default function Chat() {
   const { data: other } = useProfile(otherId);
   const { data: me } = useMe();
   const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
+
+  // On opening, and again whenever a newer message lands while the chat is on screen.
+  const { mutate: markRead } = useMarkRead(id);
+  const newest = items[0]?.id;
+  useEffect(() => {
+    if (newest) markRead();
+  }, [newest, markRead]);
 
   const canSend = draft.trim().length > 0 && !send.isPending;
 
@@ -73,11 +80,7 @@ export default function Chat() {
           accessibilityRole="button"
           accessibilityLabel={other ? s.chat.openProfile(other.name!) : s.chat.conversation}
           style={styles.title}>
-          <AuthedImage
-            path={photo}
-            size="thumb"
-            style={[styles.titleAvatar, { backgroundColor: c.surfaceMuted }]}
-          />
+          <Avatar path={photo} size={32} photoSize="thumb" style={{ backgroundColor: c.surfaceMuted }} />
           <View style={styles.titleText}>
             <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
               {other?.name ?? s.chat.conversation}
@@ -207,7 +210,6 @@ const styles = StyleSheet.create({
   titleText: { flex: 1 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   title: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
-  titleAvatar: { width: 32, height: 32, borderRadius: radius.pill },
   list: { padding: space.md, gap: space.sm },
   bubble: { maxWidth: '80%', paddingHorizontal: space.md, paddingVertical: space.sm + 2, borderRadius: 18 },
   mine: { alignSelf: 'flex-end', borderBottomRightRadius: 6, borderWidth: StyleSheet.hairlineWidth },

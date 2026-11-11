@@ -1,4 +1,7 @@
 {
+  "cli": {
+    "appVersionSource": "local"
+  },
   "build": {
     "preview": {
       "distribution": "internal",
@@ -6,7 +9,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://demo-api.EXAMPLE.TLD"
+        "EXPO_PUBLIC_API_URL": "https://localbuddy.madhatworks.com"
       }
     }
   }

@@ -66,7 +66,7 @@ Milestones:
 
 | | Item | Milestone | Check |
 |---|---|---|---|
-| [ ] | In-app badge for new requests and messages | Demo | requests done on the Chats tab; unread messages still open |
+| [x] | In-app badge for new requests and messages | Demo | `RequestTests`, `UnreadTests`; count on the chat row and on the Chats tab, cleared when the chat opens (web preview, real Postgres); not seen on a device |
 | [ ] | Push notifications (Expo Notifications, FCM/APNs) | Beta | a device receives one |
 | [ ] | Email for account events (verification, password reset) | Beta | — |
 | [ ] | Password reset | Beta | — |
@@ -97,7 +97,10 @@ Milestones:
 | | Item | Milestone | Check |
 |---|---|---|---|
 | [x] | English, Italian, Spanish, French with an in-app picker | Demo | typed dictionaries |
-| [ ] | Native-speaker review of Spanish and French | Beta | — |
+| [x] | App copy rewritten to a voice guide: concrete, short, warm; one word for the person who travels; errors no longer blame the connection | Demo | `docs/VOICE.md`; English rewritten, Italian, Spanish and French adapted; read in the browser |
+| [ ] | Gabriele's read of the Italian copy, then a native-speaker review of Spanish and French | Beta | — |
+| [x] | Circular photos centred on the face (`Avatar`); multiline fields show four whole lines | Demo | web preview |
+| [ ] | Splash on an Android 12+ phone: the wordmark must sit inside the system's 192 dp circle (`imageWidth` 184) | Demo | a device |
 | [x] | Screen-reader labels and roles on the web build | Demo | audit of 2026-09-22 |
 | [ ] | Same audit on Android TalkBack and iOS VoiceOver | Beta | a device |
 | [ ] | Run on a real phone: keyboard, safe areas, back gesture, photo picker | Demo | Gabriele's phone |
@@ -109,13 +112,13 @@ Milestones:
 
 | | Item | Milestone | Check |
 |---|---|---|---|
-| [x] | App icon, adaptive icon, splash, favicon: "arch that speaks", night and coral | Demo | `mobile/assets/brand/`; not yet seen on a launcher |
+| [x] | App icon, adaptive icon, splash, favicon: the mark (a person in the doorway) above the wordmark "LocalBuddy" (Playfair, Paper and coral on Night) | Demo | `mobile/assets/brand/`, sources in `mark-d/`, rendered by `.claude/tools/render-brand.mjs`; not yet seen on a launcher or on an Android 12+ splash; old files in `brand/backup/pre-mark-d-2026-11-02/` |
+| [~] | Logo mark: "person in the doorway" chosen on 2026-11-02 (`mobile/assets/brand/mark-d/README.md`); icon, splash, favicon and landing header redrawn. Still open: search EUIPO TMview and Google image search before investing, and outlines for the live text. The two-person heart stays parked in `parked-mark/` | Beta | trademark search done; Gabriele's final yes |
 | [~] | Backend demo mode, Dockerfile, compose behind Caddy | Demo | ADR-0010 (proposed); `docker build` passes, `docker compose up` on an empty database not run yet |
-| [x] | Landing page in the new palette (night and coral, new wordmark and logo mark) | Beta | `web/`, seen in light and dark |
+| [x] | Landing page in the new palette (night and coral, mark and wordmark in the header, favicon from the mark) | Beta | `web/`, seen in light and dark |
 | [ ] | Deploy to Hetzner (needs Gabriele's go-ahead and domain) | Demo | `curl` on the public URL |
 | [~] | APK through EAS `preview` profile | Demo | `eas build -p android --profile preview` (Gabriele's Expo login) |
-| [~] | Landing page: hero and market photos done, share image ready (`share-street.jpg`, tag waits for the domain); still the invitation destination and the domain for hreflang | Beta | `web/` |
-| [x] | App icon, splash and launcher icons redrawn from the new two-person heart logo | Demo | `mobile/assets/brand/*.svg` to `mobile/assets/images/`; not yet seen on a launcher |
+| [~] | Landing page: hero and market photos done, share image ready (`share-street.jpg`, tag waits for the domain); the invitation button opens an email to MadHat (2026-11-11, no signup endpoint yet); still the domain for hreflang, and the page is not published anywhere | Beta | `web/` |
 | [ ] | Play Store and App Store listings, screenshots, data-safety form | Launch | — |
 | [ ] | Production config: `KnownProxies`, no dev JWT key, CORS closed | Launch | startup check |
 

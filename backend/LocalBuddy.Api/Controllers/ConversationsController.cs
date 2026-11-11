@@ -37,7 +37,12 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
                 c.CreatedAt,
                 db.Messages.Where(m => m.ConversationId == c.Id)
                            .OrderByDescending(m => m.SentAt)
-                           .Select(m => m.Content).FirstOrDefault()))
+                           .Select(m => m.Content).FirstOrDefault(),
+                // Compared against the column, never a constant: Npgsql refuses a DateTime that is not UTC.
+                db.Messages.Count(m => m.ConversationId == c.Id && m.SenderId != me &&
+                    (c.UserAId == me
+                        ? c.UserAReadAt == null || m.SentAt > c.UserAReadAt
+                        : c.UserBReadAt == null || m.SentAt > c.UserBReadAt))))
             .ToListAsync();
 
         return Page<ConversationSummary>.From(rows, page, pageSize);
@@ -71,7 +76,12 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
                 c.CreatedAt,
                 db.Messages.Where(m => m.ConversationId == c.Id)
                            .OrderByDescending(m => m.SentAt)
-                           .Select(m => m.Content).FirstOrDefault()))
+                           .Select(m => m.Content).FirstOrDefault(),
+                // Compared against the column, never a constant: Npgsql refuses a DateTime that is not UTC.
+                db.Messages.Count(m => m.ConversationId == c.Id && m.SenderId != me &&
+                    (c.UserAId == me
+                        ? c.UserAReadAt == null || m.SentAt > c.UserAReadAt
+                        : c.UserBReadAt == null || m.SentAt > c.UserBReadAt))))
             .FirstOrDefaultAsync();
 
         return summary is null ? NotFound() : summary;
@@ -133,6 +143,23 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
         db.Messages.Add(message);
         await db.SaveChangesAsync();
         return Created($"/api/v1/conversations/{id}/messages", MessageDto.From(message));
+    }
+
+    /// The chat screen calls this when it opens and when a message arrives while it is open.
+    /// What the other member wrote up to now stops counting as unread.
+    [HttpPost("{id:guid}/read")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Read(Guid id)
+    {
+        var me = User.Id();
+        var now = DateTime.UtcNow;
+        var updated = await db.Conversations
+            .Where(c => c.Id == id && (c.UserAId == me || c.UserBId == me))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(c => c.UserAReadAt, c => c.UserAId == me ? now : c.UserAReadAt)
+                .SetProperty(c => c.UserBReadAt, c => c.UserBId == me ? now : c.UserBReadAt));
+        return updated == 0 ? Forbid() : NoContent();
     }
 
     Task<bool> IsParticipant(Guid conversationId)

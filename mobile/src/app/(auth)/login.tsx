@@ -1,6 +1,6 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { Button } from '@/components/Button';
@@ -16,6 +16,7 @@ export default function Login() {
   const { signIn } = useAuth();
   const router = useRouter();
   const s = useStrings();
+  const scheme = useColorScheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>();
@@ -30,6 +31,8 @@ export default function Login() {
     } catch (e) {
       // invalid_credentials and account_banned are the two codes this endpoint returns, and
       // each one's wording already says what to do next.
+      // The message for anything else is deliberately vague; in development the real cause goes to the console.
+      if (__DEV__ && !(e instanceof ApiError)) console.warn(e);
       setError(e instanceof ApiError ? errorMessage(e, s) : s.auth.signInFailed);
     } finally {
       setBusy(false);
@@ -40,9 +43,21 @@ export default function Login() {
     // The three people sit at about 55% of the photo's height; the barman behind them is above.
     <SceneSheet image={require('../../../assets/images/scenes/s03-bar-counter.jpg')} focus={{ y: 0.55, ratio: 1080 / 1907 }}>
       <View style={styles.brand}>
-        <Text role="heading" style={[type.display, { color: c.text }]}>
-          Local<Text style={{ color: c.primary }}>Buddy</Text>
-        </Text>
+        <View style={styles.lockup}>
+          {/* Decorative: the wordmark beside it is the heading. Never the Night frame on a dark ground. */}
+          <Image
+            aria-hidden
+            style={styles.mark}
+            source={
+              scheme === 'dark'
+                ? require('../../../assets/brand/mark-d/png/mark-dark.png')
+                : require('../../../assets/brand/mark-d/png/mark.png')
+            }
+          />
+          <Text role="heading" style={[type.display, { color: c.text }]}>
+            Local<Text style={{ color: c.primary }}>Buddy</Text>
+          </Text>
+        </View>
         <Text style={[type.body, { color: c.textMuted }]}>{s.auth.tagline}</Text>
       </View>
 
@@ -80,5 +95,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   brand: { gap: space.xs, marginBottom: space.sm },
+  lockup: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  mark: { width: 40, height: 40 },
   link: { textAlign: 'center', paddingVertical: space.md },
 });

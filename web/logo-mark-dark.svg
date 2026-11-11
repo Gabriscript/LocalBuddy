@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>LocalBuddy</title>
+<path fill="#F7F4F1" fill-rule="evenodd" d="M20 236V128a108 108 0 0 1 216 0V236H192V128a64 64 0 0 0-128 0V236Z"/><circle cx="128" cy="136" r="26" fill="#F45D73"/><path fill="#F45D73" d="M80 236a48 48 0 0 1 96 0Z"/>
+</svg>

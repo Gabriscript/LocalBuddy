@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useMe } from '@/api/hooks';
-import { AuthedImage } from '@/components/AuthedImage';
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Pill } from '@/components/Pill';
@@ -32,10 +33,11 @@ export default function Me() {
       <Screen loading={isPending} error={error} onRetry={refetch}>
         <ScrollView contentContainerStyle={[styles.body, { paddingBottom: clearance }]}>
           <View style={styles.identity}>
-            <AuthedImage
+            <Avatar
               path={data?.photos?.[0]?.url}
-              size="medium"
-              style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
+              size={88}
+              photoSize="medium"
+              style={{ backgroundColor: c.surfaceMuted }}
               accessibilityLabel={s.common.yourPhoto}
             />
             <View style={styles.identityText}>
@@ -64,23 +66,20 @@ export default function Me() {
             />
           ) : null}
 
-          <Button
-            title={s.me.editProfile}
-            variant="secondary"
-            onPress={() => router.push('/edit-profile')}
-          />
-          <Button
-            title={s.me.blocked}
-            variant="secondary"
-            onPress={() => router.push('/blocked')}
-          />
-          {/* One control whose words carry both the setting and its value, so a screen reader
-              hears what is chosen before opening the choice. */}
-          <Button
-            title={s.me.languageRow(preference ? LANGUAGE_NAMES[preference] : phoneOption)}
-            variant="secondary"
-            onPress={() => setChoosingLanguage(true)}
-          />
+          <View style={[styles.rows, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <Row icon="create-outline" label={s.me.editProfile} onPress={() => router.push('/edit-profile')} />
+            <Row icon="hand-left-outline" label={s.me.blocked} onPress={() => router.push('/blocked')} />
+            {/* One control whose words carry both the setting and its value, so a screen reader
+                hears what is chosen before opening the choice. */}
+            <Row
+              icon="language-outline"
+              label={s.me.language}
+              value={preference ? LANGUAGE_NAMES[preference] : phoneOption}
+              accessibilityLabel={s.me.languageRow(preference ? LANGUAGE_NAMES[preference] : phoneOption)}
+              onPress={() => setChoosingLanguage(true)}
+              last
+            />
+          </View>
 
           {/* Sign out sits apart from the rest: it is not one more settings row. */}
           <View style={[styles.separated, { borderTopColor: c.border }]}>
@@ -116,11 +115,62 @@ export default function Me() {
   );
 }
 
+/// One setting: what it is on the left, what it is set to on the right, and a chevron that says
+/// it leads somewhere.
+function Row({
+  icon,
+  label,
+  value,
+  accessibilityLabel,
+  onPress,
+  last,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string;
+  accessibilityLabel?: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  const c = useColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      android_ripple={{ color: c.border }}
+      style={({ pressed }) => [
+        styles.row,
+        { borderBottomColor: c.border, backgroundColor: pressed ? c.surfaceMuted : 'transparent' },
+        last && styles.lastRow,
+      ]}>
+      <Ionicons name={icon} size={22} color={c.textMuted} aria-hidden />
+      <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
+        {label}
+      </Text>
+      <Text style={[type.caption, styles.rowValue, { color: c.textMuted }]} numberOfLines={1}>
+        {value}
+      </Text>
+      <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   page: { flex: 1 },
+  rows: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
+  row: {
+    minHeight: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  lastRow: { borderBottomWidth: 0 },
+  rowValue: { flex: 1, textAlign: 'right' },
   body: { padding: space.md, gap: space.lg },
   identity: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  avatar: { width: 88, height: 88, borderRadius: radius.pill },
   identityText: { flex: 1, gap: space.xs },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   separated: { paddingTop: space.lg, borderTopWidth: StyleSheet.hairlineWidth },

@@ -34,6 +34,7 @@ export default function Register() {
       await register(form);
       router.replace('/verify');
     } catch (e) {
+      if (__DEV__ && !(e instanceof ApiError)) console.warn(e);
       setError(e instanceof ApiError ? errorMessage(e, s) : s.auth.registerFailed);
     } finally {
       setBusy(false);

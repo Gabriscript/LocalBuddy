@@ -132,6 +132,16 @@ match julien anna
 say julien "Ciao Anna! I arrive in Milano on Friday by train from Genova. Would Saturday afternoon work for the Navigli walk?"
 say anna "Ciao Julien! Saturday is perfect. Let us meet at 17:00 at Porta Genova station, then aperitivo on the canal."
 say julien "Parfait, see you there. I bring some focaccia from Genova, it is the least I can do."
+# Anna is the account the demo is shown from: a second chat that ends on the other side, so the
+# unread badge has something to count, and two people waiting on the Requests strip.
+match tom anna
+say tom "Hello Anna, Tom here. I walk into Milano on the 14th, straight from Firenze. Is the risotto offer real?"
+say anna "It is real. Come hungry, and bring the walking stories."
+say tom "Deal. One question first: which football team do I have to pretend to support?"
+
+echo "requests"
+req 200 -X POST "$API/users/${ID[anna]}/interest" -H "$(auth wei)"
+req 200 -X POST "$API/users/${ID[anna]}/interest" -H "$(auth lucia)"
 
 # Credits only come from reviews, so no endpoint grants them: written straight to the dev database.
 # 11 beats the older @example.com demo accounts (10), which would otherwise lead the feed on the

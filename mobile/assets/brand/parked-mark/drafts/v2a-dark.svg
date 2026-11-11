@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs>
+    <clipPath id="cv2adl"><rect x="-5" y="-5" width="63.5" height="130"/></clipPath>
+    <clipPath id="cv2adr"><rect x="61.5" y="-5" width="63.5" height="130"/></clipPath>
+    <mask id="mv2adm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="160" height="160"><rect x="-20" y="-20" width="160" height="160" fill="#fff"/><circle cx="35" cy="42" r="9" fill="#000"/><circle cx="85" cy="42" r="9" fill="#000"/></mask></defs>
+    <g mask="url(#mv2adm)"><path d="M60 112L14.61 59.7A27 27 0 1 1 61.99 42.78Z" fill="#F45D73" clip-path="url(#cv2adl)"/><path d="M60 112L105.39 59.7A27 27 0 1 0 58.01 42.78Z" fill="#F7F4F1" clip-path="url(#cv2adr)"/></g></svg>

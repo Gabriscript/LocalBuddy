@@ -4,13 +4,13 @@ import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 
 import type { components } from '@/api/generated';
 import { useConversations, useProfile, useRequestCount, useRequests } from '@/api/hooks';
-import { AuthedImage } from '@/components/AuthedImage';
+import { Avatar } from '@/components/Avatar';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
-import { radius, space, type, useColors } from '@/theme';
+import { space, type, useColors } from '@/theme';
 
 type Conversation = components['schemas']['ConversationSummary'];
 type Card = components['schemas']['ProfileCard'];
@@ -87,9 +87,10 @@ function RequestStrip({ cards, count }: { cards: Card[]; count: number }) {
             aria-hidden
             focusable={false}
             style={({ pressed }) => [styles.face, { opacity: pressed ? 0.7 : 1 }]}>
-            <AuthedImage
+            <Avatar
               path={card.photoUrl}
-              size="thumb"
+              size={56}
+              photoSize="thumb"
               aria-hidden
               style={[styles.facePhoto, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
             />
@@ -111,6 +112,8 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
   const s = useStrings();
   const { data: other } = useProfile(conversation.otherUserId);
   const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
+  // The generated type allows a string for an int32; the server always sends a number.
+  const unread = Number(conversation.unreadCount ?? 0);
 
   return (
     <Pressable
@@ -125,18 +128,13 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
       ]}>
       {/* Decorative: the row reads out its children, and the name follows immediately. Without
           this the face is announced as an image with no name at all. */}
-      <AuthedImage
-        path={photo}
-        size="thumb"
-        aria-hidden
-        style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
-      />
+      <Avatar path={photo} size={48} photoSize="thumb" aria-hidden style={{ backgroundColor: c.surfaceMuted }} />
 
       <View style={styles.rowText}>
         <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
           {other?.name ?? ' '}
         </Text>
-        <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
+        <Text style={[type.caption, { color: unread ? c.text : c.textMuted }]} numberOfLines={1}>
           {conversation.lastMessage ?? s.chats.sayHello}
         </Text>
         {conversation.unlockedByPayment ? (
@@ -144,7 +142,17 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
         ) : null}
       </View>
 
-      <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+      {unread ? (
+        <View style={[styles.unread, { backgroundColor: c.primary }]}>
+          <Text
+            accessibilityLabel={s.chats.unread(unread)}
+            style={[type.caption, styles.figure, { color: c.onPrimary }]}>
+            {unread > 9 ? '9+' : unread}
+          </Text>
+        </View>
+      ) : (
+        <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+      )}
     </Pressable>
   );
 }
@@ -161,7 +169,6 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  avatar: { width: 48, height: 48, borderRadius: radius.pill },
   requests: { paddingVertical: space.md, gap: space.sm, borderBottomWidth: StyleSheet.hairlineWidth },
   requestsHead: {
     minHeight: 44,
@@ -173,6 +180,7 @@ const styles = StyleSheet.create({
   figure: { fontVariant: ['tabular-nums'] },
   faces: { paddingHorizontal: space.md, gap: space.md },
   face: { width: 56, alignItems: 'center', gap: space.xs },
-  facePhoto: { width: 56, height: 56, borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth },
+  facePhoto: { borderWidth: StyleSheet.hairlineWidth },
   rowText: { flex: 1, gap: 2 },
+  unread: { minWidth: 24, height: 24, paddingHorizontal: 6, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

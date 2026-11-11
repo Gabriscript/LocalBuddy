@@ -58,6 +58,9 @@ public class Conversation
     public Guid UserBId { get; set; }
     public bool UnlockedByPayment { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    // When each side last had the chat open; null means never. Unread = the other's messages after it.
+    public DateTime? UserAReadAt { get; set; }
+    public DateTime? UserBReadAt { get; set; }
 }
 
 public class Message

@@ -24,6 +24,6 @@
     "jest.config.js",
     "android",
     "ios",
-    "backup"
+    "**/backup"
   ]
 }

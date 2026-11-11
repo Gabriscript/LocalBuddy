@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 
-import { useRequestCount } from '@/api/hooks';
+import { useConversations, useRequestCount } from '@/api/hooks';
 import { TabBar } from '@/components/TabBar';
 import { useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
@@ -12,6 +12,9 @@ export default function TabsLayout() {
   const { token } = useAuth();
   const s = useStrings();
   const requests = useRequestCount(!!token).data ?? 0;
+  // shortcut: sums the inbox pages loaded so far (the first 20 chats), a count endpoint when inboxes outgrow one page
+  const unread = useConversations(!!token).items.reduce((sum, chat) => sum + Number(chat.unreadCount ?? 0), 0);
+  const waiting = requests + unread;
 
   if (!token) return <Redirect href="/login" />;
 
@@ -31,9 +34,14 @@ export default function TabsLayout() {
         name="chats"
         options={{
           title: s.tabs.chats,
-          // Waiting requests live on the Chats tab. The badge is drawn only; the label says it.
-          tabBarBadge: requests ? (requests > 9 ? '9+' : requests) : undefined,
-          tabBarAccessibilityLabel: requests ? `${s.tabs.chats}, ${s.requests.count(requests)}` : undefined,
+          // Waiting requests and unread messages live on the Chats tab. The badge is drawn only;
+          // the label says what it counts.
+          tabBarBadge: waiting ? (waiting > 9 ? '9+' : waiting) : undefined,
+          tabBarAccessibilityLabel: waiting
+            ? [s.tabs.chats, requests && s.requests.count(requests), unread && s.chats.unread(unread)]
+                .filter(Boolean)
+                .join(', ')
+            : undefined,
           tabBarIcon: ({ color, focused, size }) => (
             <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={size} color={color} aria-hidden />
           ),

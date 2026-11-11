@@ -38,12 +38,14 @@ type PageOf<T> = { items: T[]; hasMore: boolean };
 function usePages<T extends { id?: string }>(
   queryKey: readonly unknown[],
   load: (page: number) => Promise<PageOf<T>>,
-  refetchInterval?: number
+  refetchInterval?: number,
+  enabled = true
 ) {
   const query = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) => load(pageParam),
     refetchInterval,
+    enabled,
     initialPageParam: 0,
     getNextPageParam: (last, _pages, lastPageParam) =>
       last.hasMore ? lastPageParam + 1 : undefined,
@@ -120,12 +122,23 @@ export function useRequestCount(enabled = true) {
   });
 }
 
-export function useConversations() {
+/// `enabled` for the same reason as useRequestCount: the tab layout reads the unread total.
+export function useConversations(enabled = true) {
   return usePages(
     keys.conversations,
     async (page) => unwrap(await api.GET('/api/v1/conversations', { params: { query: { page } } })),
-    POLL.inbox
+    POLL.inbox,
+    enabled
   );
+}
+
+/// Tells the server the chat is on screen, so what the other member wrote stops counting as unread.
+export function useMarkRead(id: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async () => unwrap(await api.POST('/api/v1/conversations/{id}/read', { params: { path: { id } } })),
+    onSuccess: () => client.invalidateQueries({ queryKey: keys.conversations }),
+  });
 }
 
 /// The one conversation a chat screen is on. Asking for it directly rather than hunting for it

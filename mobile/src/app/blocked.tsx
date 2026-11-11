@@ -4,11 +4,11 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useBlock, useBlocks } from '@/api/hooks';
-import { AuthedImage } from '@/components/AuthedImage';
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { useStrings } from '@/i18n';
-import { radius, space, type, useColors } from '@/theme';
+import { space, type, useColors } from '@/theme';
 
 /// The only screen a blocked member still appears on. Everywhere else they are gone, which is
 /// the point of a block and also the reason this list has to exist.
@@ -50,12 +50,7 @@ export default function Blocked() {
           renderItem={({ item }) => (
             <View style={[styles.row, { borderBottomColor: c.border }]}>
               {/* Decorative: the name is read out right after it. */}
-              <AuthedImage
-                path={item.photoUrl}
-                size="thumb"
-                aria-hidden
-                style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
-              />
+              <Avatar path={item.photoUrl} size={48} photoSize="thumb" aria-hidden style={{ backgroundColor: c.surfaceMuted }} />
               <View style={styles.rowText}>
                 <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
                   {item.name}
@@ -97,6 +92,5 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  avatar: { width: 48, height: 48, borderRadius: radius.pill },
   rowText: { flex: 1, gap: 2 },
 });
