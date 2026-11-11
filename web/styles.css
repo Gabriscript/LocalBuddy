@@ -270,6 +270,57 @@ section + section {
   gap: clamp(var(--step-lg), 5vw, 72px);
   align-items: center;
   padding-top: clamp(var(--step-lg), 4vw, 64px);
+  /* The app's Night band, in both themes: the tokens are swapped here so everything inside
+     follows. The shadow carries the colour to the window's edges without a wrapper. */
+  --text: #f7f4f1;
+  --text-muted: #cfe6ef;
+  --hairline: #2a5873;
+  --action: #f45d73;
+  --on-action: #032b43;
+  color: var(--text);
+  background: #032b43;
+  box-shadow: 0 0 0 100vmax #032b43;
+  clip-path: inset(0 -100vmax);
+}
+
+/* What the photograph is of, on the photograph. */
+.hero-figure,
+.who figure {
+  position: relative;
+}
+
+.tag {
+  position: absolute;
+  top: var(--step-md);
+  left: var(--step-md);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f7f4f1;
+  color: #1c1a19;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* The code stays dark on Paper in both themes: a scanner needs the contrast. */
+.get-app {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--step-lg);
+}
+
+.get-app p {
+  margin-top: var(--step-sm);
+  color: var(--text-muted);
+  max-width: 46ch;
+}
+
+.qr {
+  flex: none;
+  width: 148px;
+  height: 148px;
+  border-radius: 12px;
 }
 
 .hero-copy {
