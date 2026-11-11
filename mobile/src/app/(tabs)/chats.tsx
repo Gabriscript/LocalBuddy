@@ -112,6 +112,8 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
   const s = useStrings();
   const { data: other } = useProfile(conversation.otherUserId);
   const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
+  // The generated type allows a string for an int32; the server always sends a number.
+  const unread = Number(conversation.unreadCount ?? 0);
 
   return (
     <Pressable
@@ -132,7 +134,7 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
         <Text style={[type.label, { color: c.text }]} numberOfLines={1}>
           {other?.name ?? ' '}
         </Text>
-        <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
+        <Text style={[type.caption, { color: unread ? c.text : c.textMuted }]} numberOfLines={1}>
           {conversation.lastMessage ?? s.chats.sayHello}
         </Text>
         {conversation.unlockedByPayment ? (
@@ -140,7 +142,17 @@ function ChatRow({ conversation }: { conversation: Conversation }) {
         ) : null}
       </View>
 
-      <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+      {unread ? (
+        <View style={[styles.unread, { backgroundColor: c.primary }]}>
+          <Text
+            accessibilityLabel={s.chats.unread(unread)}
+            style={[type.caption, styles.figure, { color: c.onPrimary }]}>
+            {unread > 9 ? '9+' : unread}
+          </Text>
+        </View>
+      ) : (
+        <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+      )}
     </Pressable>
   );
 }
@@ -170,4 +182,5 @@ const styles = StyleSheet.create({
   face: { width: 56, alignItems: 'center', gap: space.xs },
   facePhoto: { borderWidth: StyleSheet.hairlineWidth },
   rowText: { flex: 1, gap: 2 },
+  unread: { minWidth: 24, height: 24, paddingHorizontal: 6, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

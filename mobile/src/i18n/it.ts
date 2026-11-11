@@ -151,6 +151,7 @@ export const it: Strings = {
     empty: 'Ancora nessuna chat. Quando dite sì tutti e due, si comincia da qui.',
     sayHello: 'Saluta',
     unlocked: 'Sbloccata',
+    unread: (n) => (n === 1 ? '1 messaggio nuovo' : `${n} messaggi nuovi`),
   },
 
   requests: {

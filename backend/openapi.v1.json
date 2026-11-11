@@ -357,6 +357,42 @@
         }
       }
     },
+    "/api/v1/conversations/{id}/read": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/discovery": {
       "get": {
         "tags": [
@@ -1774,7 +1810,8 @@
           "otherUserId",
           "unlockedByPayment",
           "createdAt",
-          "lastMessage"
+          "lastMessage",
+          "unreadCount"
         ],
         "type": "object",
         "properties": {
@@ -1798,6 +1835,14 @@
               "null",
               "string"
             ]
+          },
+          "unreadCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },

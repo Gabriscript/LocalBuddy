@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useConversation, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
+import { useConversation, useMarkRead, useMe, useMessages, useProfile, useSendMessage } from '@/api/hooks';
 import { ActionError } from '@/components/ActionError';
 import { Avatar } from '@/components/Avatar';
 import { ReviewSheet } from '@/components/ReviewSheet';
@@ -42,6 +42,13 @@ export default function Chat() {
   const { data: other } = useProfile(otherId);
   const { data: me } = useMe();
   const photo = other?.photos?.find((p) => p.type === 'profile')?.url;
+
+  // On opening, and again whenever a newer message lands while the chat is on screen.
+  const { mutate: markRead } = useMarkRead(id);
+  const newest = items[0]?.id;
+  useEffect(() => {
+    if (newest) markRead();
+  }, [newest, markRead]);
 
   const canSend = draft.trim().length > 0 && !send.isPending;
 

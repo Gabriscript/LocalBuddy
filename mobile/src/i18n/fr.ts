@@ -155,6 +155,7 @@ export const fr: Strings = {
     empty: "Aucune conversation pour l'instant. Quand vous dites oui tous les deux, c'est ici que tout commence.",
     sayHello: 'Dites bonjour',
     unlocked: 'Débloquée',
+    unread: (n) => (n === 1 ? '1 nouveau message' : `${n} nouveaux messages`),
   },
 
   requests: {

@@ -84,8 +84,14 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<Guid>("UserAId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("UserAReadAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("UserBId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UserBReadAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

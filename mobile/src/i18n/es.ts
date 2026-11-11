@@ -154,6 +154,7 @@ export const es: Strings = {
     empty: 'Aún no hay chats. Cuando los dos digáis que sí, todo empieza aquí.',
     sayHello: 'Saluda',
     unlocked: 'Desbloqueado',
+    unread: (n) => (n === 1 ? '1 mensaje nuevo' : `${n} mensajes nuevos`),
   },
 
   requests: {

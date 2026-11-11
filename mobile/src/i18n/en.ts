@@ -151,6 +151,7 @@ export const en = {
     empty: 'No chats yet. When you both say yes, this is where it starts.',
     sayHello: 'Say hello',
     unlocked: 'Unlocked',
+    unread: (n: number) => (n === 1 ? '1 new message' : `${n} new messages`),
   },
 
   requests: {
