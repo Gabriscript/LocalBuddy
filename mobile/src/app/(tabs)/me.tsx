@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useMe } from '@/api/hooks';
-import { AuthedImage } from '@/components/AuthedImage';
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Pill } from '@/components/Pill';
@@ -13,7 +13,7 @@ import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage, useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
-import { radius, space, type, useColors } from '@/theme';
+import { space, type, useColors } from '@/theme';
 
 export default function Me() {
   const c = useColors();
@@ -32,10 +32,11 @@ export default function Me() {
       <Screen loading={isPending} error={error} onRetry={refetch}>
         <ScrollView contentContainerStyle={[styles.body, { paddingBottom: clearance }]}>
           <View style={styles.identity}>
-            <AuthedImage
+            <Avatar
               path={data?.photos?.[0]?.url}
-              size="medium"
-              style={[styles.avatar, { backgroundColor: c.surfaceMuted }]}
+              size={88}
+              photoSize="medium"
+              style={{ backgroundColor: c.surfaceMuted }}
               accessibilityLabel={s.common.yourPhoto}
             />
             <View style={styles.identityText}>
@@ -120,7 +121,6 @@ const styles = StyleSheet.create({
   page: { flex: 1 },
   body: { padding: space.md, gap: space.lg },
   identity: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  avatar: { width: 88, height: 88, borderRadius: radius.pill },
   identityText: { flex: 1, gap: space.xs },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   separated: { paddingTop: space.lg, borderTopWidth: StyleSheet.hairlineWidth },

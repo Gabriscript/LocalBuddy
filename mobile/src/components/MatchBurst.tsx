@@ -15,7 +15,7 @@ import {
 import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
-import { AuthedImage } from './AuthedImage';
+import { Avatar } from './Avatar';
 
 // Room for a label under each satellite without it running under the photo in the middle.
 const STAGE = 320;
@@ -172,9 +172,10 @@ export function MatchBurst({
               })}
             </Animated.View>
 
-            <AuthedImage
+            <Avatar
               path={photoPath}
-              size="medium"
+              size={PLANET}
+              photoSize="medium"
               style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
               accessibilityLabel={s.common.photoOf(name)}
             />
@@ -215,5 +216,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  planet: { width: PLANET, height: PLANET, borderRadius: radius.pill, borderWidth: 2 },
+  planet: { borderWidth: 2 },
 });
