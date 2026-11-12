@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { api, setAuthToken, setUnauthorizedHandler, unwrap } from '@/api/client';
+import { useLanguage, useStrings } from '@/i18n';
 
+import { forgetPush, registerPush, unregisterPush } from './push';
 import { tokenStore } from './storage';
 
 const TOKEN_KEY = 'localbuddy.token';
@@ -48,8 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setReady(true));
 
     // Any 401 anywhere in the app lands here.
-    setUnauthorizedHandler(() => void keep(null));
+    setUnauthorizedHandler(() => {
+      forgetPush();
+      void keep(null);
+    });
   }, []);
+
+  // Signed in, or the language changed: the server texts pushes in the device's language.
+  const { language } = useLanguage();
+  const channelName = useStrings().push.channel;
+  useEffect(() => {
+    if (token) void registerPush(language, channelName);
+  }, [token, language, channelName]);
 
   const value = useMemo<Auth>(
     () => ({
@@ -62,7 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = unwrap(await api.POST('/api/v1/auth/register', { body }));
         await keep(result.token);
       },
-      signOut: () => keep(null).then(() => undefined),
+      // A slow network must not hold the member on a screen they asked to leave.
+      signOut: () =>
+        Promise.race([unregisterPush(), new Promise((resolve) => setTimeout(resolve, 3000))])
+          .then(() => keep(null))
+          .then(() => undefined),
     }),
     [token]
   );

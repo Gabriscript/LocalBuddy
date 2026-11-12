@@ -96,6 +96,13 @@ export function FilterSheet({
         onChange={(on) => set('offersOvernight')(on || undefined)}
       />
 
+      <Toggle
+        label={s.common.freeToday}
+        value={!!draft.freeToday}
+        // Off means "no preference", not "must be busy".
+        onChange={(on) => set('freeToday')(on || undefined)}
+      />
+
       <Tri label={s.common.hasCar} value={draft.hasCar} onChange={set('hasCar')} />
       <Tri label={s.common.smokes} value={draft.smokes} onChange={set('smokes')} />
       <Tri label={s.filters.hasPets} value={draft.hasPets} onChange={set('hasPets')} />

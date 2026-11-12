@@ -17,12 +17,12 @@ public record PublicProfile(
     Guid Id, string Name, string City, string Role,
     string WhatWeWillDo, string WhyIHost, string LanguagesSpoken,
     bool IdentityVerified, bool HasCar, bool Smokes, bool HasPets,
-    List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle)
+    List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle, bool FreeToday)
 {
     public static PublicProfile From(User u) =>
         new(u.Id, u.Name, u.City, u.Role, u.WhatWeWillDo, u.WhyIHost, u.LanguagesSpoken,
             u.IdentityVerified, u.HasCar, u.Smokes, u.HasPets,
-            Models.UsualDays.FromMask(u.UsualDays), u.ActivityStyle, u.Lifestyle);
+            Models.UsualDays.FromMask(u.UsualDays), u.ActivityStyle, u.Lifestyle, u.FreeUntil > DateTime.UtcNow);
 }
 
 /// Full profile page. Derives from PublicProfile so the JSON stays flat and the inherited
@@ -39,12 +39,17 @@ public record ProfileDetail : PublicProfile
     public double? Rating { get; init; }
 }
 
+/// What other members see of a trip: where and when, never its id.
+public record PublicTrip(string City, DateOnly From, DateOnly To);
+
 /// Discovery result: the same public fields, plus what a swipe card needs.
 public record ProfileCard : PublicProfile
 {
-    public ProfileCard(PublicProfile p, string? photoUrl, double? rating) : base(p)
-        => (PhotoUrl, Rating) = (photoUrl, rating);
+    public ProfileCard(PublicProfile p, string? photoUrl, double? rating, PublicTrip? trip = null) : base(p)
+        => (PhotoUrl, Rating, Trip) = (photoUrl, rating, trip);
 
     public string? PhotoUrl { get; init; }
     public double? Rating { get; init; }
+    /// The member's earliest active trip to the city searched for; null for residents and without a city.
+    public PublicTrip? Trip { get; init; }
 }

@@ -40,6 +40,29 @@ public record ProfileUpdate(
     ActivityStyle? ActivityStyle = null,
     Lifestyle? Lifestyle = null);
 
+/// The instant "Free today" ends; the server accepts at most 24 hours ahead.
+public record FreeToday(DateTime Until);
+
+public record NewTrip(
+    [Required, StringLength(Limits.City)] string City,
+    DateOnly From,
+    DateOnly To);
+
+static class PushPatterns
+{
+    /// What expo-notifications' getExpoPushTokenAsync returns, e.g. ExponentPushToken[xxxx].
+    public const string Token = @"(Exponent|Expo)PushToken\[[^\[\]\s]+\]";
+    /// The app's languages. fi, sv and de arrive with the languages step and are accepted already.
+    public const string Language = "en|it|es|fr|fi|sv|de";
+}
+
+/// The device's Expo push token and the language the app shows on it.
+public record PushTokenRegistration(
+    [Required, StringLength(Limits.PushToken), RegularExpression(PushPatterns.Token)] string Token,
+    [Required, RegularExpression(PushPatterns.Language)] string Language);
+
+public record PushTokenRemoval([Required, StringLength(Limits.PushToken)] string Token);
+
 public record AvailabilitySlot(TimeOfDay TimeOfDay, DateOnly? SeasonStart, DateOnly? SeasonEnd);
 
 public record ListingUpdate(bool OffersExperience, bool OffersOvernight, bool OvernightComplianceAck);

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { components } from '@/api/generated';
 import { LIFE_ICON, roleName, STYLE_ICON } from '@/api/labels';
 import { useLanguage, useStrings } from '@/i18n';
+import { isoDay, shortDay } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 import { AuthedImage } from './AuthedImage';
@@ -43,6 +44,12 @@ export const ProfileCard = memo(function ProfileCard({
   const rating =
     typeof card.rating === 'number' ? card.rating.toLocaleString(language, ONE_DECIMAL) : null;
   const role = roleName(card.role, s);
+  // Only present when the feed is filtered to a city this member is visiting.
+  const trip = card.trip
+    ? card.trip.from <= isoDay()
+      ? s.profileCard.inTown
+      : s.profileCard.arriving(shortDay(card.trip.from, language))
+    : null;
 
   // A card is one control, so a screen reader hears its label and nothing else. The label
   // therefore carries everything the card shows — the pills and the plan included, or pass and
@@ -51,6 +58,8 @@ export const ProfileCard = memo(function ProfileCard({
     card.name,
     card.city,
     role,
+    trip,
+    card.freeToday ? s.common.freeToday : null,
     card.identityVerified ? s.profileCard.verified : null,
     rating ? s.profileCard.rated(rating) : null,
     card.hasCar ? s.profileCard.hasCar : null,
@@ -99,6 +108,13 @@ export const ProfileCard = memo(function ProfileCard({
               </>
             ) : null}
           </View>
+
+          {trip || card.freeToday ? (
+            <View style={styles.pills}>
+              {trip ? <Pill icon="airplane-outline" label={trip} tone="positive" /> : null}
+              {card.freeToday ? <Pill icon="cafe-outline" label={s.common.freeToday} tone="positive" /> : null}
+            </View>
+          ) : null}
 
           {/* Left out when empty: an empty row would still take a gap's worth of height. */}
           {card.hasCar || card.hasPets || card.smokes || card.activityStyle || card.lifestyle ? (

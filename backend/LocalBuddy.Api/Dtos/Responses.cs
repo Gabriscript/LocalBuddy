@@ -16,6 +16,8 @@ public record ListingDto(bool OffersExperience, bool OffersOvernight, bool Overn
         l is null ? null : new(l.OffersExperience, l.OffersOvernight, l.OvernightComplianceAck);
 }
 
+public record TripDto(Guid Id, string City, DateOnly From, DateOnly To);
+
 public record MessageDto(Guid Id, Guid ConversationId, Guid SenderId, string Content, DateTime SentAt)
 {
     public static MessageDto From(Message m) => new(m.Id, m.ConversationId, m.SenderId, m.Content, m.SentAt);
@@ -48,7 +50,8 @@ public record MyProfile(
     bool IdentityVerified, bool AgeVerified, int CreditsBalance,
     bool HasCar, bool Smokes, bool HasPets, bool ProfileVisibleToAnonymous,
     List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle,
-    List<PhotoDto> Photos, List<AvailabilityDto> Availability, ListingDto? Listing);
+    List<PhotoDto> Photos, List<AvailabilityDto> Availability, ListingDto? Listing,
+    bool IdentityVerificationPending, DateTime? FreeUntil);
 
 /// Result of an authentication attempt.
 public record AuthResult(string Token, Guid UserId);
@@ -63,8 +66,12 @@ public record RequestCount(int Count);
 /// one-time | credits | subscription | none.
 public record UnlockResult(Guid ConversationId, string Charged);
 
-/// Verification verdict returned to the member.
-public record VerificationResult(bool IdentityVerified, bool AgeVerified);
+/// Verification verdict returned to the member. Pending: asked, waiting for a moderator (ADR-0011).
+public record VerificationResult(bool IdentityVerified, bool AgeVerified, bool Pending);
+
+/// A member waiting for a moderator to approve their identity (ADR-0011). Name and email are
+/// what the moderator, who knows every pilot member, recognises them by.
+public record PendingVerificationDto(Guid UserId, string Name, string? Email, string City, DateTime RequestedAt);
 
 /// What the next unlock will cost this member, and what the alternatives are. The client must
 /// never carry its own copy of a price: the amounts live in Pricing and travel from here.

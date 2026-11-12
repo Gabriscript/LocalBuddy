@@ -131,3 +131,25 @@ public class Block
     public Guid BlockerId { get; set; }
     public Guid BlockedId { get; set; }
 }
+
+/// A stay in another city, so the people there can find the traveller before and during it.
+public class Trip
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public string City { get; set; } = "";
+    public DateOnly From { get; set; }
+    public DateOnly To { get; set; } // inclusive: the last day in town
+
+    // shortcut: UTC date, up to ~3 h off around midnight in Europe; store a zone if users notice.
+    public static DateOnly Today => DateOnly.FromDateTime(DateTime.UtcNow);
+}
+
+/// One of a member's devices, reachable through Expo's push service (ADR-0012).
+public class PushToken
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public string Token { get; set; } = "";
+    public string Language { get; set; } = "en"; // the app's language on that device; the push texts follow it
+}

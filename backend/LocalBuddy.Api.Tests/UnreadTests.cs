@@ -8,7 +8,7 @@ namespace LocalBuddy.Api.Tests;
 /// Unread = what the other member wrote since I last had the chat open.
 public class UnreadTests
 {
-    static ConversationsController Chats(TestDb t, Guid caller) => new ConversationsController(t.Db).As(caller);
+    static ConversationsController Chats(TestDb t, Guid caller) => new ConversationsController(t.Db, TestPush.For(t.Db)).As(caller);
 
     static async Task<int> UnreadOf(TestDb t, Guid me)
     {
@@ -23,7 +23,7 @@ public class UnreadTests
     {
         using var t = new TestDb();
         var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
-        var matches = new MatchesController(t.Db, new ConversationService(t.Db));
+        var matches = new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db));
         await matches.As(anna).Interest(bruno);
         await matches.As(bruno).Interest(anna);
         var chat = t.Db.Conversations.Single().Id;
@@ -47,7 +47,7 @@ public class UnreadTests
     {
         using var t = new TestDb();
         var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
-        var matches = new MatchesController(t.Db, new ConversationService(t.Db));
+        var matches = new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db));
         await matches.As(anna).Interest(bruno);
         await matches.As(bruno).Interest(anna);
         var chat = t.Db.Conversations.Single();

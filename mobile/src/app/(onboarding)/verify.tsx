@@ -23,7 +23,10 @@ export default function Verify() {
   const s = useStrings();
   const { from } = useLocalSearchParams<{ from?: string }>();
   const verify = useVerify();
-  const guest = useMe().data?.role === 'guest';
+  const me = useMe().data;
+  const guest = me?.role === 'guest';
+  // Waiting for a moderator (ADR-0011): asked, not yet approved. Browsing stays open meanwhile.
+  const pending = verify.data?.pending || me?.identityVerificationPending;
   const onboarding = from !== 'app';
 
   // Reached by deep link there is no screen behind this one, so back would lead nowhere.
@@ -39,11 +42,13 @@ export default function Verify() {
       image={require('../../../assets/images/scenes/s03-bar-counter.jpg')}
       step={onboarding ? 2 : undefined}
       total={guest ? 4 : 5}
-      title={s.onboarding.verifyTitle}
-      subtitle={s.onboarding.verifySubtitle}
-      cta={s.onboarding.verifyCta}
+      title={pending ? s.common.waitingApproval : s.onboarding.verifyTitle}
+      subtitle={pending ? s.onboarding.verifyPendingBody : s.onboarding.verifySubtitle}
+      cta={pending ? s.common.continue : s.onboarding.verifyCta}
       loading={verify.isPending}
-      onNext={() => verify.mutate(undefined, { onSuccess: done })}>
+      onNext={() =>
+        pending ? done() : verify.mutate(undefined, { onSuccess: (result) => !result.pending && done() })
+      }>
       {verify.error ? (
         // Under 18, or an identity already banned: the code says which, in plain words.
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>

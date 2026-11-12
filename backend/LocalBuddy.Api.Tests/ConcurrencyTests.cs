@@ -86,8 +86,8 @@ public class ConcurrencyTests(PostgresFixture postgres) : IClassFixture<Postgres
             var (gino, hana) = (await Member("gino"), await Member("hana"));
 
             await AllAtOnce(
-                db => new MatchesController(db, new ConversationService(db)).As(gino).Interest(hana),
-                db => new MatchesController(db, new ConversationService(db)).As(hana).Interest(gino));
+                db => new MatchesController(db, new ConversationService(db), TestPush.For(db)).As(gino).Interest(hana),
+                db => new MatchesController(db, new ConversationService(db), TestPush.For(db)).As(hana).Interest(gino));
 
             await using var check = new LocalBuddyDbContext(postgres.Options);
             var statuses = await check.Matches.Where(m => m.InitiatorId == gino || m.InitiatorId == hana)

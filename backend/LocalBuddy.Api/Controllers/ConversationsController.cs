@@ -12,7 +12,7 @@ namespace LocalBuddy.Api.Controllers;
 [Route("api/v1/conversations")]
 [Authorize]
 [Produces("application/json")]
-public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
+public class ConversationsController(LocalBuddyDbContext db, PushNotifier push) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<Page<ConversationSummary>>(StatusCodes.Status200OK)]
@@ -123,7 +123,11 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
         var me = User.Id();
         var chat = await db.Conversations
             .Where(c => c.Id == id && (c.UserAId == me || c.UserBId == me))
-            .Select(c => new { Other = c.UserAId == me ? c.UserBId : c.UserAId })
+            .Select(c => new
+            {
+                Other = c.UserAId == me ? c.UserBId : c.UserAId,
+                OtherReadAt = c.UserAId == me ? c.UserBReadAt : c.UserAReadAt
+            })
             .FirstOrDefaultAsync();
         if (chat is null) return Forbid();
 
@@ -142,6 +146,19 @@ public class ConversationsController(LocalBuddyDbContext db) : ControllerBase
 
         db.Messages.Add(message);
         await db.SaveChangesAsync();
+
+        // One push per unread stretch: the first message they have not seen yet. The rest wait
+        // until they open the chat, which moves their read marker. Only earlier messages count, so
+        // of two sent at once exactly one pushes; the id breaks a tie (version 7 ids are random
+        // within a millisecond, so they cannot order two sends on their own).
+        var firstUnread = !await db.Messages.AnyAsync(m =>
+            m.ConversationId == id && m.SenderId == me &&
+            (m.SentAt < message.SentAt || (m.SentAt == message.SentAt && m.Id < message.Id)) &&
+            (chat.OtherReadAt == null || m.SentAt > chat.OtherReadAt));
+        // shortcut: the push is awaited inline (3 s timeout), so a slow Expo slows the send; move it
+        // to a background channel if send latency shows up in the pilot.
+        if (firstUnread) await push.NotifyAsync(chat.Other, me, PushKind.Message, $"/chat/{id}");
+
         return Created($"/api/v1/conversations/{id}/messages", MessageDto.From(message));
     }
 

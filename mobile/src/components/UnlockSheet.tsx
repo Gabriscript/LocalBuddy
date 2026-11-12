@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
-import { usePaymentOptions, useUnlock } from '@/api/hooks';
+import { useMe, usePaymentOptions, useUnlock } from '@/api/hooks';
 import { useLanguage, useStrings } from '@/i18n';
 import { type, useColors } from '@/theme';
 
@@ -61,6 +61,7 @@ export function UnlockSheet({
     money: s.unlock.ctaMoney(price),
   }[pays];
 
+  const pending = !!useMe().data?.identityVerificationPending;
   const unverified =
     unlock.error instanceof ApiError && unlock.error.code === 'identity_verification_required';
 
@@ -72,7 +73,8 @@ export function UnlockSheet({
         <View style={styles.grow}>
           {unverified ? (
             <Button
-              title={s.common.verifyIdentity}
+              title={pending ? s.common.waitingApproval : s.common.verifyIdentity}
+              disabled={pending}
               // `from` keeps the verify screen out of its onboarding costume: no "Step 2 of 5"
               // dots, and it comes back to this profile instead of walking on to step 3.
               onPress={() => router.push({ pathname: '/verify', params: { from: 'app' } })}

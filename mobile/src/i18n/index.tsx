@@ -4,14 +4,17 @@ import { Platform } from 'react-native';
 
 import { tokenStore } from '@/lib/storage';
 
+import { de } from './de';
 import { en, type Strings } from './en';
 import { es } from './es';
+import { fi } from './fi';
 import { fr } from './fr';
 import { it } from './it';
+import { sv } from './sv';
 
 export type { Strings } from './en';
 
-const DICTIONARIES = { en, it, es, fr };
+const DICTIONARIES = { en, it, es, fr, fi, sv, de };
 export type Language = keyof typeof DICTIONARIES;
 export const LANGUAGES = Object.keys(DICTIONARIES) as Language[];
 
@@ -22,6 +25,9 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   it: 'Italiano',
   es: 'Español',
   fr: 'Français',
+  fi: 'Suomi',
+  sv: 'Svenska',
+  de: 'Deutsch',
 };
 
 const PREFERENCE_KEY = 'localbuddy.language';

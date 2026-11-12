@@ -1,13 +1,16 @@
 using LocalBuddy.Api.Controllers;
+using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LocalBuddy.Api.Tests;
 
 public class DiscoveryTests
 {
     static MatchesController Matches(TestDb t, Guid caller) =>
-        new MatchesController(t.Db, new ConversationService(t.Db)).As(caller);
+        new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db)).As(caller);
 
     static DiscoveryController Discovery(TestDb t, Guid caller) => new DiscoveryController(t.Db).As(caller);
 
@@ -37,6 +40,20 @@ public class DiscoveryTests
         await Matches(t, anna).UndoPass(bruno);
 
         Assert.Empty(await FeedOf(t, anna));
+    }
+
+    [Fact]
+    public async Task Undo_leaves_a_match_alone()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        await Matches(t, anna).Interest(bruno);
+        await Matches(t, bruno).Interest(anna);
+
+        await Matches(t, anna).UndoPass(bruno);
+
+        Assert.Equal(MatchStatus.Matched, (await t.Db.Matches.SingleAsync(m => m.InitiatorId == anna)).Status);
+        Assert.Equal(1, await t.Db.Conversations.CountAsync());
     }
 
     [Fact]
@@ -72,9 +89,25 @@ public class DiscoveryTests
                 .Value!.Items.Select(c => c.Id).ToList();
 
         Assert.Equal([weekend], await Feed(days: [DayOfWeek.Sunday, DayOfWeek.Friday]));
+        Assert.Equal([weekday], await Feed(days: [(DayOfWeek)(-1), DayOfWeek.Monday])); // unknown days are ignored
+        Assert.Equal(2, (await Feed(days: [(DayOfWeek)40])).Count);
         Assert.Equal([weekday], await Feed(style: ActivityStyle.Relaxed));
         Assert.Equal([weekend], await Feed(life: Lifestyle.Nightlife));
         Assert.Equal(2, (await Feed()).Count);
+    }
+
+    [Fact]
+    public async Task A_profile_with_an_unknown_usual_day_is_refused()
+    {
+        using var t = new TestDb();
+        var anna = t.AddUser("anna");
+
+        var result = await new UsersController(t.Db, null!, null!).As(anna)
+            .UpdateMe(new ProfileUpdate("anna", "Milano", "guest", "", "", "", false, false, false, false, [DayOfWeek.Monday, (DayOfWeek)40]));
+
+        var problem = Assert.IsType<ProblemDetails>(Assert.IsType<ObjectResult>(result).Value);
+        Assert.Equal((400, "invalid_day"), (problem.Status, problem.Extensions["code"]?.ToString()));
+        Assert.Equal(0, t.Db.Users.Find(anna)!.UsualDays);
     }
 
     [Fact]

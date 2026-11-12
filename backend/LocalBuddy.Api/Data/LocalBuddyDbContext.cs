@@ -19,6 +19,8 @@ public class LocalBuddyDbContext(DbContextOptions<LocalBuddyDbContext> options)
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Report> Reports => Set<Report>();
     public DbSet<Block> Blocks => Set<Block>();
+    public DbSet<Trip> Trips => Set<Trip>();
+    public DbSet<PushToken> PushTokens => Set<PushToken>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -61,6 +63,15 @@ public class LocalBuddyDbContext(DbContextOptions<LocalBuddyDbContext> options)
         b.Entity<Block>().HasOne<User>().WithMany()
             .HasForeignKey(x => x.BlockedId).OnDelete(DeleteBehavior.Cascade);
 
+        // shortcut: only the UserId index; discovery scans trips by lower(City). Add a functional
+        // index like IX_AspNetUsers_City_Lower once EXPLAIN shows the scan costs something.
+        b.Entity<Trip>().HasOne<User>().WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+
+        // A device token is personal data like any other: erasure takes it too.
+        b.Entity<PushToken>().HasOne<User>().WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+
         // A subscription is meaningless without its subscriber; the Payment rows below keep
         // the accounting trail.
         b.Entity<Subscription>().HasOne<User>().WithMany()
@@ -80,6 +91,8 @@ public class LocalBuddyDbContext(DbContextOptions<LocalBuddyDbContext> options)
         b.Entity<Match>().HasIndex(x => new { x.InitiatorId, x.TargetId }).IsUnique();
         b.Entity<Block>().HasIndex(x => new { x.BlockerId, x.BlockedId }).IsUnique();
         b.Entity<Review>().HasIndex(x => new { x.AuthorId, x.SubjectId }).IsUnique();
+        // A device belongs to one account at a time: the last one to sign in on it.
+        b.Entity<PushToken>().HasIndex(x => x.Token).IsUnique();
 
         // Identity enforces RequireUniqueEmail inside UserManager only, which two concurrent
         // registrations can both pass. This is the constraint that actually holds. It replaces
@@ -117,6 +130,12 @@ public class LocalBuddyDbContext(DbContextOptions<LocalBuddyDbContext> options)
         b.Entity<Review>().Property(x => x.Comment).HasMaxLength(Limits.Comment);
         b.Entity<Report>().Property(x => x.Reason).HasMaxLength(Limits.Reason);
         b.Entity<Photo>().Property(x => x.Url).HasMaxLength(Limits.Url);
+        b.Entity<Trip>().Property(x => x.City).HasMaxLength(Limits.City);
+        b.Entity<PushToken>(t =>
+        {
+            t.Property(x => x.Token).HasMaxLength(Limits.PushToken);
+            t.Property(x => x.Language).HasMaxLength(Limits.Language);
+        });
         b.Entity<Payment>().Property(x => x.StripeId).HasMaxLength(Limits.ExternalId);
         b.Entity<Subscription>(s =>
         {

@@ -1,15 +1,17 @@
 import { Geist_400Regular } from '@expo-google-fonts/geist/400Regular';
 import { Geist_600SemiBold } from '@expo-google-fonts/geist/600SemiBold';
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display/600SemiBold';
-import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { router, Stack, useRootNavigationState, type Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { ApiError } from '@/api/client';
+import { keys } from '@/api/hooks';
 import { LanguageProvider } from '@/i18n';
 import { AuthProvider } from '@/lib/auth';
 import { useColors } from '@/theme';
@@ -59,9 +61,49 @@ export default function RootLayout() {
       <QueryClientProvider client={client}>
         <AuthProvider>
           <StatusBar style="auto" />
+          <PushRouting />
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
         </AuthProvider>
       </QueryClientProvider>
     </LanguageProvider>
   );
+}
+
+/// Inside AuthProvider, so a tap that launched the app opens its screen only once the stored
+/// session has been read and the navigator exists.
+function PushRouting() {
+  const client = useQueryClient();
+  // A cold-start tap must wait for the root navigator, or router.push has nothing to push to.
+  const ready = !!useRootNavigationState()?.key;
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !ready) return;
+
+    // The server puts the route to open in data.url: /requests or /chat/{id} (ADR-0012).
+    // The last response and the listener can report the same tap: open each one once.
+    let handled: string | null = null;
+    const open = (response: Notifications.NotificationResponse | null) => {
+      if (!response) return;
+      const url = response.notification.request.content.data?.url;
+      const id = response.notification.request.identifier;
+      if (typeof url !== 'string' || !url.startsWith('/') || id === handled) return;
+      handled = id;
+      router.push(url as Href);
+    };
+    open(Notifications.getLastNotificationResponse()); // the tap that started the app, if any
+    const taps = Notifications.addNotificationResponseReceivedListener(open);
+
+    // Arriving while the app is open: refresh now rather than at the next poll.
+    const arrivals = Notifications.addNotificationReceivedListener(() => {
+      client.invalidateQueries({ queryKey: keys.requests });
+      client.invalidateQueries({ queryKey: keys.conversations });
+    });
+
+    return () => {
+      taps.remove();
+      arrivals.remove();
+    };
+  }, [client, ready]);
+
+  return null;
 }

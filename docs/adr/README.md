@@ -18,6 +18,8 @@ code; each one notes its original date.
 | [0008](0008-api-conventions.md) | API conventions: versioned paths, one error shape, paged collections | accepted | 2026-08-28 |
 | [0009](0009-frontend-expo-generated-client.md) | Front-end: Expo dev build, API client generated from OpenAPI | accepted | 2026-08-28 |
 | [0010](0010-demo-environment.md) | A Demo environment for a hosted showcase | proposed | 2026-10-27 |
+| [0011](0011-pilot-on-demo-with-manual-identity-approval.md) | The pilot runs on Demo, with identities approved by hand | proposed | 2026-11-12 |
+| [0012](0012-push-through-expo-best-effort.md) | Push notifications through Expo, best effort | accepted | 2026-11-12 |
 
 ## Adding one
 

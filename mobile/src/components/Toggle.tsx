@@ -12,18 +12,21 @@ export function Toggle({
   value,
   onChange,
   as = 'switch',
+  disabled = false,
 }: {
   label: string;
   hint?: string;
   value: boolean;
   onChange: (next: boolean) => void;
   as?: 'switch' | 'checkbox';
+  disabled?: boolean;
 }) {
   const c = useColors();
 
   return (
     <Pressable
       onPress={() => onChange(!value)}
+      disabled={disabled}
       // role / aria-* rather than accessibilityRole / accessibilityState: React Native maps
       // these on iOS, Android and the web, where the older props never reach the DOM.
       role={as}

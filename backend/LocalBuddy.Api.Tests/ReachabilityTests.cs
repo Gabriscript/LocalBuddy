@@ -55,8 +55,8 @@ public class ReachabilityTests
         var chat = await Chat(t, anna, bruno);
         await Block(t, anna, bruno);
 
-        Assert.Equal("blocked", Code(await new ConversationsController(t.Db).As(bruno).Send(chat, new SendMessage("ancora qui"))));
-        Assert.Equal("blocked", Code(await new ConversationsController(t.Db).As(anna).Send(chat, new SendMessage("ciao"))));
+        Assert.Equal("blocked", Code(await new ConversationsController(t.Db, TestPush.For(t.Db)).As(bruno).Send(chat, new SendMessage("ancora qui"))));
+        Assert.Equal("blocked", Code(await new ConversationsController(t.Db, TestPush.For(t.Db)).As(anna).Send(chat, new SendMessage("ciao"))));
         Assert.Equal(0, await t.Db.Messages.CountAsync());
     }
 
@@ -69,8 +69,8 @@ public class ReachabilityTests
         var kept = await Chat(t, anna, carla);
         await Block(t, bruno, anna);
 
-        var annas = (await new ConversationsController(t.Db).As(anna).List()).Value!;
-        var brunos = (await new ConversationsController(t.Db).As(bruno).List()).Value!;
+        var annas = (await new ConversationsController(t.Db, TestPush.For(t.Db)).As(anna).List()).Value!;
+        var brunos = (await new ConversationsController(t.Db, TestPush.For(t.Db)).As(bruno).List()).Value!;
         Assert.Equal([kept], annas.Items.Select(c => c.Id));
         Assert.Empty(brunos.Items);
     }
@@ -85,15 +85,15 @@ public class ReachabilityTests
         var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
         var chat = await Chat(t, anna, bruno);
 
-        var mine = (await new ConversationsController(t.Db).As(anna).One(chat)).Value!;
+        var mine = (await new ConversationsController(t.Db, TestPush.For(t.Db)).As(anna).One(chat)).Value!;
         Assert.Equal(bruno, mine.OtherUserId);
 
         // Whichever side asks, the other member is the one they are not.
-        var theirs = (await new ConversationsController(t.Db).As(bruno).One(chat)).Value!;
+        var theirs = (await new ConversationsController(t.Db, TestPush.For(t.Db)).As(bruno).One(chat)).Value!;
         Assert.Equal(anna, theirs.OtherUserId);
 
         // A stranger is refused rather than told whether the conversation exists.
-        Assert.IsType<ForbidResult>((await new ConversationsController(t.Db).As(carla).One(chat)).Result);
+        Assert.IsType<ForbidResult>((await new ConversationsController(t.Db, TestPush.For(t.Db)).As(carla).One(chat)).Result);
     }
 
     [Fact]
@@ -105,8 +105,8 @@ public class ReachabilityTests
         await Block(t, bruno, anna);
 
         // It left both inboxes; fetching it directly must not be the way back in.
-        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db).As(anna).One(chat)).Result);
-        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db).As(bruno).One(chat)).Result);
+        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db, TestPush.For(t.Db)).As(anna).One(chat)).Result);
+        Assert.IsType<NotFoundResult>((await new ConversationsController(t.Db, TestPush.For(t.Db)).As(bruno).One(chat)).Result);
     }
 
     [Fact]
@@ -190,7 +190,7 @@ public class ReachabilityTests
         var (anna, elena) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("elena"));
         await Ban(t, elena);
 
-        var result = await new MatchesController(t.Db, new ConversationService(t.Db)).As(anna).Interest(elena);
+        var result = await new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db)).As(anna).Interest(elena);
         Assert.IsType<NotFoundResult>(result);
     }
 

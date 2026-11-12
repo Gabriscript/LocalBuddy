@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// A hosted showcase with invented people, run from deploy/demo/: the Development fakes, without
-// Development's key, CORS or OpenAPI. Not a staging environment for real users. See ADR-0010.
+// A hosted showcase run from deploy/demo/: the Development fakes, without Development's key, CORS
+// or OpenAPI (ADR-0010). Also the invite-only pilot, so identities wait for a moderator (ADR-0011).
 var isDemo = builder.Environment.IsEnvironment("Demo");
 
 // No need to advertise the server software.
@@ -131,6 +131,7 @@ builder.Services.AddRateLimiter(o =>
 });
 
 builder.Services.AddScoped<ConversationService>();
+builder.Services.AddScoped<PushNotifier>();
 builder.Services.AddSingleton<IPhotoStorage, LocalDiskPhotoStorage>();
 
 // The fakes are Development and Demo only. Outside them nothing is registered and the app refuses
@@ -138,7 +139,15 @@ builder.Services.AddSingleton<IPhotoStorage, LocalDiskPhotoStorage>();
 if (builder.Environment.IsDevelopment() || isDemo)
 {
     builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
-    builder.Services.AddSingleton<IIdentityVerifier, FakeIdentityVerifier>();
+    // Real people meet strangers through the pilot on Demo, so nobody is approved automatically
+    // there: a moderator approves each identity by hand. ADR-0011.
+    if (isDemo) builder.Services.AddSingleton<IIdentityVerifier, ManualIdentityVerifier>();
+    else builder.Services.AddSingleton<IIdentityVerifier, FakeIdentityVerifier>();
+
+    // Pilot members on Demo get real notifications through Expo; Development only logs them.
+    // No flag: the environment name decides, as for the verifier above. ADR-0012.
+    if (isDemo) builder.Services.AddHttpClient<IPushSender, ExpoPushSender>();
+    else builder.Services.AddSingleton<IPushSender, FakePushSender>();
 
     // Lets the Expo web preview call the API from the Metro dev server: any origin in Development,
     // only the configured Cors:AllowedOrigins in Demo, none by default. The mobile client is not a

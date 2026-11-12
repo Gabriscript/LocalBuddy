@@ -11,7 +11,8 @@
 # Re-running is safe: each demo account that already exists is deleted (DELETE /users/me, which
 # cascades its photos, matches and conversations) and created again. Nothing else is touched.
 # Identity is verified through POST /users/me/verify, which FakeIdentityVerifier approves in
-# Development only (ADR-0002); outside Development no verifier is registered at all.
+# Development (ADR-0002). On Demo it only queues the request for a moderator (ADR-0011), so the
+# nine invented people are approved with a database write before they reach each other.
 set -euo pipefail
 
 API=${API:-http://localhost:5200/api/v1}
@@ -131,6 +132,10 @@ person lucia "Lucía" "Venezia" guest p08-lucia.jpg \
 person julien "Julien" "Genova" guest p09-julien.jpg \
   "Focaccia hunter on a train trip from Genoa to Milan. I like the places that are not on Instagram, a good bookshop and a bar where people argue about politics." \
   "" "French, English, Italian (I try)" "false true false" "afternoon evening night" -
+
+# Matches need a verified identity (ADR-0007). A no-op in Development, where verify approved them.
+echo "verified"
+docker exec "${PG:-localbuddy-postgres-1}" sh -c 'psql -U "$POSTGRES_USER" -d localbuddy -qAtc "update \"AspNetUsers\" set \"IdentityVerified\" = true, \"AgeVerified\" = true where \"Email\" like '\''%@'"$DOMAIN"''\''"'
 
 echo "matches"
 match tom giulia

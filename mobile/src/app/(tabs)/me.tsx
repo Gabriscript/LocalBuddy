@@ -3,17 +3,19 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useMe } from '@/api/hooks';
+import { useFreeToday, useMe } from '@/api/hooks';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Pill } from '@/components/Pill';
-import { Screen } from '@/components/Screen';
+import { Screen, errorMessage } from '@/components/Screen';
 import { Sheet } from '@/components/Sheet';
+import { Toggle } from '@/components/Toggle';
 import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage, useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
+import { endOfToday } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Me() {
@@ -22,6 +24,7 @@ export default function Me() {
   const router = useRouter();
   const { data, isPending, error, refetch } = useMe();
   const { signOut } = useAuth();
+  const freeToday = useFreeToday();
   const s = useStrings();
   const { preference, phone, setPreference } = useLanguage();
   const [choosingLanguage, setChoosingLanguage] = useState(false);
@@ -51,7 +54,13 @@ export default function Me() {
           <View style={styles.pills}>
             <Pill
               icon={data?.identityVerified ? 'shield-checkmark-outline' : 'alert-circle-outline'}
-              label={data?.identityVerified ? s.common.verified : s.me.notVerified}
+              label={
+                data?.identityVerified
+                  ? s.common.verified
+                  : data?.identityVerificationPending
+                    ? s.common.waitingApproval
+                    : s.me.notVerified
+              }
               tone={data?.identityVerified ? 'positive' : 'neutral'}
             />
             <Pill icon="sparkles-outline" label={s.me.credits(Number(data?.creditsBalance ?? 0))} />
@@ -59,15 +68,29 @@ export default function Me() {
 
           {/* The pill above says what is missing; on its own it was a dead end. Nobody can be
               contacted before this is done (ADR-0007), so it belongs above everything else. */}
-          {data && !data.identityVerified ? (
+          {data && !data.identityVerified && !data.identityVerificationPending ? (
             <Button
               title={s.common.verifyIdentity}
               onPress={() => router.push({ pathname: '/verify', params: { from: 'app' } })}
             />
           ) : null}
 
+          <Toggle
+            label={s.common.freeToday}
+            hint={s.me.freeTodayHint}
+            value={!!data?.freeUntil}
+            onChange={(on) => freeToday.mutate(on ? endOfToday() : null)}
+            disabled={freeToday.isPending}
+          />
+          {freeToday.error ? (
+            <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
+              {errorMessage(freeToday.error, s)}
+            </Text>
+          ) : null}
+
           <View style={[styles.rows, { backgroundColor: c.surface, borderColor: c.border }]}>
             <Row icon="create-outline" label={s.me.editProfile} onPress={() => router.push('/edit-profile')} />
+            <Row icon="airplane-outline" label={s.me.trips} onPress={() => router.push('/trips')} />
             <Row icon="hand-left-outline" label={s.me.blocked} onPress={() => router.push('/blocked')} />
             {/* One control whose words carry both the setting and its value, so a screen reader
                 hears what is chosen before opening the choice. */}

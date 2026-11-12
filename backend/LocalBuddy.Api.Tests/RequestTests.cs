@@ -10,7 +10,7 @@ namespace LocalBuddy.Api.Tests;
 public class RequestTests
 {
     static MatchesController Matches(TestDb t, Guid caller) =>
-        new MatchesController(t.Db, new ConversationService(t.Db)).As(caller);
+        new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db)).As(caller);
 
     static async Task<List<Guid>> RequestsOf(TestDb t, Guid me)
     {

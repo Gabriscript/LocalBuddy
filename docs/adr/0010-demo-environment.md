@@ -1,7 +1,7 @@
 # ADR-0010: A Demo environment for a hosted showcase
 
 **Date**: 2026-10-27
-**Status**: proposed
+**Status**: proposed, amended by [ADR-0011](0011-pilot-on-demo-with-manual-identity-approval.md) (the invite-only pilot runs on Demo; identities are approved by a moderator, not automatically), and by [ADR-0012](0012-push-through-expo-best-effort.md) (Demo sends real push notifications through Expo)
 **Deciders**: solo developer
 
 ## Context
@@ -53,8 +53,8 @@ and photos stay on local disk (ADR-0003), on a named Docker volume.
 
 ### Negative
 - Demo is **not** a staging environment. It is not for real users or real personal data, it
-  takes no real payments (no Stripe), it sends no push notifications, and identity checks always
-  pass. Anyone who registers on it is "verified".
+  takes no real payments (no Stripe), it sends push notifications through Expo (amended by ADR-0012),
+  and identity checks always pass. Anyone who registers on it is "verified".
 - Single instance only: photos on one disk, the rate limiter in one process.
 - The guarded development key is a constant in `JwtOptions` that has to match
   `appsettings.Development.json`; a test fails if the two drift apart.
