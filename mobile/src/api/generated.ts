@@ -364,6 +364,9 @@ export interface paths {
                     hasCar?: boolean;
                     smokes?: boolean;
                     hasPets?: boolean;
+                    days?: components["schemas"]["DayOfWeek"][];
+                    activityStyle?: components["schemas"]["ActivityStyle"];
+                    lifestyle?: components["schemas"]["Lifestyle"];
                     page?: number | string;
                     pageSize?: number | string;
                 };
@@ -380,6 +383,43 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["PageOfProfileCard"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/cities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string[];
                     };
                 };
             };
@@ -628,7 +668,28 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    targetId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1681,6 +1742,8 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        ActivityStyle: "relaxed" | "adventurous" | null;
         AuthResult: {
             token: string;
             /** Format: uuid */
@@ -1715,6 +1778,8 @@ export interface components {
             /** Format: int32 */
             unreadCount: number | string;
         };
+        /** @enum {unknown} */
+        DayOfWeek: "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday";
         /** Format: binary */
         IFormFile: string;
         InterestResult: {
@@ -1722,6 +1787,8 @@ export interface components {
             /** Format: uuid */
             conversationId: null | string;
         };
+        /** @enum {unknown} */
+        Lifestyle: "nightlife" | "family" | null;
         ListingDto: {
             offersExperience: boolean;
             offersOvernight: boolean;
@@ -1765,6 +1832,9 @@ export interface components {
             smokes: boolean;
             hasPets: boolean;
             profileVisibleToAnonymous: boolean;
+            usualDays: components["schemas"]["DayOfWeek"][];
+            activityStyle: null | components["schemas"]["ActivityStyle"];
+            lifestyle: null | components["schemas"]["Lifestyle"];
             photos: components["schemas"]["PhotoDto"][];
             availability: components["schemas"]["AvailabilityDto"][];
             listing: null | components["schemas"]["ListingDto"];
@@ -1869,6 +1939,9 @@ export interface components {
             hasCar?: boolean;
             smokes?: boolean;
             hasPets?: boolean;
+            usualDays?: components["schemas"]["DayOfWeek"][];
+            activityStyle?: null | components["schemas"]["ActivityStyle"];
+            lifestyle?: null | components["schemas"]["Lifestyle"];
         };
         ProfileDetail: {
             photos: components["schemas"]["PhotoDto"][];
@@ -1888,6 +1961,9 @@ export interface components {
             hasCar?: boolean;
             smokes?: boolean;
             hasPets?: boolean;
+            usualDays?: components["schemas"]["DayOfWeek"][];
+            activityStyle?: null | components["schemas"]["ActivityStyle"];
+            lifestyle?: null | components["schemas"]["Lifestyle"];
         };
         ProfileUpdate: {
             name: string;
@@ -1900,6 +1976,9 @@ export interface components {
             smokes: boolean;
             hasPets: boolean;
             profileVisibleToAnonymous: boolean;
+            usualDays?: null | components["schemas"]["DayOfWeek"][];
+            activityStyle?: null | components["schemas"]["ActivityStyle"];
+            lifestyle?: null | components["schemas"]["Lifestyle"];
         };
         RegisterRequest: {
             email: string;

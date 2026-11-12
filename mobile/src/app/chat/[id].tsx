@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -106,7 +105,7 @@ export default function Chat() {
 
       <KeyboardAvoidingView
         style={styles.page}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior="padding">
         <Screen
           loading={isPending}
           error={error}

@@ -24,6 +24,11 @@ public class User : IdentityUser<Guid>
     public bool Smokes { get; set; }
     public bool HasPets { get; set; }
 
+    // what kind of company they are, shown on the profile and filterable in discovery
+    public int UsualDays { get; set; } // bitmask, see Models.UsualDays
+    public ActivityStyle? ActivityStyle { get; set; }
+    public Lifestyle? Lifestyle { get; set; }
+
     /// Each host decides whether their public profile is readable by visitors who are not
     /// signed in. Default is app users only: the safe side of the choice. ADR-0006.
     public bool ProfileVisibleToAnonymous { get; set; }

@@ -28,6 +28,7 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
             user.WhatWeWillDo, user.WhyIHost, user.LanguagesSpoken,
             user.IdentityVerified, user.AgeVerified, user.CreditsBalance,
             user.HasCar, user.Smokes, user.HasPets, user.ProfileVisibleToAnonymous,
+            Models.UsualDays.FromMask(user.UsualDays), user.ActivityStyle, user.Lifestyle,
             user.Photos.Select(PhotoDto.From).ToList(),
             user.Availabilities.Select(AvailabilityDto.From).ToList(),
             ListingDto.From(user.Listing));
@@ -77,6 +78,8 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
             (update.WhatWeWillDo, update.WhyIHost, update.LanguagesSpoken);
         (user.HasCar, user.Smokes, user.HasPets) = (update.HasCar, update.Smokes, update.HasPets);
         user.ProfileVisibleToAnonymous = update.ProfileVisibleToAnonymous;
+        user.UsualDays = Models.UsualDays.ToMask(update.UsualDays ?? []);
+        (user.ActivityStyle, user.Lifestyle) = (update.ActivityStyle, update.Lifestyle);
 
         await db.SaveChangesAsync();
         return NoContent();

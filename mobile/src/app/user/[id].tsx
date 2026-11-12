@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
-import { roleName } from '@/api/labels';
+import { DAYS, LIFE_ICON, roleName, STYLE_ICON } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
@@ -122,7 +122,9 @@ export default function Profile() {
             data?.listing?.offersOvernight ||
             data?.hasCar ||
             data?.hasPets ||
-            data?.smokes ? (
+            data?.smokes ||
+            data?.activityStyle ||
+            data?.lifestyle ? (
               <View style={styles.pills}>
                 {typeof data?.rating === 'number' ? (
                   <Pill icon="star-outline" label={s.profile.rating(data.rating.toLocaleString(language, ONE_DECIMAL))} />
@@ -131,12 +133,20 @@ export default function Profile() {
                 {data?.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
                 {data?.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
                 {data?.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
+                {data?.activityStyle ? (
+                  <Pill icon={STYLE_ICON[data.activityStyle]} label={s.activityStyle[data.activityStyle]} />
+                ) : null}
+                {data?.lifestyle ? <Pill icon={LIFE_ICON[data.lifestyle]} label={s.lifestyle[data.lifestyle]} /> : null}
               </View>
             ) : null}
 
             <Section title={s.profile.whatWeDo} body={data?.whatWeWillDo} />
             <Section title={s.profile.whyHost} body={data?.whyIHost} />
             <Section title={s.profile.languages} body={data?.languagesSpoken} />
+            <Section
+              title={s.profileFields.usualDays}
+              body={DAYS.filter((day) => data?.usualDays?.includes(day)).map((day) => s.days[day]).join(', ')}
+            />
 
             {others.length ? (
               <ScrollView

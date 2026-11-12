@@ -34,6 +34,12 @@ export const fr: Strings = {
 
   timeOfDay: { morning: 'Matin', afternoon: 'Après-midi', evening: 'Soirée', night: 'Nuit' },
 
+  days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Jeu', friday: 'Ven', saturday: 'Sam', sunday: 'Dim' },
+
+  activityStyle: { relaxed: 'Sorties tranquilles', adventurous: 'Sorties palpitantes' },
+
+  lifestyle: { nightlife: 'Vie nocturne', family: 'Vie de famille' },
+
   auth: {
     tagline: "Rencontrez quelqu'un du coin.",
     signIn: 'Se connecter',
@@ -83,6 +89,12 @@ export const fr: Strings = {
   },
 
   profileFields: {
+    style: 'Votre style',
+    usualDays: 'Généralement libre le',
+    usualDaysHint: 'Une indication, pas un engagement : le vrai jour se décide dans le chat.',
+    activityStyle: 'Vos sorties sont plutôt',
+    lifestyle: 'Vous penchez pour',
+    both: 'Un peu des deux',
     whatWeDo: 'Que ferions-nous ensemble ?',
     whatWeDoHint:
       'Une balade dans votre quartier, un marché que vous aimez, le bar que seuls les gens du coin connaissent.',
@@ -99,6 +111,10 @@ export const fr: Strings = {
   },
 
   discover: {
+    search: 'Où allez-vous ?',
+    clearSearch: 'Effacer la destination',
+    searchTyped: (q) => `Chercher « ${q} »`,
+    undo: 'Faire revenir la dernière personne écartée',
     title: 'Découvrir',
     subtitle: "Qui est près de vous, et l'après-midi qu'ils ont en tête.",
     everyone: 'Tout le monde',
@@ -114,10 +130,12 @@ export const fr: Strings = {
   },
 
   filters: {
+    usualDays: 'Généralement libres le',
+    activityStyle: 'Type de sorties',
+    lifestyle: 'Quelle ambiance',
     title: 'Filtres',
     clear: 'Effacer',
     showResults: 'Voir les personnes',
-    anywhere: 'Partout',
     whenFree: 'Quand ils sont libres',
     hasPets: 'A des animaux',
     any: 'Peu importe',

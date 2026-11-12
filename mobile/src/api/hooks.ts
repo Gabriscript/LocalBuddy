@@ -85,6 +85,15 @@ export function useDiscovery(filters: DiscoveryFilters) {
   );
 }
 
+/// Destinations with people in them, for the search box on Discover.
+export function useCities(q: string) {
+  return useQuery({
+    queryKey: ['cities', q],
+    queryFn: async () => unwrap(await api.GET('/api/v1/discovery/cities', { params: { query: { q } } })),
+    placeholderData: (previous) => previous, // keeps the list steady while the next keystroke loads
+  });
+}
+
 /// The id is optional because the chat screen only learns who it is talking to once the
 /// conversation list has arrived.
 export function useProfile(id: string | undefined) {
@@ -211,7 +220,14 @@ export function useDecide() {
     onSuccess: forget,
   });
 
-  return { interest, pass };
+  /// Takes a pass back, so the card returns to the feed.
+  const undoPass = useMutation({
+    mutationFn: async (targetId: string) =>
+      unwrap(await api.DELETE('/api/v1/users/{targetId}/pass', { params: { path: { targetId } } })),
+    onSuccess: forget,
+  });
+
+  return { interest, pass, undoPass };
 }
 
 // ---- Onboarding writes ------------------------------------------------------------------

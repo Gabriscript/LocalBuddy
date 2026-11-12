@@ -152,4 +152,17 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
         await db.SaveChangesAsync();
         return NoContent();
     }
+
+    /// Takes back a pass, so the person comes back into discovery. Only a pass: an interest
+    /// already reached the other side. Idempotent, like the pass itself.
+    [HttpDelete("{targetId:guid}/pass")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> UndoPass(Guid targetId)
+    {
+        var me = User.Id();
+        await db.Matches
+            .Where(m => m.InitiatorId == me && m.TargetId == targetId && m.Status == MatchStatus.Passed)
+            .ExecuteDeleteAsync();
+        return NoContent();
+    }
 }

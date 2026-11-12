@@ -11,6 +11,19 @@ public enum TimeOfDay { Morning = 0, Afternoon = 1, Evening = 2, Night = 3 }
 public enum MatchStatus { Pending = 0, Matched = 1, Passed = 2 }
 public enum PaymentType { OneTimeUnlock = 0, Subscription = 1 }
 public enum ReportStatus { Open = 0, Reviewed = 1, Dismissed = 2 }
+// Null on the profile means "a bit of both", or not said: neither is a reason to hide someone.
+public enum ActivityStyle { Relaxed = 0, Adventurous = 1 }
+public enum Lifestyle { Nightlife = 0, Family = 1 }
+
+/// The days a member is usually free, one bit per DayOfWeek (bit 0 Sunday), so a filter on
+/// several days is one bitwise AND in SQL. An indication, not a booking calendar.
+public static class UsualDays
+{
+    public static int ToMask(IEnumerable<DayOfWeek> days) => days.Aggregate(0, (mask, d) => mask | 1 << (int)d);
+
+    public static List<DayOfWeek> FromMask(int mask) =>
+        Enum.GetValues<DayOfWeek>().Where(d => (mask & 1 << (int)d) != 0).ToList();
+}
 
 public class Photo
 {

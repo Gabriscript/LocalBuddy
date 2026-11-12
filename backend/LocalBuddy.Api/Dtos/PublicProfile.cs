@@ -16,11 +16,13 @@ public record PhotoDto(Guid Id, PhotoType Type, string Url)
 public record PublicProfile(
     Guid Id, string Name, string City, string Role,
     string WhatWeWillDo, string WhyIHost, string LanguagesSpoken,
-    bool IdentityVerified, bool HasCar, bool Smokes, bool HasPets)
+    bool IdentityVerified, bool HasCar, bool Smokes, bool HasPets,
+    List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle)
 {
     public static PublicProfile From(User u) =>
         new(u.Id, u.Name, u.City, u.Role, u.WhatWeWillDo, u.WhyIHost, u.LanguagesSpoken,
-            u.IdentityVerified, u.HasCar, u.Smokes, u.HasPets);
+            u.IdentityVerified, u.HasCar, u.Smokes, u.HasPets,
+            Models.UsualDays.FromMask(u.UsualDays), u.ActivityStyle, u.Lifestyle);
 }
 
 /// Full profile page. Derives from PublicProfile so the JSON stays flat and the inherited

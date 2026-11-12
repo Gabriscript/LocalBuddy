@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
-import { roleName } from '@/api/labels';
+import { LIFE_ICON, roleName, STYLE_ICON } from '@/api/labels';
 import { useLanguage, useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -101,11 +101,15 @@ export const ProfileCard = memo(function ProfileCard({
           </View>
 
           {/* Left out when empty: an empty row would still take a gap's worth of height. */}
-          {card.hasCar || card.hasPets || card.smokes ? (
+          {card.hasCar || card.hasPets || card.smokes || card.activityStyle || card.lifestyle ? (
             <View style={styles.pills}>
               {card.hasCar ? <Pill icon="car-outline" label={s.common.hasCar} /> : null}
               {card.hasPets ? <Pill icon="paw-outline" label={s.common.pets} /> : null}
               {card.smokes ? <Pill icon="flame-outline" label={s.common.smokes} /> : null}
+              {card.activityStyle ? (
+                <Pill icon={STYLE_ICON[card.activityStyle]} label={s.activityStyle[card.activityStyle]} />
+              ) : null}
+              {card.lifestyle ? <Pill icon={LIFE_ICON[card.lifestyle]} label={s.lifestyle[card.lifestyle]} /> : null}
             </View>
           ) : null}
 
