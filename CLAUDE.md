@@ -17,6 +17,9 @@ Flow: skim repo patterns -> consult the skill by name -> smallest change -> note
   `dotnet-skills:package-management`, `dotnet-skills:project-structure`
 - Testing: `dotnet-skills:testcontainers` (real Postgres; the current suite runs on SQLite)
 
+`dotnet build` fails while the `api` preview (`dotnet run`) is running, because the Debug DLL is locked:
+stop the preview or build with `-c Release`.
+
 Quality gates: `dotnet-skills:slopwatch` after substantial new or LLM-written code;
 `dotnet-skills:crap-analysis` after tests change in complex code.
 Specialist agents: `dotnet-skills:dotnet-concurrency-specialist`, `dotnet-skills:dotnet-performance-analyst`.
