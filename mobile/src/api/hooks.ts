@@ -2,6 +2,9 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { useMemo } from 'react';
 import type { ImagePickerAsset } from 'expo-image-picker';
 
+import { useLanguage, useStrings } from '@/i18n';
+import { registerPush } from '@/lib/push';
+
 import { api, unwrap } from './client';
 import type { components, paths } from './generated';
 
@@ -22,6 +25,7 @@ export const keys = {
   messages: (id: string) => ['messages', id] as const,
   reviews: (id: string) => ['reviews', id] as const,
   blocks: ['blocks'] as const,
+  trips: ['trips'] as const,
   /// The count shares the prefix, so invalidating `requests` refreshes the badge with the list.
   requests: ['requests'] as const,
   requestCount: ['requests', 'count'] as const,
@@ -106,7 +110,8 @@ export function useProfile(id: string | undefined) {
 }
 
 /// How often the screens that wait for somebody else's action ask again. Polling, not a socket:
-/// the backend has no push channel yet (Beta, docs/CHECKLIST.md). Query pauses it while the app
+/// push (ADR-0012) is best effort and needs
+/// Firebase in the build, so this stays as the fallback. Query pauses it while the app
 /// is in the background (see RootLayout), so it costs nothing when nobody is looking.
 const POLL = { messages: 4_000, inbox: 15_000, requests: 20_000 };
 
@@ -200,6 +205,8 @@ export function useSendMessage(id: string) {
 /// to a request, so the requests and their badge go too.
 export function useDecide() {
   const client = useQueryClient();
+  const { language } = useLanguage();
+  const channelName = useStrings().push.channel;
   const forget = () => {
     client.invalidateQueries({ queryKey: ['discovery'] });
     client.invalidateQueries({ queryKey: keys.requests });
@@ -211,6 +218,8 @@ export function useDecide() {
     onSuccess: () => {
       forget();
       client.invalidateQueries({ queryKey: keys.conversations });
+      // The moment a reply starts to matter, so the moment to ask whether we may notify.
+      void registerPush(language, channelName, true);
     },
   });
 
@@ -246,6 +255,21 @@ function useMeMutation<TInput, TResult>(write: (input: TInput) => Promise<TResul
 /// In Development the backend's fake verifier approves every account.
 export function useVerify() {
   return useMeMutation(async () => unwrap(await api.POST('/api/v1/users/me/verify')));
+}
+
+/// On: free until `until` (an ISO instant). Off: DELETE. Both change who the feed shows as free.
+export function useFreeToday() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (until: string | null) =>
+      until
+        ? unwrap(await api.PUT('/api/v1/users/me/free-today', { body: { until } }))
+        : unwrap(await api.DELETE('/api/v1/users/me/free-today')),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: keys.me });
+      client.invalidateQueries({ queryKey: ['discovery'] });
+    },
+  });
 }
 
 export function useUpdateProfile() {
@@ -389,4 +413,35 @@ export function useUploadPhoto() {
       await api.POST('/api/v1/photos', { params: { query: { type } }, body: form as never })
     );
   });
+}
+
+// ---- Trips ----------------------------------------------------------------------------------
+
+/// My upcoming trips (the server drops the ones already over, and allows five).
+export function useTrips() {
+  return usePages(keys.trips, async (page) =>
+    unwrap(await api.GET('/api/v1/trips', { params: { query: { page } } }))
+  );
+}
+
+/// A trip changes where I appear in a city's feed, so both of those are stale afterwards.
+export function useTripMutations() {
+  const client = useQueryClient();
+  const forget = () => {
+    client.invalidateQueries({ queryKey: keys.trips });
+    client.invalidateQueries({ queryKey: ['discovery'] });
+  };
+
+  const create = useMutation({
+    mutationFn: async (body: Schemas['NewTrip']) => unwrap(await api.POST('/api/v1/trips', { body })),
+    onSuccess: forget,
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) =>
+      unwrap(await api.DELETE('/api/v1/trips/{id}', { params: { path: { id } } })),
+    onSuccess: forget,
+  });
+
+  return { create, remove };
 }

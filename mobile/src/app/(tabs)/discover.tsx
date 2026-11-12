@@ -17,6 +17,7 @@ import { FeedSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
+import { isoDay } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 /// Route params are strings; the query takes booleans and a list of times of day.
@@ -24,6 +25,7 @@ type Params = {
   city?: string;
   role?: string;
   offersOvernight?: string;
+  freeToday?: string;
   timeOfDay?: string;
   hasCar?: string;
   smokes?: string;
@@ -57,6 +59,7 @@ export default function Discover() {
     city: params.city,
     role: params.role,
     offersOvernight: asBool(params.offersOvernight),
+    freeToday: asBool(params.freeToday),
     hasCar: asBool(params.hasCar),
     smokes: asBool(params.smokes),
     hasPets: asBool(params.hasPets),
@@ -71,6 +74,7 @@ export default function Discover() {
   // Role and city are not counted: each has its own control right there, in view.
   const active = [
     filters.offersOvernight,
+    filters.freeToday,
     filters.hasCar,
     filters.smokes,
     filters.hasPets,
@@ -86,6 +90,7 @@ export default function Discover() {
     // out would keep its old value. Role and city are left out on purpose, and survive.
     router.setParams({
       offersOvernight: next.offersOvernight ? 'true' : undefined,
+      freeToday: next.freeToday ? 'true' : undefined,
       timeOfDay: next.timeOfDay?.length ? next.timeOfDay.join(',') : undefined,
       hasCar: asParam(next.hasCar),
       smokes: asParam(next.smokes),
@@ -102,6 +107,13 @@ export default function Discover() {
   const busy = interest.isPending || pass.isPending || undoPass.isPending;
   // Who was passed in this visit, latest last: the undo button walks back through them.
   const [passed, setPassed] = useState<string[]>([]);
+  // The stack belongs to one feed: another city or filter set starts it over.
+  const feedKey = JSON.stringify(filters);
+  const [stackKey, setStackKey] = useState(feedKey);
+  if (stackKey !== feedKey) {
+    setStackKey(feedKey);
+    setPassed([]);
+  }
 
   // A reciprocal match is the moment the whole product exists for, so it gets a moment of its
   // own instead of a silent navigation. Anything else: the card simply goes.
@@ -140,20 +152,36 @@ export default function Discover() {
   );
   const undo = () => {
     const last = passed.at(-1);
-    if (last) undoPass.mutate(last, { onSuccess: () => setPassed((ids) => ids.slice(0, -1)) });
+    // On success or refusal (e.g. 404) the id leaves the stack: a failure must not retry forever.
+    if (last) undoPass.mutate(last, { onSettled: () => setPassed((ids) => ids.filter((id) => id !== last)) });
   };
 
+  // With a city set the server orders the feed: in town now, arriving by date, then residents.
+  // A header is drawn where that group changes, so it needs no markers from the server.
+  const group = (card?: Card) =>
+    !card?.trip ? 'residents' : card.trip.from <= isoDay() ? 'inTown' : 'arriving';
+  const showGroups = !!filters.city;
   const renderCard = useCallback(
-    ({ item }: { item: Card }) => (
-      <ProfileCard
-        card={item}
-        busy={busy}
-        onOpen={showProfile}
-        onPass={passOn}
-        onInterest={showInterest}
-      />
-    ),
-    [busy, showProfile, passOn, showInterest]
+    ({ item, index }: { item: Card; index: number }) => {
+      const heading = showGroups && group(item) !== group(items[index - 1]) ? group(item) : null;
+      return (
+        <View style={styles.group}>
+          {heading ? (
+            <Text role="heading" style={[type.label, { color: c.textMuted }]}>
+              {s.discover[heading]}
+            </Text>
+          ) : null}
+          <ProfileCard
+            card={item}
+            busy={busy}
+            onOpen={showProfile}
+            onPass={passOn}
+            onInterest={showInterest}
+          />
+        </View>
+      );
+    },
+    [busy, showProfile, passOn, showInterest, showGroups, items, c.textMuted, s]
   );
 
   return (
@@ -298,4 +326,5 @@ const styles = StyleSheet.create({
   },
   note: { marginHorizontal: space.md, marginBottom: space.md },
   list: { paddingHorizontal: space.md, gap: space.lg },
+  group: { gap: space.sm },
 });

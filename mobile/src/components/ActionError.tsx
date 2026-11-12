@@ -26,7 +26,9 @@ export function ActionError({ error, style }: { error: unknown; style?: StylePro
   const c = useColors();
   const router = useRouter();
   const s = useStrings();
-  const verified = useMe().data?.identityVerified;
+  const me = useMe().data;
+  const verified = me?.identityVerified;
+  const pending = !!me?.identityVerificationPending;
 
   const unverified = error instanceof ApiError && error.code === 'identity_verification_required';
   // Coming back from the check, the refusal that sent you there is no longer true, and a
@@ -39,11 +41,11 @@ export function ActionError({ error, style }: { error: unknown; style?: StylePro
         {/* The icon repeats what the words say: red alone is not a message (DESIGN.md). */}
         <Ionicons name="alert-circle-outline" size={20} color={c.danger} aria-hidden />
         <Text accessibilityRole="alert" style={[type.body, styles.text, { color: c.text }]}>
-          {errorMessage(error, s)}
+          {unverified && pending ? s.common.waitingApproval : errorMessage(error, s)}
         </Text>
       </View>
 
-      {unverified ? (
+      {unverified && !pending ? (
         <Button
           title={s.common.verifyIdentity}
           variant="secondary"

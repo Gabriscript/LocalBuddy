@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useCities } from '@/api/hooks';
+import { useCities, useTrips } from '@/api/hooks';
 import { useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -14,8 +14,16 @@ export function DestinationSearch({ city, onChange }: { city?: string; onChange:
   const s = useStrings();
   const [text, setText] = useState(city ?? '');
   const [open, setOpen] = useState(false);
+  const focused = useRef(false);
+  // The city can change from outside (deep link, back navigation): follow it unless typing.
+  useEffect(() => {
+    if (!focused.current) setText(city ?? '');
+  }, [city]);
   const typed = text.trim();
   const { data: cities = [] } = useCities(typed);
+  // My own upcoming trips are the likeliest next search, so they lead the empty box.
+  const { items: trips } = useTrips();
+  const tripCities = typed ? [] : [...new Set(trips.map((trip) => trip.city))];
 
   function pick(next?: string) {
     setText(next ?? '');
@@ -32,8 +40,18 @@ export function DestinationSearch({ city, onChange }: { city?: string; onChange:
           onChangeText={(next) => {
             setText(next);
             setOpen(true);
+            // An empty box must not hide an active city filter.
+            if (!next.trim() && city) onChange(undefined);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            focused.current = true;
+            setOpen(true);
+          }}
+          // Delayed so a tap on a row still lands before the list goes away.
+          onBlur={() => {
+            focused.current = false;
+            setTimeout(() => setOpen(false), 200);
+          }}
           onSubmitEditing={() => pick(typed)}
           placeholder={s.discover.search}
           placeholderTextColor={c.textMuted}
@@ -56,7 +74,10 @@ export function DestinationSearch({ city, onChange }: { city?: string; onChange:
 
       {open ? (
         <View style={[styles.list, { backgroundColor: c.surface, borderColor: c.border }]}>
-          {cities.map((name) => (
+          {tripCities.map((name) => (
+            <Row key={`trip-${name}`} icon="airplane-outline" label={name} onPress={() => pick(name)} />
+          ))}
+          {cities.filter((name) => !tripCities.includes(name)).map((name) => (
             <Row key={name} icon="location-outline" label={name} onPress={() => pick(name)} />
           ))}
           {/* A city nobody lives in yet is still a fair search: the feed says so if it is empty. */}

@@ -15,7 +15,8 @@ namespace LocalBuddy.Api.Controllers;
 [Route("api/v1/users")]
 [Authorize]
 [Produces("application/json")]
-public class MatchesController(LocalBuddyDbContext db, ConversationService conversations) : ControllerBase
+public class MatchesController(LocalBuddyDbContext db, ConversationService conversations, PushNotifier push)
+    : ControllerBase
 {
     /// Free path to a conversation: both sides express interest (GUIDELINES §3).
     /// 201 with a Location when the interest was reciprocal and a chat opened, 200 otherwise.
@@ -57,8 +58,11 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
 
         if (!matched)
         {
+            // Someone who already passed on me never sees this request, so they are not told about it.
+            var passedOnMe = await db.Matches.AnyAsync(m => m.InitiatorId == targetId && m.TargetId == me);
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
+            if (!passedOnMe) await push.NotifyAsync(targetId, me, PushKind.Request, "/requests");
             return Ok(new InterestResult(false, null));
         }
 
@@ -70,6 +74,8 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
 
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+        // They asked first; I just said yes.
+        await push.NotifyAsync(targetId, me, PushKind.Match, $"/chat/{conversation.Id}");
         return Created($"/api/v1/conversations/{conversation.Id}/messages",
                        new InterestResult(true, conversation.Id));
     }

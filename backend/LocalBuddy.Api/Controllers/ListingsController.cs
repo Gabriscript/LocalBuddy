@@ -22,7 +22,7 @@ public class ListingsController(LocalBuddyDbContext db) : ControllerBase
         // TULPS acknowledgement. Enforced here, not just in the UI checkbox.
         if (update.OffersOvernight && !update.OvernightComplianceAck)
             return this.Invalid("compliance_not_acknowledged",
-                "Overnight hosting requires confirming the Alloggiati Web / TULPS obligations.");
+                "Overnight hosting requires confirming that you have checked and met your country's guest-registration obligations.");
 
         var me = User.Id();
         var listing = await db.Listings.FirstOrDefaultAsync(l => l.UserId == me);

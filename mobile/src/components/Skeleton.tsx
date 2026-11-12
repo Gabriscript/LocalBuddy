@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { AccessibilityInfo, Animated, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useStrings } from '@/i18n';
-import { radius, space, useColors } from '@/theme';
+import { radius, space, type, useColors } from '@/theme';
 
 /// Blocks shaped like the content that is coming, instead of a spinner in the middle of an
 /// empty screen. The layout is already in place, so nothing jumps when the data lands.
@@ -47,14 +47,18 @@ function Block({ opacity, style }: { opacity: Animated.Value; style: StyleProp<V
   );
 }
 
-/// The discovery feed: the same card geometry, down to the 4:3 photo.
+/// The discovery feed: the same card geometry, down to the 4:3 photo. A short tip sits above,
+/// picked once per mount; outside the progressbar, so a screen reader reads it as plain text.
 export function FeedSkeleton() {
   const c = useColors();
   const s = useStrings();
   const opacity = usePulse();
+  const [tip] = useState(() => Math.floor(Math.random() * s.skeleton.tips.length));
 
   return (
-    <View style={styles.feed} role="progressbar" aria-label={s.skeleton.profiles}>
+    <>
+      <Text style={[type.caption, styles.tip, { color: c.textMuted }]}>{s.skeleton.tips[tip]}</Text>
+      <View style={styles.feed} role="progressbar" aria-label={s.skeleton.profiles}>
       {[0, 1].map((card) => (
         <View key={card} style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
           <Block opacity={opacity} style={styles.photo} />
@@ -65,7 +69,8 @@ export function FeedSkeleton() {
           </View>
         </View>
       ))}
-    </View>
+      </View>
+    </>
   );
 }
 
@@ -92,6 +97,7 @@ export function ChatListSkeleton() {
 }
 
 const styles = StyleSheet.create({
+  tip: { paddingHorizontal: space.md, paddingTop: space.md },
   feed: { paddingHorizontal: space.md, paddingTop: space.md, gap: space.lg },
   card: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   photo: { width: '100%', aspectRatio: 4 / 3, borderRadius: 0 },

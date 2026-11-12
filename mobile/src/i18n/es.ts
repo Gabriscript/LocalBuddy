@@ -22,6 +22,8 @@ export const es: Strings = {
     pets: 'Mascotas',
     smokes: 'Fuma',
     canHostOvernight: 'Puede alojar para dormir',
+    freeToday: 'Libre hoy',
+    waitingApproval: 'Pendiente de aprobación',
     progress: 'Progreso',
     stepOf: (step, total) => `Paso ${step} de ${total}`,
   },
@@ -65,8 +67,9 @@ export const es: Strings = {
     pickTimes: 'Elige todos los que encajen. Los planes cambian, y esto también.',
     verifyTitle: 'Verifica que eres tú',
     verifySubtitle:
-      'Una comprobación rápida del documento, una sola vez. Sin ella nadie puede escribir a nadie, y así este sigue siendo un sitio seguro para conocer a desconocidos.',
+      'Durante el piloto, el equipo de LocalBuddy confirma cada identidad a mano. Sin esto, nadie puede escribir a nadie, lo que mantiene este lugar seguro para conocer a desconocidos.',
     verifyCta: 'Empezar la comprobación',
+    verifyPendingBody: '¡Gracias! El equipo de LocalBuddy confirmará tu identidad en breve.',
     listingTitle: 'Qué puedes compartir',
     listingSubtitle:
       'Una tarde fuera, una cama para la noche, o las dos cosas. Puedes cambiarlo más adelante.',
@@ -76,13 +79,11 @@ export const es: Strings = {
     overnightHint: 'Un viajero pasa la noche en tu casa.',
     obligationsTitle: 'Alojar a alguien por la noche conlleva obligaciones legales',
     obligationRegistered:
-      'Estoy registrado/a en el portal Alloggiati Web ante la Questura de mi zona.',
+      'He comprobado lo que exige mi país a quien aloja huéspedes por la noche y estoy en regla (en Italia: Alloggiati Web ante la Questura).',
     obligationCheck:
       'Comprobaré en persona el documento de identidad de cada huésped a su llegada. Un check-in a distancia no basta.',
-    obligationSend:
-      'Enviaré los datos de cada huésped en las 24 horas siguientes a su llegada, o en 6 horas si la estancia dura menos de un día.',
-    cannotSend:
-      'LocalBuddy no puede enviar estos datos por ti: hace falta tu propio acceso a la Questura.',
+    obligationSend: 'Comunicaré yo mismo/a los datos de mis huéspedes donde la ley lo exija.',
+    cannotSend: 'LocalBuddy te lo recuerda; nunca presenta nada por ti.',
     confirmAll: 'Confirmo las tres',
     chooseOne: 'Elige al menos una para terminar.',
   },
@@ -102,6 +103,7 @@ export const es: Strings = {
     languagesHint: 'Por ejemplo: italiano, inglés, un poco de español.',
     facts: 'Lo práctico',
     haveCar: 'Tengo coche',
+    liftHint: 'Si quieres, puedes ofrecer a tus invitados que los lleves en coche, siempre gratis.',
     smoke: 'Fumo',
     havePets: 'Tengo mascotas',
     visible: 'Visible para quien no tiene cuenta',
@@ -113,6 +115,9 @@ export const es: Strings = {
     search: '¿Adónde vas?',
     clearSearch: 'Borrar el destino',
     searchTyped: (q) => `Buscar "${q}"`,
+    inTown: 'En la ciudad ahora',
+    arriving: 'Llegando',
+    residents: 'Vive aquí',
     undo: 'Recuperar a la última persona descartada',
     title: 'Descubrir',
     subtitle: 'Quién hay cerca, y la tarde que tienen en mente.',
@@ -144,6 +149,8 @@ export const es: Strings = {
 
   profileCard: {
     verified: 'identidad verificada',
+    inTown: 'En la ciudad ahora',
+    arriving: (date) => `Llega el ${date}`,
     rated: (rating) => `valoración ${rating}`,
     hasCar: 'tiene coche',
     hasPets: 'tiene mascotas',
@@ -194,11 +201,14 @@ export const es: Strings = {
     send: 'Enviar mensaje',
   },
 
+  push: { channel: 'Solicitudes y mensajes' },
   me: {
     notVerified: 'Identidad aún sin verificar',
+    freeTodayHint: 'Haz saber que te apetece quedar hasta medianoche.',
     credits: (n) => (n === 1 ? '1 crédito' : `${n} créditos`),
     editProfile: 'Editar perfil',
     blocked: 'Miembros bloqueados',
+    trips: 'Mis viajes',
     signOut: 'Cerrar sesión',
     language: 'Idioma',
     languageRow: (value) => `Idioma: ${value}`,
@@ -206,6 +216,21 @@ export const es: Strings = {
 
   language: {
     phone: (name) => `Idioma del teléfono (${name})`,
+  },
+
+  trips: {
+    title: 'Mis viajes',
+    subtitle: 'Cuéntales cuándo estarás en una ciudad. Te verán como llegando, o en la ciudad ahora.',
+    empty: 'Aún no tienes viajes próximos.',
+    add: 'Añadir un viaje',
+    pickCity: 'Elige una ciudad de la lista.',
+    from: 'Desde (AAAA-MM-DD)',
+    to: 'Hasta (AAAA-MM-DD)',
+    badDate: 'Usa el formato AAAA-MM-DD, por ejemplo 2026-12-12.',
+    dateOrder: 'La fecha de fin no puede ser anterior a la de inicio.',
+    dateOver: 'Elige fechas desde hoy.',
+    save: 'Añadir viaje',
+    remove: (city) => `Quitar el viaje a ${city}`,
   },
 
   blocked: {
@@ -281,6 +306,20 @@ export const es: Strings = {
   skeleton: {
     profiles: 'Cargando perfiles',
     conversations: 'Cargando conversaciones',
+    tips: [
+      'La primera vez, quedad en un lugar público.',
+      'Responde a las solicitudes, aunque sea con un no. El silencio es la peor respuesta.',
+      'Cuéntale a tu anfitrión si tienes alergias o mascotas antes de veros.',
+      'En LocalBuddy nadie paga a nadie, y nadie debería pedirlo.',
+      'Mantened los planes en el chat hasta que os conozcáis.',
+      'Cuéntale tus planes a un amigo antes de ir.',
+      'Pide el café que toman los locales, no el de los turistas.',
+      'Un mercado por la mañana vale más que la cola de un museo.',
+      '¿Tienes coche? Puedes ofrecer llevar a alguien. Siempre es gratis.',
+      'Pregunta a tu anfitrión por el sitio al que llevaría a sus propios amigos.',
+      'Di qué te encantaría ver. A los anfitriones les gusta una pista.',
+      'Di que sí al plan pequeño: un paseo suele ganar a un gran itinerario.',
+    ],
   },
 
   field: {
@@ -303,6 +342,7 @@ export const es: Strings = {
     home_photo_not_allowed:
       'Las fotos de casa son solo para anfitriones que ofrecen un sitio donde dormir.',
     identity_verification_required: 'Verifica tu identidad antes de contactar con otros miembros.',
+    invalid_free_until: 'Libre hoy puede durar como máximo 24 horas desde ahora.',
     image_too_large: 'Esa imagen tiene demasiados píxeles. Las fotos hechas con el teléfono están bien.',
     invalid_credentials:
       'El correo y la contraseña no coinciden. Tras 5 intentos fallidos, el acceso se pausa durante 15 minutos.',
@@ -320,6 +360,13 @@ export const es: Strings = {
       'Esta persona aún no ha verificado su identidad, así que el chat no se puede desbloquear.',
     too_many_photos: 'Puedes tener como máximo 12 fotos. Quita una para añadir otra.',
     too_many_slots: 'Puedes elegir como máximo 20 franjas de disponibilidad.',
+    invalid_city: 'Elige una ciudad para el viaje.',
+    invalid_dates: 'Revisa las fechas: usa días reales, y el final no puede ser anterior al inicio.',
+    too_many_trips: 'Puedes tener como máximo 5 viajes próximos. Quita uno para añadir otro.',
+    trip_over: 'Ese viaje ya ha terminado. Elige fechas desde hoy.',
+    trip_home_city: 'Esa es la ciudad donde vives: añade viajes a lugares que vas a visitar.',
+    trip_too_far: 'Un viaje puede empezar como máximo dentro de un año.',
+    trip_too_long: 'Un viaje puede durar como máximo 30 días.',
     under_age: 'Tienes que tener 18 años o más para usar LocalBuddy.',
     unknown_plan: 'Ese plan de suscripción no existe. Elige mensual o anual.',
     weak_password:

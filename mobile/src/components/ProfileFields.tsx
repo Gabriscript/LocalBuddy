@@ -123,7 +123,12 @@ export function ProfileFields({
 
       <View style={styles.group}>
         <Text style={[type.label, { color: c.textMuted }]}>{s.profileFields.facts}</Text>
-        <Toggle label={s.profileFields.haveCar} value={draft.hasCar} onChange={set('hasCar')} />
+        <Toggle
+          label={s.profileFields.haveCar}
+          hint={draft.hasCar ? s.profileFields.liftHint : undefined}
+          value={draft.hasCar}
+          onChange={set('hasCar')}
+        />
         <Toggle label={s.profileFields.smoke} value={draft.smokes} onChange={set('smokes')} />
         <Toggle label={s.profileFields.havePets} value={draft.hasPets} onChange={set('hasPets')} />
       </View>

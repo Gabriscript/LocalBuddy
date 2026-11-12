@@ -31,7 +31,9 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
             Models.UsualDays.FromMask(user.UsualDays), user.ActivityStyle, user.Lifestyle,
             user.Photos.Select(PhotoDto.From).ToList(),
             user.Availabilities.Select(AvailabilityDto.From).ToList(),
-            ListingDto.From(user.Listing));
+            ListingDto.From(user.Listing),
+            user.IdentityVerificationRequestedAt is not null && !user.IdentityVerified,
+            user.FreeUntil > DateTime.UtcNow ? user.FreeUntil : null);
     }
 
     /// Public profile — what PublicProfile exposes and nothing more (GUIDELINES §3).
@@ -54,8 +56,12 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         // Home photos exist for overnight hosting only; switching it off takes them off the profile.
         var photos = user.Photos.Where(p => p.Type == PhotoType.Profile || user.Listing?.OffersOvernight == true);
 
+        // Whether someone is free right now is for members, not for anyone holding a link.
+        var profile = PublicProfile.From(user);
+        if (User.Identity?.IsAuthenticated != true) profile = profile with { FreeToday = false };
+
         return new ProfileDetail(
-            PublicProfile.From(user),
+            profile,
             photos.Select(PhotoDto.From).ToList(),
             user.Availabilities.Select(AvailabilityDto.From).ToList(),
             ListingDto.From(user.Listing),
@@ -67,9 +73,14 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
 
     [HttpPut("me")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMe(ProfileUpdate update)
     {
+        // JSON happily binds any number into an enum, and the mask would set a wrong bit for it.
+        if (update.UsualDays?.Any(d => !Enum.IsDefined(d)) == true)
+            return this.Invalid("invalid_day", "Usual days must be days of the week.");
+
         var user = await db.Users.FindAsync(User.Id());
         if (user is null) return NotFound();
 
@@ -82,6 +93,65 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         (user.ActivityStyle, user.Lifestyle) = (update.ActivityStyle, update.Lifestyle);
 
         await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpPut("me/free-today")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SetFreeToday(FreeToday body)
+    {
+        var now = DateTime.UtcNow;
+        // A time without Z or an offset is taken as UTC, not as whatever zone the server runs in.
+        var until = body.Until.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(body.Until, DateTimeKind.Utc)
+            : body.Until.ToUniversalTime();
+        if (until <= now || until > now.AddHours(24))
+            return this.Invalid("invalid_free_until", "Free today must end within the next 24 hours.");
+
+        var user = await db.Users.FindAsync(User.Id());
+        if (user is null) return NotFound();
+        user.FreeUntil = until;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("me/free-today")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ClearFreeToday()
+    {
+        var user = await db.Users.FindAsync(User.Id());
+        if (user is null) return NotFound();
+        user.FreeUntil = null;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    /// Sent by the app after sign-in (ADR-0012). A phone that changes hands takes its token
+    /// along: the last account signed in on a device is the one it notifies.
+    [HttpPut("me/push-tokens")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegisterPushToken(PushTokenRegistration body)
+    {
+        var row = await db.PushTokens.FirstOrDefaultAsync(t => t.Token == body.Token);
+        if (row is null) db.PushTokens.Add(row = new PushToken { Id = Guid.CreateVersion7(), Token = body.Token });
+        (row.UserId, row.Language) = (User.Id(), body.Language);
+
+        // shortcut: two simultaneous first registrations of one token make the second a 500 on the
+        // unique index; the app registers once per sign-in. Catch the conflict if logs show it.
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    /// Sent by the app on sign-out. In the body, not the path, so the token stays out of access logs.
+    /// Idempotent: a token that is gone, or belongs to someone else, changes nothing.
+    [HttpDelete("me/push-tokens")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> RemovePushToken([FromBody] PushTokenRemoval body)
+    {
+        var me = User.Id();
+        await db.PushTokens.Where(t => t.Token == body.Token && t.UserId == me).ExecuteDeleteAsync();
         return NoContent();
     }
 
@@ -155,6 +225,19 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         if (user is null) return NotFound();
 
         var check = await verifier.VerifyAsync(user.Id);
+
+        // No verdict yet: the member waits in the moderators' queue (ADR-0011). Asking again
+        // keeps their place, and an already verified member stays verified.
+        if (check.Pending)
+        {
+            if (!user.IdentityVerified)
+            {
+                user.IdentityVerificationRequestedAt ??= DateTime.UtcNow;
+                await db.SaveChangesAsync();
+            }
+            return Ok(new VerificationResult(user.IdentityVerified, user.AgeVerified, !user.IdentityVerified));
+        }
+
         if (!check.IsAdult) return this.Invalid("under_age", "You must be 18 or older to use LocalBuddy.");
 
         if (check.Verified && check.SubjectHash is not null)
@@ -178,6 +261,6 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
 
         (user.IdentityVerified, user.AgeVerified) = (check.Verified, check.IsAdult);
         await db.SaveChangesAsync();
-        return Ok(new VerificationResult(user.IdentityVerified, user.AgeVerified));
+        return Ok(new VerificationResult(user.IdentityVerified, user.AgeVerified, false));
     }
 }

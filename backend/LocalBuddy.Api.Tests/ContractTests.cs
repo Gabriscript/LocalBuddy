@@ -164,7 +164,7 @@ public class ChatOrderTests
             });
         await t.Db.SaveChangesAsync();
 
-        var page = (await new ConversationsController(t.Db).As(carla).Messages(chat.Id, null)).Value!;
+        var page = (await new ConversationsController(t.Db, TestPush.For(t.Db)).As(carla).Messages(chat.Id, null)).Value!;
 
         Assert.Equal("m25", page.Items[0].Content);
         Assert.Equal("m06", page.Items[^1].Content);

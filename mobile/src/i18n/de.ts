@@ -1,0 +1,366 @@
+import type { Strings } from './en';
+
+/// Informal "du". First draft: needs review by a native speaker.
+export const de: Strings = {
+  common: {
+    tryAgain: 'Erneut versuchen',
+    somethingWrong: 'Etwas ist schiefgelaufen.',
+    goBack: 'Zurück',
+    close: 'Schließen',
+    continue: 'Weiter',
+    finish: 'Fertig',
+    verifyIdentity: 'Identität bestätigen',
+    verified: 'Verifiziert',
+    name: 'Name',
+    city: 'Stadt',
+    email: 'E-Mail',
+    password: 'Passwort',
+    iWantToBe: 'Ich möchte sein',
+    photoOf: (name: string) => `Foto von ${name}`,
+    yourPhoto: 'Dein Profilfoto',
+    hasCar: 'Hat ein Auto',
+    pets: 'Haustiere',
+    smokes: 'Raucht',
+    canHostOvernight: 'Kann Übernachtungen anbieten',
+    freeToday: 'Heute frei',
+    waitingApproval: 'Wartet auf Zustimmung',
+    progress: 'Fortschritt',
+    stepOf: (step: number, total: number) => `Schritt ${step} von ${total}`,
+  },
+
+  roles: { host: 'Gastgeber', guest: 'Reisende', entrambi: 'Beides' },
+  roleShown: { host: 'Gastgeber', guest: 'Reisende', entrambi: 'Gastgeber und Reisende' },
+
+  tabs: { discover: 'Entdecken', chats: 'Chats', me: 'Ich' },
+
+  timeOfDay: { morning: 'Morgens', afternoon: 'Nachmittags', evening: 'Abends', night: 'Nachts' },
+
+  days: { monday: 'Mo', tuesday: 'Di', wednesday: 'Mi', thursday: 'Do', friday: 'Fr', saturday: 'Sa', sunday: 'So' },
+
+  activityStyle: { relaxed: 'Entspannte Pläne', adventurous: 'Abenteuerliche Pläne' },
+
+  lifestyle: { nightlife: 'Nachtleben', family: 'Familienleben' },
+
+  auth: {
+    tagline: 'Triff jemanden, der dort lebt.',
+    signIn: 'Anmelden',
+    noAccount: 'Neu hier? Registrieren',
+    haveAccount: 'Schon Mitglied? Anmelden',
+    signInFailed: 'Die Anmeldung hat nicht geklappt. Versuch es gleich noch einmal.',
+    createAccount: 'Konto erstellen',
+    passwordHint: 'Mindestens 8 Zeichen: Groß- und Kleinbuchstaben, eine Zahl und ein Sonderzeichen.',
+    changeLater: 'Du kannst jederzeit wechseln.',
+    registerFailed: 'Dein Konto konnte nicht erstellt werden. Versuch es gleich noch einmal.',
+  },
+
+  onboarding: {
+    aboutTitle: 'Ein bisschen über dich',
+    aboutSubtitle:
+      'Kurze Antworten sind besser als eine lange Bio. Sie zeigen einer fremden Person, wie ein Tag mit dir aussieht.',
+    photoTitle: 'Dein Gesicht, deine Freizeit',
+    photoSubtitle: 'Zu einem Gesicht sagt man eher ja. Lade ein klares Foto hoch und sag uns, wann du Zeit hast.',
+    changePhoto: 'Foto ändern',
+    addPhoto: 'Foto hinzufügen',
+    photoPrivacy: 'Aus deinem Foto werden die Standortdaten entfernt, bevor es jemand sieht.',
+    whenFree: 'Wann hast du normalerweise Zeit?',
+    pickTimes: 'Wähle alles, was passt. Pläne ändern sich, und das hier auch.',
+    verifyTitle: 'Bestätige, dass du es bist',
+    verifySubtitle:
+      'Während der Pilotphase bestätigt das LocalBuddy-Team jede Identität von Hand. Ohne das kann niemand jemandem schreiben, und so bleibt dies ein sicherer Ort, um Fremde zu treffen.',
+    verifyCta: 'Prüfung starten',
+    verifyPendingBody: 'Danke! Das LocalBuddy-Team bestätigt deine Identität in Kürze.',
+    listingTitle: 'Was du teilen kannst',
+    listingSubtitle: 'Einen Nachmittag unterwegs, ein Bett für die Nacht oder beides. Du kannst das später ändern.',
+    experience: 'Ein Nachmittag unterwegs',
+    experienceHint: 'Ein Spaziergang, ein Essen, die Bar, in die du einen Freund mitnehmen würdest.',
+    overnight: 'Ein Bett für die Nacht',
+    overnightHint: 'Ein Reisender übernachtet bei dir zu Hause.',
+    obligationsTitle: 'Übernachtungsgäste bringen rechtliche Pflichten mit sich',
+    obligationRegistered:
+      'Ich habe geprüft, was mein Land von Personen verlangt, die Gäste über Nacht beherbergen, und alles ist in Ordnung (in Italien: Alloggiati Web bei der Questura).',
+    obligationCheck:
+      'Ich prüfe den Ausweis jedes Reisenden bei der Ankunft persönlich. Ein Online-Check-in reicht nicht.',
+    obligationSend: 'Ich melde meine Gäste selbst, wo das Gesetz es verlangt.',
+    cannotSend: 'LocalBuddy erinnert dich, übermittelt aber nie etwas für dich.',
+    confirmAll: 'Ich bestätige alle drei',
+    chooseOne: 'Wähle mindestens eines, um fertig zu werden.',
+  },
+
+  profileFields: {
+    style: 'Dein Stil',
+    usualDays: 'Meistens frei am',
+    usualDaysHint: 'Ein Richtwert, kein Versprechen: den genauen Tag besprecht ihr im Chat.',
+    activityStyle: 'Deine Pläne sind meistens',
+    lifestyle: 'Du tendierst zu',
+    both: 'Ein bisschen von beidem',
+    whatWeDo: 'Was würden wir zusammen unternehmen?',
+    whatWeDoHint: 'Ein Spaziergang durch dein Viertel, ein Markt, den du liebst, die Bar, die nur Einheimische kennen.',
+    whyHost: 'Warum bist du Gastgeber?',
+    languages: 'Sprachen, die du sprichst',
+    languagesHint: 'Zum Beispiel: Italienisch, Englisch, ein bisschen Spanisch.',
+    facts: 'Das Praktische',
+    haveCar: 'Ich habe ein Auto',
+    liftHint: 'Wenn du magst, kannst du Gästen eine Mitfahrt anbieten, immer kostenlos.',
+    smoke: 'Ich rauche',
+    havePets: 'Ich habe Haustiere',
+    visible: 'Sichtbar für Personen ohne Konto',
+    visibleHint: 'Aus: Nur LocalBuddy-Mitglieder sehen dein Profil. Du kannst das jederzeit ändern.',
+  },
+
+  discover: {
+    search: 'Wohin gehst du?',
+    clearSearch: 'Reiseziel entfernen',
+    searchTyped: (q: string) => `Suche nach „${q}“`,
+    inTown: 'Gerade in der Stadt',
+    arriving: 'Kommt an',
+    residents: 'Wohnt hier',
+    undo: 'Die zuletzt übersprungene Person zurückholen',
+    title: 'Entdecken',
+    subtitle: 'Wer in der Nähe ist und welchen Nachmittag sie sich vorstellen.',
+    everyone: 'Alle',
+    hosts: 'Gastgeber',
+    guests: 'Reisende',
+    whoToShow: 'Wen du treffen möchtest',
+    filters: 'Filter',
+    filtersLabel: (n: number) => (n === 1 ? 'Filter, 1 aktiv' : `Filter, ${n} aktiv`),
+    emptyFiltered: 'Gerade passt niemand zu all dem. Versuch, einen Filter zu lockern.',
+    empty: 'Du hast alle in der Nähe gesehen. Schau bald wieder vorbei oder probiere eine andere Stadt.',
+    changeFilters: 'Filter ändern',
+    openFilters: 'Filter öffnen',
+  },
+
+  filters: {
+    usualDays: 'Meistens frei am',
+    activityStyle: 'Art der Pläne',
+    lifestyle: 'Ihre Szene',
+    title: 'Filter',
+    clear: 'Zurücksetzen',
+    showResults: 'Personen anzeigen',
+    whenFree: 'Wann sie Zeit haben',
+    hasPets: 'Hat Haustiere',
+    any: 'Egal',
+    yes: 'Ja',
+    no: 'Nein',
+  },
+
+  profileCard: {
+    verified: 'verifiziert',
+    inTown: 'Gerade in der Stadt',
+    arriving: (date: string) => `Kommt am ${date} an`,
+    rated: (rating: string) => `bewertet mit ${rating}`,
+    hasCar: 'hat ein Auto',
+    hasPets: 'hat Haustiere',
+    smokes: 'raucht',
+    openHint: 'Öffnet das vollständige Profil',
+    passOn: (name: string) => `${name} überspringen`,
+    interestIn: (name: string) => `Interesse an ${name} zeigen`,
+  },
+
+  profile: {
+    reportOrBlock: 'Melden oder blockieren',
+    anotherPhotoOf: (name: string) => `Ein weiteres Foto von ${name}`,
+    rating: (rating: string) => `Bewertung ${rating}`,
+    whatWeDo: 'Was wir unternehmen',
+    whyHost: 'Warum ich Gastgeber bin',
+    languages: 'Sprachen',
+    reviews: 'Was andere sagen',
+    ratedOutOf5: (n: number) => `Bewertet mit ${n} von 5`,
+    moreReviews: 'Mehr Bewertungen lesen',
+    showInterest: 'Interesse zeigen',
+    unlock: 'Nicht warten und den Chat freischalten',
+  },
+
+  chats: {
+    title: 'Chats',
+    empty: 'Noch keine Chats. Wenn ihr beide ja sagt, beginnt es hier.',
+    sayHello: 'Hallo sagen',
+    unlocked: 'Freigeschaltet',
+    unread: (n: number) => (n === 1 ? '1 neue Nachricht' : `${n} neue Nachrichten`),
+  },
+
+  requests: {
+    title: 'Anfragen',
+    subtitle: 'Diese Personen möchten dich kennenlernen. Sag ebenfalls ja, und der Chat öffnet sich.',
+    empty: 'Niemand wartet auf deine Antwort.',
+    count: (n: number) => (n === 1 ? '1 Anfrage' : `${n} Anfragen`),
+  },
+
+  chat: {
+    back: 'Zurück zu den Chats',
+    openProfile: (name: string) => `${name}, Profil öffnen`,
+    conversation: 'Unterhaltung',
+    moreActions: 'Bewerten, melden oder blockieren',
+    empty: 'Hier ist noch nichts. Jemand muss zuerst Hallo sagen.',
+    youSaid: (text: string) => `Du hast gesagt: ${text}`,
+    theySaid: (name: string | undefined, text: string) => `${name ?? 'Die Person'} hat gesagt: ${text}`,
+    message: 'Nachricht schreiben',
+    send: 'Nachricht senden',
+  },
+
+  push: { channel: 'Anfragen und Nachrichten' },
+  me: {
+    notVerified: 'Noch nicht verifiziert',
+    freeTodayHint: 'Zeig, dass du bis Mitternacht für ein Treffen bereit bist.',
+    credits: (n: number) => (n === 1 ? '1 Guthaben' : `${n} Guthaben`),
+    editProfile: 'Profil bearbeiten',
+    blocked: 'Blockierte Mitglieder',
+    trips: 'Meine Reisen',
+    signOut: 'Abmelden',
+    language: 'Sprache',
+    languageRow: (value: string) => `Sprache: ${value}`,
+  },
+
+  language: {
+    phone: (name: string) => `Sprache des Telefons (${name})`,
+  },
+
+  trips: {
+    title: 'Meine Reisen',
+    subtitle: 'Sag den Leuten, wann du in einer Stadt bist. Sie sehen dich dann als „kommt an“ oder „gerade in der Stadt“.',
+    empty: 'Noch keine anstehenden Reisen.',
+    add: 'Reise hinzufügen',
+    pickCity: 'Wähle eine Stadt aus der Liste.',
+    from: 'Von (JJJJ-MM-TT)',
+    to: 'Bis (JJJJ-MM-TT)',
+    badDate: 'Verwende das Format JJJJ-MM-TT, zum Beispiel 2026-12-12.',
+    dateOrder: 'Das Enddatum darf nicht vor dem Startdatum liegen.',
+    dateOver: 'Wähle Daten ab heute.',
+    save: 'Reise hinzufügen',
+    remove: (city: string) => `Reise nach ${city} entfernen`,
+  },
+
+  blocked: {
+    title: 'Blockierte Mitglieder',
+    empty: 'Du hast niemanden blockiert. Falls du es einmal tust, kannst du es hier rückgängig machen.',
+    unblock: 'Blockierung aufheben',
+  },
+
+  editProfile: {
+    title: 'Profil bearbeiten',
+    save: 'Änderungen speichern',
+  },
+
+  safety: {
+    report: (name: string) => `${name} melden`,
+    block: (name: string) => `${name} blockieren`,
+    sent: 'Meldung gesendet',
+    sendReport: 'Meldung senden',
+    sentBody:
+      'Danke. Ein Moderator liest jede Meldung. Zu dieser hörst du nichts mehr von uns, und niemand erfährt, wer sie gesendet hat.',
+    whatHappened: 'Was ist passiert?',
+    whatHappenedHint: 'Schreib es so, wie du es einer Person erzählen würdest. Ein Moderator liest das, keine Maschine.',
+    reportNotBlock:
+      'Eine Meldung blockiert niemanden. Wenn du die Person auch aus deinem Feed und deinem Postfach entfernen möchtest, blockiere sie.',
+    cancel: 'Abbrechen',
+    blockAction: 'Blockieren',
+    blockBody: (name: string) =>
+      `${name} sieht dein Profil nicht mehr und du siehst das Profil dieser Person nicht mehr. Jede Unterhaltung zwischen euch wird in beide Richtungen geschlossen.`,
+    undoLater: 'Du kannst das später unter „Blockierte Mitglieder“ in deinem Profil rückgängig machen.',
+    leaveReview: 'Bewertung schreiben',
+  },
+
+  review: {
+    sent: 'Bewertung gesendet',
+    sentBody:
+      'Danke. Sie steht jetzt im Profil, wo die nächste Person sie liest, bevor sie Kontakt aufnimmt.',
+    title: (name: string) => `${name} bewerten`,
+    send: 'Bewertung senden',
+    howWasIt: 'Wie war es?',
+    rating: 'Bewertung',
+    stars: (n: number) => (n === 1 ? '1 Stern' : `${n} Sterne`),
+    comment: 'Möchtest du noch etwas hinzufügen?',
+    commentHint:
+      'Optional. Es bleibt im Profil, schreib also, was die nächste Person wissen möchte.',
+  },
+
+  unlock: {
+    title: 'Chat freischalten',
+    checking: 'Wir prüfen, was dich das kostet.',
+    subscription: 'Dein Abo deckt das ab, ohne weitere Kosten.',
+    credits: (have: number, cost: number) =>
+      `Du hast ${have} Guthaben vom Gastgeben. Dafür werden ${cost} verwendet.`,
+    money: (price: string) => `${price}, einmalig, für diese eine Person.`,
+    ctaSubscription: 'Chat öffnen',
+    ctaCredits: (n: number) => (n === 1 ? '1 Guthaben verwenden' : `${n} Guthaben verwenden`),
+    ctaMoney: (price: string) => `${price} bezahlen`,
+    body: (name: string) =>
+      `Das öffnet jetzt einen Chat mit ${name}, ohne darauf zu warten, dass die Person ebenfalls Interesse zeigt.`,
+    note: 'Es bezahlt die Vorstellung und sonst nichts. Die gemeinsame Zeit wird nie bezahlt, von keinem von euch.',
+  },
+
+  match: {
+    dialog: (name: string) => `${name} und du habt beide ja gesagt`,
+    headline: 'Ihr habt beide ja gesagt',
+    body: (name: string) => `Der Chat mit ${name} ist offen, und niemand hat dafür bezahlt.`,
+    sayHello: 'Hallo sagen',
+    theirProfile: 'Profil ansehen',
+    later: 'Jetzt nicht',
+  },
+
+  skeleton: {
+    profiles: 'Profile werden geladen',
+    conversations: 'Unterhaltungen werden geladen',
+    tips: [
+      'Trefft euch beim ersten Mal an einem öffentlichen Ort.',
+      'Beantworte Anfragen, auch mit einem Nein. Schweigen ist die schlechteste Antwort.',
+      'Sag deinem Gastgeber vorab, ob du Allergien oder Haustiere hast.',
+      'Bei LocalBuddy zahlt niemand jemandem etwas, und niemand sollte danach fragen.',
+      'Halte die Pläne im Chat, bis ihr euch trefft.',
+      'Erzähl vor dem Treffen einem Freund oder einer Freundin von deinen Plänen.',
+      'Frag nach dem Kaffee, den Einheimische trinken, nicht dem für Touristen.',
+      'Ein Markt am Morgen schlägt die Schlange vor dem Museum.',
+      'Du hast ein Auto? Biete doch eine Mitfahrt an. Sie ist immer kostenlos.',
+      'Frag deinen Gastgeber nach dem Ort, an den er seine eigenen Freunde mitnehmen würde.',
+      'Sag, was du unbedingt sehen möchtest. Gastgeber freuen sich über einen Hinweis.',
+      'Sag ja zum kleinen Plan: Ein Spaziergang schlägt oft ein großes Programm.',
+    ],
+  },
+
+  field: {
+    showPassword: 'Passwort anzeigen',
+    hidePassword: 'Passwort verbergen',
+  },
+
+  errors: {
+    account_banned: 'Dieses Konto ist gesperrt und kann LocalBuddy nicht mehr nutzen.',
+    account_not_found: 'Dieses Konto existiert nicht mehr.',
+    already_responded: 'Du hast auf dieses Profil bereits reagiert.',
+    already_reviewed: 'Du hast dieses Mitglied bereits bewertet.',
+    already_subscribed: 'Du hast bereits ein aktives Abo.',
+    blocked: 'Dieses Mitglied ist nicht erreichbar.',
+    compliance_not_acknowledged: 'Um eine Unterkunft anzubieten, bestätige zuerst die drei rechtlichen Pflichten.',
+    empty_file: 'Die gewählte Datei ist leer.',
+    empty_message: 'Eine Nachricht darf nicht leer sein.',
+    file_too_large: 'Fotos dürfen höchstens 10 MB groß sein.',
+    home_photo_not_allowed: 'Fotos der Unterkunft sind nur für Gastgeber, die eine Übernachtung anbieten.',
+    identity_verification_required: 'Bestätige deine Identität, bevor du andere Mitglieder kontaktierst.',
+    invalid_free_until: 'Heute frei kann höchstens 24 Stunden ab jetzt dauern.',
+    image_too_large: 'Dieses Bild hat zu viele Pixel. Fotos von der Handykamera sind in Ordnung.',
+    invalid_credentials:
+      'E-Mail und Passwort stimmen nicht überein. Nach 5 falschen Versuchen pausiert die Anmeldung für 15 Minuten.',
+    invalid_slot:
+      'Jedes Zeitfenster braucht eine bekannte Tageszeit und eine Jahreszeit, die nach dem Beginn endet.',
+    moderator_only: 'Das können nur Moderatoren.',
+    no_exchange: 'Du kannst jemanden erst bewerten, wenn ihr beide in derselben Unterhaltung geschrieben habt.',
+    not_a_resolution: 'Eine Meldung kann nur als geprüft oder abgelehnt geschlossen werden.',
+    not_an_image: 'Diese Datei ist kein lesbares Bild.',
+    rate_limited: 'Zu viele Versuche hintereinander. Warte eine Minute und versuch es erneut.',
+    registration_failed: 'Dein Konto konnte nicht erstellt werden. Prüfe deine Angaben und versuch es erneut.',
+    self_target: 'Das kannst du bei deinem eigenen Profil nicht tun.',
+    target_not_verified:
+      'Dieses Mitglied hat die Identität noch nicht bestätigt, deshalb kann der Chat nicht freigeschaltet werden.',
+    too_many_photos: 'Du kannst höchstens 12 Fotos haben. Entferne eines, um ein weiteres hinzuzufügen.',
+    too_many_slots: 'Du kannst höchstens 20 Zeitfenster wählen.',
+    invalid_city: 'Wähle eine Stadt für die Reise.',
+    invalid_dates: 'Prüfe die Daten: Nimm echte Tage, und das Ende darf nicht vor dem Beginn liegen.',
+    too_many_trips: 'Du kannst höchstens 5 anstehende Reisen haben. Entferne eine, um eine weitere hinzuzufügen.',
+    trip_over: 'Diese Reise ist schon vorbei. Wähle Daten ab heute.',
+    trip_home_city: 'Das ist die Stadt, in der du wohnst. Füge Reisen zu Orten hinzu, die du besuchst.',
+    trip_too_far: 'Eine Reise kann höchstens in einem Jahr beginnen.',
+    trip_too_long: 'Eine Reise kann höchstens 30 Tage dauern.',
+    under_age: 'Du musst mindestens 18 Jahre alt sein, um LocalBuddy zu nutzen.',
+    unknown_plan: 'Dieses Abo gibt es nicht. Wähle monatlich oder jährlich.',
+    weak_password:
+      'Prüfe die E-Mail-Adresse und verwende ein Passwort mit mindestens 8 Zeichen, mit Großbuchstabe, Kleinbuchstabe, Zahl und Sonderzeichen.',
+  },
+};

@@ -17,4 +17,6 @@ public static class Limits
     public const int Url = 200;
     public const int ExternalId = 100; // Stripe identifiers
     public const int SubjectHash = 128;
+    public const int PushToken = 200;  // Expo push tokens are ~41 characters today
+    public const int Language = 5;
 }

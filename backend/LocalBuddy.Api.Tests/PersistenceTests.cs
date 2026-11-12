@@ -105,6 +105,7 @@ public class ErasureTests
         t.Db.Photos.Add(new Photo { Id = Guid.NewGuid(), UserId = a, Type = PhotoType.Profile, Url = "/uploads/x.jpg" });
         t.Db.Listings.Add(new Listing { Id = Guid.NewGuid(), UserId = a });
         t.Db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), UserId = a, PlanType = "monthly", Status = "active" });
+        t.Db.Trips.Add(new Trip { Id = Guid.NewGuid(), UserId = a, City = "Firenze", From = Trip.Today, To = Trip.Today });
         await t.Db.SaveChangesAsync();
 
         t.Db.Users.Remove(await t.Db.Users.FindAsync(a) ?? throw new InvalidOperationException());
@@ -118,6 +119,7 @@ public class ErasureTests
         Assert.Equal(0, await t.Db.Photos.CountAsync());
         Assert.Equal(0, await t.Db.Listings.CountAsync());
         Assert.Equal(0, await t.Db.Subscriptions.CountAsync());
+        Assert.Equal(0, await t.Db.Trips.CountAsync());
     }
 
     /// The deliberate exception: accounting and abuse history outlive the account (ADR-0004).

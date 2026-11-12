@@ -79,6 +79,48 @@ public class ModerationController(LocalBuddyDbContext db, ILogger<ModerationCont
         return NoContent();
     }
 
+    /// Members who asked to be verified and are waiting for a moderator, oldest first (ADR-0011).
+    [HttpGet("verifications")]
+    [ProducesResponseType<Page<PendingVerificationDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<Page<PendingVerificationDto>>> PendingVerifications(
+        int page = 0, int pageSize = Page<PendingVerificationDto>.DefaultSize)
+    {
+        (page, pageSize) = Page<PendingVerificationDto>.Clamp(page, pageSize);
+
+        var rows = await db.Users.Where(u => u.IdentityVerificationRequestedAt != null && !u.IdentityVerified && u.BannedAt == null)
+                                 .OrderBy(u => u.IdentityVerificationRequestedAt)
+                                 .ThenBy(u => u.Id)
+                                 .Skip(page * pageSize)
+                                 .Take(pageSize + 1)
+                                 .Select(u => new PendingVerificationDto(u.Id, u.Name, u.Email, u.City, u.IdentityVerificationRequestedAt!.Value))
+                                 .ToListAsync();
+
+        return Page<PendingVerificationDto>.From(rows, page, pageSize);
+    }
+
+    /// The pilot's identity check (ADR-0011): the moderator knows the person and has confirmed
+    /// they are who they say and an adult. Idempotent. No identity hash is stored: there is no
+    /// provider handle, and every new account has to pass the same moderator, who is the ban
+    /// continuity ADR-0005 asks for.
+    [HttpPost("users/{userId:guid}/verify")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Verify(Guid userId)
+    {
+        var user = await db.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+        // Verifying is a way back into contact; a banned account comes back through unban first.
+        if (user.BannedAt is not null) return this.Conflicted("user_banned", "This account is banned; lift the ban first.");
+        if (user.IdentityVerified && user.AgeVerified) return NoContent();
+
+        (user.IdentityVerified, user.AgeVerified) = (true, true);
+        await db.SaveChangesAsync();
+
+        log.LogWarning("Identity of user {UserId} approved by {ModeratorId}", userId, User.Id());
+        return NoContent();
+    }
+
     /// Lifts the ban on this one account only. Other accounts of the same person that went down
     /// with it stay banned until a moderator lifts them individually.
     [HttpPost("users/{userId:guid}/unban")]

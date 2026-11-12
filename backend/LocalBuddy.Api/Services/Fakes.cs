@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -24,4 +25,22 @@ public class FakeIdentityVerifier : IIdentityVerifier
     /// provider, or against a stub in tests — see IdentityBanTests.
     public Task<IdentityCheck> VerifyAsync(Guid userId) => Task.FromResult(
         new IdentityCheck(true, true, Convert.ToHexString(SHA256.HashData(userId.ToByteArray()))));
+}
+
+/// Development and the tests: nothing leaves the machine. What would have been sent is logged
+/// and kept, so a test can read it back (ADR-0012).
+public class FakePushSender(ILogger<FakePushSender> log) : IPushSender
+{
+    public ConcurrentQueue<PushMessage> Sent { get; } = new();
+
+    public Task<IReadOnlyList<string>> SendAsync(IReadOnlyList<PushMessage> messages, CancellationToken cancellationToken)
+    {
+        foreach (var message in messages)
+        {
+            Sent.Enqueue(message);
+            // The body carries a member's name, so it stays out of the log.
+            log.LogInformation("Fake push: {Title} -> {Url}", message.Title, message.Url);
+        }
+        return Task.FromResult<IReadOnlyList<string>>([]);
+    }
 }

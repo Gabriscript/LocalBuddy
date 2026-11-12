@@ -1,0 +1,366 @@
+import type { Strings } from './en';
+
+/// Informal "sinä", with the pronoun left out. First draft: needs review by a native speaker.
+export const fi: Strings = {
+  common: {
+    tryAgain: 'Yritä uudelleen',
+    somethingWrong: 'Jokin meni vikaan.',
+    goBack: 'Takaisin',
+    close: 'Sulje',
+    continue: 'Jatka',
+    finish: 'Valmis',
+    verifyIdentity: 'Vahvista henkilöllisyytesi',
+    verified: 'Vahvistettu',
+    name: 'Nimi',
+    city: 'Kaupunki',
+    email: 'Sähköposti',
+    password: 'Salasana',
+    iWantToBe: 'Haluan olla',
+    photoOf: (name: string) => `Kuva henkilöstä ${name}`,
+    yourPhoto: 'Profiilikuvasi',
+    hasCar: 'Autoa on',
+    pets: 'Lemmikit',
+    smokes: 'Tupakoi',
+    canHostOvernight: 'Voi majoittaa yöksi',
+    freeToday: 'Vapaa tänään',
+    waitingApproval: 'Odottaa hyväksyntää',
+    progress: 'Eteneminen',
+    stepOf: (step: number, total: number) => `Vaihe ${step} / ${total}`,
+  },
+
+  roles: { host: 'Isäntä', guest: 'Matkailija', entrambi: 'Molemmat' },
+  roleShown: { host: 'Isäntä', guest: 'Matkailija', entrambi: 'Isäntä ja matkailija' },
+
+  tabs: { discover: 'Löydä', chats: 'Keskustelut', me: 'Minä' },
+
+  timeOfDay: { morning: 'Aamu', afternoon: 'Iltapäivä', evening: 'Ilta', night: 'Yö' },
+
+  days: { monday: 'Ma', tuesday: 'Ti', wednesday: 'Ke', thursday: 'To', friday: 'Pe', saturday: 'La', sunday: 'Su' },
+
+  activityStyle: { relaxed: 'Rennot suunnitelmat', adventurous: 'Seikkailevat suunnitelmat' },
+
+  lifestyle: { nightlife: 'Yöelämä', family: 'Perhe-elämä' },
+
+  auth: {
+    tagline: 'Tapaa joku, joka asuu siellä.',
+    signIn: 'Kirjaudu sisään',
+    noAccount: 'Uusi täällä? Rekisteröidy',
+    haveAccount: 'Jo jäsen? Kirjaudu sisään',
+    signInFailed: 'Kirjautuminen ei onnistunut. Yritä hetken kuluttua uudelleen.',
+    createAccount: 'Luo tili',
+    passwordHint: 'Vähintään 8 merkkiä: isoja ja pieniä kirjaimia, numero ja erikoismerkki.',
+    changeLater: 'Voit vaihtaa milloin tahansa.',
+    registerFailed: 'Tilin luominen ei onnistunut. Yritä hetken kuluttua uudelleen.',
+  },
+
+  onboarding: {
+    aboutTitle: 'Vähän sinusta',
+    aboutSubtitle:
+      'Lyhyet vastaukset voittavat pitkän esittelyn. Ne näyttävät vieraalle, millainen päivä kanssasi on.',
+    photoTitle: 'Kasvosi, vapaa-aikasi',
+    photoSubtitle: 'Kasvoille sanotaan helpommin kyllä. Lisää selkeä kuva ja kerro, milloin olet vapaa.',
+    changePhoto: 'Vaihda kuva',
+    addPhoto: 'Lisää kuva',
+    photoPrivacy: 'Kuvastasi poistetaan sijaintitiedot, ennen kuin kukaan näkee sen.',
+    whenFree: 'Milloin olet yleensä vapaa?',
+    pickTimes: 'Valitse kaikki sopivat. Suunnitelmat muuttuvat, ja nämä voivat muuttua myös.',
+    verifyTitle: 'Vahvista, että se olet sinä',
+    verifySubtitle:
+      'Pilottivaiheessa LocalBuddy-tiimi vahvistaa jokaisen henkilöllisyyden käsin. Ilman sitä kukaan ei voi kirjoittaa kenellekään, mikä pitää tämän turvallisena paikkana tavata vieraita.',
+    verifyCta: 'Aloita tarkistus',
+    verifyPendingBody: 'Kiitos! LocalBuddy-tiimi vahvistaa henkilöllisyytesi pian.',
+    listingTitle: 'Mitä voit jakaa',
+    listingSubtitle: 'Iltapäivän kaupungilla, sängyn yöksi tai molemmat. Voit muuttaa tätä myöhemmin.',
+    experience: 'Iltapäivä kaupungilla',
+    experienceHint: 'Kävely, ateria, baari, johon veisit ystävän.',
+    overnight: 'Sänky yöksi',
+    overnightHint: 'Matkailija yöpyy kotonasi.',
+    obligationsTitle: 'Yöpymisen järjestämiseen liittyy lakisääteisiä velvoitteita',
+    obligationRegistered:
+      'Olen tarkistanut, mitä maani vaatii yöpyviä vieraita majoittavalta, ja kaikki on kunnossa (Italiassa: Alloggiati Web ja Questura).',
+    obligationCheck:
+      'Tarkistan jokaisen matkailijan henkilöllisyystodistuksen henkilökohtaisesti saapuessa. Etäilmoittautuminen ei riitä.',
+    obligationSend: 'Ilmoitan vieraani itse, missä laki sitä vaatii.',
+    cannotSend: 'LocalBuddy muistuttaa sinua, mutta ei koskaan lähetä mitään puolestasi.',
+    confirmAll: 'Vahvistan kaikki kolme',
+    chooseOne: 'Valitse vähintään yksi, jotta voit valmistua.',
+  },
+
+  profileFields: {
+    style: 'Tyylisi',
+    usualDays: 'Yleensä vapaana',
+    usualDaysHint: 'Suuntaa-antava, ei lupaus: oikean päivän sovitte keskustelussa.',
+    activityStyle: 'Suunnitelmasi ovat enimmäkseen',
+    lifestyle: 'Kallistut kohti',
+    both: 'Vähän molempia',
+    whatWeDo: 'Mitä tekisimme yhdessä?',
+    whatWeDoHint: 'Kävely naapurustossasi, tori jota rakastat, baari jonka vain paikalliset tuntevat.',
+    whyHost: 'Miksi toimit isäntänä?',
+    languages: 'Puhumasi kielet',
+    languagesHint: 'Esimerkiksi: italia, englanti, vähän espanjaa.',
+    facts: 'Käytännön asiat',
+    haveCar: 'Minulla on auto',
+    liftHint: 'Halutessasi voit tarjota vieraille kyydin, aina ilmaiseksi.',
+    smoke: 'Tupakoin',
+    havePets: 'Minulla on lemmikkejä',
+    visible: 'Näkyy ihmisille, joilla ei ole tiliä',
+    visibleHint: 'Pois: vain LocalBuddyn jäsenet näkevät profiilisi. Voit muuttaa tätä milloin tahansa.',
+  },
+
+  discover: {
+    search: 'Minne olet menossa?',
+    clearSearch: 'Tyhjennä kohde',
+    searchTyped: (q: string) => `Hae “${q}”`,
+    inTown: 'Kaupungissa nyt',
+    arriving: 'Saapumassa',
+    residents: 'Asuu täällä',
+    undo: 'Tuo takaisin viimeksi ohittamasi henkilö',
+    title: 'Löydä',
+    subtitle: 'Ketä on lähellä, ja millaista iltapäivää he suunnittelevat.',
+    everyone: 'Kaikki',
+    hosts: 'Isännät',
+    guests: 'Matkailijat',
+    whoToShow: 'Keitä haluat tavata',
+    filters: 'Suodattimet',
+    filtersLabel: (n: number) => (n === 1 ? 'Suodattimet, 1 käytössä' : `Suodattimet, ${n} käytössä`),
+    emptyFiltered: 'Kukaan ei sovi kaikkiin näihin juuri nyt. Yritä höllentää yhtä.',
+    empty: 'Olet nähnyt kaikki lähistöllä. Palaa pian takaisin tai kokeile toista kaupunkia.',
+    changeFilters: 'Muuta suodattimia',
+    openFilters: 'Avaa suodattimet',
+  },
+
+  filters: {
+    usualDays: 'Yleensä vapaana',
+    activityStyle: 'Suunnitelmien laji',
+    lifestyle: 'Heidän tyylinsä',
+    title: 'Suodattimet',
+    clear: 'Tyhjennä',
+    showResults: 'Näytä ihmiset',
+    whenFree: 'Milloin he ovat vapaita',
+    hasPets: 'Lemmikkejä on',
+    any: 'Mikä tahansa',
+    yes: 'Kyllä',
+    no: 'Ei',
+  },
+
+  profileCard: {
+    verified: 'vahvistettu',
+    inTown: 'Kaupungissa nyt',
+    arriving: (date: string) => `Saapuu ${date}`,
+    rated: (rating: string) => `arvosana ${rating}`,
+    hasCar: 'autoa on',
+    hasPets: 'lemmikkejä on',
+    smokes: 'tupakoi',
+    openHint: 'Avaa koko profiilin',
+    passOn: (name: string) => `Ohita ${name}`,
+    interestIn: (name: string) => `Osoita kiinnostusta: ${name}`,
+  },
+
+  profile: {
+    reportOrBlock: 'Ilmoita tai estä',
+    anotherPhotoOf: (name: string) => `Toinen kuva henkilöstä ${name}`,
+    rating: (rating: string) => `Arvosana ${rating}`,
+    whatWeDo: 'Mitä teemme',
+    whyHost: 'Miksi toimin isäntänä',
+    languages: 'Kielet',
+    reviews: 'Mitä ihmiset sanovat',
+    ratedOutOf5: (n: number) => `Arvosana ${n} / 5`,
+    moreReviews: 'Lue lisää arvosteluja',
+    showInterest: 'Osoita kiinnostusta',
+    unlock: 'Ohita odotus ja avaa keskustelu',
+  },
+
+  chats: {
+    title: 'Keskustelut',
+    empty: 'Ei vielä keskusteluja. Kun molemmat sanotte kyllä, se alkaa täältä.',
+    sayHello: 'Sano hei',
+    unlocked: 'Avattu',
+    unread: (n: number) => (n === 1 ? '1 uusi viesti' : `${n} uutta viestiä`),
+  },
+
+  requests: {
+    title: 'Pyynnöt',
+    subtitle: 'He haluaisivat tavata sinut. Sano kyllä takaisin, niin keskustelu avautuu.',
+    empty: 'Kukaan ei odota vastaustasi.',
+    count: (n: number) => (n === 1 ? '1 pyyntö' : `${n} pyyntöä`),
+  },
+
+  chat: {
+    back: 'Takaisin keskusteluihin',
+    openProfile: (name: string) => `${name}, avaa profiili`,
+    conversation: 'Keskustelu',
+    moreActions: 'Arvostele, ilmoita tai estä',
+    empty: 'Täällä ei ole vielä mitään. Jonkun täytyy sanoa hei ensin.',
+    youSaid: (text: string) => `Sanoit: ${text}`,
+    theySaid: (name: string | undefined, text: string) => `${name ?? 'Hän'} sanoi: ${text}`,
+    message: 'Kirjoita viesti',
+    send: 'Lähetä viesti',
+  },
+
+  push: { channel: 'Pyynnöt ja viestit' },
+  me: {
+    notVerified: 'Ei vielä vahvistettu',
+    freeTodayHint: 'Näytä, että olet valmis tapaamiseen puoleenyöhön asti.',
+    credits: (n: number) => (n === 1 ? '1 krediitti' : `${n} krediittiä`),
+    editProfile: 'Muokkaa profiilia',
+    blocked: 'Estetyt jäsenet',
+    trips: 'Matkani',
+    signOut: 'Kirjaudu ulos',
+    language: 'Kieli',
+    languageRow: (value: string) => `Kieli: ${value}`,
+  },
+
+  language: {
+    phone: (name: string) => `Puhelimen kieli (${name})`,
+  },
+
+  trips: {
+    title: 'Matkani',
+    subtitle: 'Kerro ihmisille, milloin olet kaupungissa. He näkevät sinut saapuvana tai kaupungissa nyt.',
+    empty: 'Ei vielä tulevia matkoja.',
+    add: 'Lisää matka',
+    pickCity: 'Valitse kaupunki luettelosta.',
+    from: 'Alkaen (VVVV-KK-PP)',
+    to: 'Päättyen (VVVV-KK-PP)',
+    badDate: 'Käytä muotoa VVVV-KK-PP, esimerkiksi 2026-12-12.',
+    dateOrder: 'Päättymispäivä ei voi olla ennen alkamispäivää.',
+    dateOver: 'Valitse päivämäärät tästä päivästä eteenpäin.',
+    save: 'Lisää matka',
+    remove: (city: string) => `Poista matka kaupunkiin ${city}`,
+  },
+
+  blocked: {
+    title: 'Estetyt jäsenet',
+    empty: 'Et ole estänyt ketään. Jos joskus estät, voit perua sen täältä.',
+    unblock: 'Poista esto',
+  },
+
+  editProfile: {
+    title: 'Muokkaa profiilia',
+    save: 'Tallenna muutokset',
+  },
+
+  safety: {
+    report: (name: string) => `Ilmoita käyttäjä ${name}`,
+    block: (name: string) => `Estä käyttäjä ${name}`,
+    sent: 'Ilmoitus lähetetty',
+    sendReport: 'Lähetä ilmoitus',
+    sentBody:
+      'Kiitos. Moderaattori lukee jokaisen ilmoituksen. Tästä et kuule takaisin, eikä kukaan saa tietää, kuka sen lähetti.',
+    whatHappened: 'Mitä tapahtui?',
+    whatHappenedHint: 'Kirjoita niin kuin kertoisit ihmiselle. Tämän lukee moderaattori, ei kone.',
+    reportNotBlock:
+      'Ilmoittaminen ei estä ketään. Jos haluat hänet pois myös syötteestäsi ja postilaatikostasi, estä hänet.',
+    cancel: 'Peruuta',
+    blockAction: 'Estä',
+    blockBody: (name: string) =>
+      `${name} ei näe profiiliasi, etkä sinä näe hänen profiiliaan. Kaikki teidän väliset keskustelut sulkeutuvat molempiin suuntiin.`,
+    undoLater: 'Voit perua tämän myöhemmin kohdasta Estetyt jäsenet omassa profiilissasi.',
+    leaveReview: 'Jätä arvostelu',
+  },
+
+  review: {
+    sent: 'Arvostelu lähetetty',
+    sentBody:
+      'Kiitos. Se on nyt hänen profiilissaan, missä seuraava henkilö lukee sen ennen yhteydenottoa.',
+    title: (name: string) => `Arvostele ${name}`,
+    send: 'Lähetä arvostelu',
+    howWasIt: 'Millaista oli?',
+    rating: 'Arvosana',
+    stars: (n: number) => (n === 1 ? '1 tähti' : `${n} tähteä`),
+    comment: 'Haluatko lisätä jotain?',
+    commentHint:
+      'Valinnainen. Se jää hänen profiiliinsa, joten kirjoita, mitä seuraava haluaisi tietää.',
+  },
+
+  unlock: {
+    title: 'Avaa keskustelu',
+    checking: 'Tarkistamme, mitä tämä sinulle maksaa.',
+    subscription: 'Tilauksesi kattaa tämän, mitään ei tarvitse maksaa lisää.',
+    credits: (have: number, cost: number) =>
+      `Sinulla on ${have} ${have === 1 ? 'krediitti' : 'krediittiä'} isäntänä toimimisesta. Tämä käyttää ${cost}.`,
+    money: (price: string) => `${price}, kerran, tästä yhdestä ihmisestä.`,
+    ctaSubscription: 'Avaa keskustelu',
+    ctaCredits: (n: number) => (n === 1 ? 'Käytä 1 krediitti' : `Käytä ${n} krediittiä`),
+    ctaMoney: (price: string) => `Maksa ${price}`,
+    body: (name: string) =>
+      `Tämä avaa keskustelun henkilön ${name} kanssa nyt, odottamatta että hän osoittaa kiinnostusta takaisin.`,
+    note: 'Se maksaa esittelystä, eikä mistään muusta. Yhdessä vietettyä aikaa ei koskaan makseta, kumpikaan teistä.',
+  },
+
+  match: {
+    dialog: (name: string) => `Sinä ja ${name} sanoitte molemmat kyllä`,
+    headline: 'Sanoitte molemmat kyllä',
+    body: (name: string) => `Keskustelu henkilön ${name} kanssa on auki, eikä kukaan maksanut siitä.`,
+    sayHello: 'Sano hei',
+    theirProfile: 'Hänen profiilinsa',
+    later: 'Ei nyt',
+  },
+
+  skeleton: {
+    profiles: 'Ladataan profiileja',
+    conversations: 'Ladataan keskusteluja',
+    tips: [
+      'Tavatkaa ensimmäisellä kerralla julkisessa paikassa.',
+      'Vastaa pyyntöihin, myös kieltävästi. Hiljaisuus on huonoin vastaus.',
+      'Kerro isännällesi allergioista tai lemmikeistä ennen tapaamista.',
+      'LocalBuddyssa kukaan ei maksa kenellekään, eikä kenenkään pidä sitä pyytää.',
+      'Pidä suunnitelmat keskustelussa, kunnes tapaatte.',
+      'Kerro suunnitelmistasi ystävälle ennen lähtöä.',
+      'Pyydä kahvia, jota paikalliset juovat, ei turistien kahvia.',
+      'Aamun tori voittaa museojonon.',
+      'Onko autoa? Voit tarjota kyydin. Se on aina ilmainen.',
+      'Kysy isännältäsi paikkaa, johon hän veisi omat ystävänsä.',
+      'Kerro, mitä haluaisit nähdä. Isännät arvostavat vinkkiä.',
+      'Sano kyllä pienelle suunnitelmalle: kävely voittaa usein suuren ohjelman.',
+    ],
+  },
+
+  field: {
+    showPassword: 'Näytä salasana',
+    hidePassword: 'Piilota salasana',
+  },
+
+  errors: {
+    account_banned: 'Tämä tili on jäädytetty, eikä sillä voi enää käyttää LocalBuddya.',
+    account_not_found: 'Tätä tiliä ei ole enää olemassa.',
+    already_responded: 'Olet jo vastannut tähän profiiliin.',
+    already_reviewed: 'Olet jo arvostellut tämän jäsenen.',
+    already_subscribed: 'Sinulla on jo voimassa oleva tilaus.',
+    blocked: 'Tätä jäsentä ei voi tavoittaa.',
+    compliance_not_acknowledged: 'Jotta voit tarjota majoitusta, vahvista ensin kolme lakisääteistä velvoitetta.',
+    empty_file: 'Valitsemasi tiedosto on tyhjä.',
+    empty_message: 'Viesti ei voi olla tyhjä.',
+    file_too_large: 'Kuvat saavat olla enintään 10 Mt.',
+    home_photo_not_allowed: 'Kotikuvat ovat vain isännille, jotka tarjoavat majoitusta.',
+    identity_verification_required: 'Vahvista henkilöllisyytesi ennen kuin otat yhteyttä muihin jäseniin.',
+    invalid_free_until: 'Vapaa tänään voi kestää enintään 24 tuntia tästä hetkestä.',
+    image_too_large: 'Kuvassa on liikaa pikseleitä. Puhelimen kameran kuvat käyvät.',
+    invalid_credentials:
+      'Sähköposti ja salasana eivät täsmää. 5 väärän yrityksen jälkeen kirjautuminen keskeytyy 15 minuutiksi.',
+    invalid_slot:
+      'Jokaiseen aikaikkunaan tarvitaan tunnettu vuorokaudenaika ja kausi, joka päättyy alkamisen jälkeen.',
+    moderator_only: 'Vain moderaattorit voivat tehdä tämän.',
+    no_exchange: 'Voit arvostella jonkun vasta, kun olette molemmat kirjoittaneet samassa keskustelussa.',
+    not_a_resolution: 'Ilmoituksen voi sulkea vain tarkistettuna tai hylättynä.',
+    not_an_image: 'Tämä tiedosto ei ole luettava kuva.',
+    rate_limited: 'Liian monta yritystä peräkkäin. Odota minuutti ja yritä uudelleen.',
+    registration_failed: 'Tilin luominen ei onnistunut. Tarkista tietosi ja yritä uudelleen.',
+    self_target: 'Et voi tehdä sitä omalle profiilillesi.',
+    target_not_verified:
+      'Tämä jäsen ei ole vielä vahvistanut henkilöllisyyttään, joten keskustelua ei voi avata.',
+    too_many_photos: 'Voit lisätä enintään 12 kuvaa. Poista yksi lisätäksesi toisen.',
+    too_many_slots: 'Voit valita enintään 20 aikaikkunaa.',
+    invalid_city: 'Valitse matkalle kaupunki.',
+    invalid_dates: 'Tarkista päivämäärät: käytä oikeita päiviä, eikä loppu voi olla ennen alkua.',
+    too_many_trips: 'Voit lisätä enintään 5 tulevaa matkaa. Poista yksi lisätäksesi toisen.',
+    trip_over: 'Tuo matka on jo ohi. Valitse päivämäärät tästä päivästä eteenpäin.',
+    trip_home_city: 'Se on kaupunki, jossa asut. Lisää matkoja paikkoihin, joissa vierailet.',
+    trip_too_far: 'Matka voi alkaa enintään vuoden kuluttua.',
+    trip_too_long: 'Matka voi kestää enintään 30 päivää.',
+    under_age: 'Sinun on oltava vähintään 18-vuotias käyttääksesi LocalBuddya.',
+    unknown_plan: 'Tuota tilausta ei ole. Valitse kuukausi- tai vuositilaus.',
+    weak_password:
+      'Tarkista sähköpostiosoite ja käytä salasanaa, jossa on vähintään 8 merkkiä, iso kirjain, pieni kirjain, numero ja erikoismerkki.',
+  },
+};

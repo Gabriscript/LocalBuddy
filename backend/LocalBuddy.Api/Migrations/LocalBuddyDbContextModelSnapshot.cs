@@ -243,6 +243,35 @@ namespace LocalBuddy.Api.Migrations
                     b.ToTable("Photos");
                 });
 
+            modelBuilder.Entity("LocalBuddy.Api.Models.PushToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PushTokens");
+                });
+
             modelBuilder.Entity("LocalBuddy.Api.Models.Report", b =>
                 {
                     b.Property<Guid>("Id")
@@ -335,6 +364,33 @@ namespace LocalBuddy.Api.Migrations
                     b.ToTable("Subscriptions");
                 });
 
+            modelBuilder.Entity("LocalBuddy.Api.Models.Trip", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateOnly>("From")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("To")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Trips");
+                });
+
             modelBuilder.Entity("LocalBuddy.Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -376,6 +432,9 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime?>("FreeUntil")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("HasCar")
                         .HasColumnType("boolean");
 
@@ -385,6 +444,9 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<string>("IdentitySubjectHash")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("IdentityVerificationRequestedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IdentityVerified")
                         .HasColumnType("boolean");
@@ -691,6 +753,15 @@ namespace LocalBuddy.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LocalBuddy.Api.Models.PushToken", b =>
+                {
+                    b.HasOne("LocalBuddy.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LocalBuddy.Api.Models.Review", b =>
                 {
                     b.HasOne("LocalBuddy.Api.Models.User", null)
@@ -707,6 +778,15 @@ namespace LocalBuddy.Api.Migrations
                 });
 
             modelBuilder.Entity("LocalBuddy.Api.Models.Subscription", b =>
+                {
+                    b.HasOne("LocalBuddy.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LocalBuddy.Api.Models.Trip", b =>
                 {
                     b.HasOne("LocalBuddy.Api.Models.User", null)
                         .WithMany()

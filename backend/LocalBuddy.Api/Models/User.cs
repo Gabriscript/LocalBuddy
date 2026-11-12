@@ -17,7 +17,15 @@ public class User : IdentityUser<Guid>
 
     public bool IdentityVerified { get; set; }
     public bool AgeVerified { get; set; }
+
+    /// When the member asked to be verified and the verifier left it to a moderator (ADR-0011).
+    /// Set while unverified, it is what puts them in the moderators' queue.
+    public DateTime? IdentityVerificationRequestedAt { get; set; }
     public int CreditsBalance { get; set; }
+
+    /// "Free today": the member is up for a meeting until this instant (UTC). It expires by
+    /// itself: every read tests `FreeUntil > now`, so no job clears it.
+    public DateTime? FreeUntil { get; set; }
 
     // traits (GUIDELINES §9)
     public bool HasCar { get; set; }

@@ -367,6 +367,7 @@ export interface paths {
                     days?: components["schemas"]["DayOfWeek"][];
                     activityStyle?: components["schemas"]["ActivityStyle"];
                     lifestyle?: components["schemas"]["Lifestyle"];
+                    freeToday?: boolean;
                     page?: number | string;
                     pageSize?: number | string;
                 };
@@ -837,6 +838,99 @@ export interface paths {
                 };
                 /** @description Not Found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/moderation/verifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageOfPendingVerificationDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/moderation/users/{userId}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1483,6 +1577,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageOfTripDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NewTrip"];
+                    "text/json": components["schemas"]["NewTrip"];
+                    "application/*+json": components["schemas"]["NewTrip"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TripDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/me": {
         parameters: {
             query?: never;
@@ -1541,6 +1753,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
                     };
                 };
                 /** @description Not Found */
@@ -1630,6 +1851,150 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/free-today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FreeToday"];
+                    "text/json": components["schemas"]["FreeToday"];
+                    "application/*+json": components["schemas"]["FreeToday"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/push-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PushTokenRegistration"];
+                    "text/json": components["schemas"]["PushTokenRegistration"];
+                    "application/*+json": components["schemas"]["PushTokenRegistration"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PushTokenRemoval"];
+                    "text/json": components["schemas"]["PushTokenRemoval"];
+                    "application/*+json": components["schemas"]["PushTokenRemoval"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1780,6 +2145,10 @@ export interface components {
         };
         /** @enum {unknown} */
         DayOfWeek: "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday";
+        FreeToday: {
+            /** Format: date-time */
+            until: string;
+        };
         /** Format: binary */
         IFormFile: string;
         InterestResult: {
@@ -1838,6 +2207,9 @@ export interface components {
             photos: components["schemas"]["PhotoDto"][];
             availability: components["schemas"]["AvailabilityDto"][];
             listing: null | components["schemas"]["ListingDto"];
+            identityVerificationPending: boolean;
+            /** Format: date-time */
+            freeUntil: null | string;
         };
         NewReport: {
             /** Format: uuid */
@@ -1851,6 +2223,13 @@ export interface components {
             rating: number | string;
             comment: string;
         };
+        NewTrip: {
+            city: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
         PageOfConversationSummary: {
             items: components["schemas"]["ConversationSummary"][];
             /** Format: int32 */
@@ -1861,6 +2240,14 @@ export interface components {
         };
         PageOfMessageDto: {
             items: components["schemas"]["MessageDto"][];
+            /** Format: int32 */
+            pageNumber: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            hasMore: boolean;
+        };
+        PageOfPendingVerificationDto: {
+            items: components["schemas"]["PendingVerificationDto"][];
             /** Format: int32 */
             pageNumber: number | string;
             /** Format: int32 */
@@ -1891,6 +2278,14 @@ export interface components {
             pageSize: number | string;
             hasMore: boolean;
         };
+        PageOfTripDto: {
+            items: components["schemas"]["TripDto"][];
+            /** Format: int32 */
+            pageNumber: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            hasMore: boolean;
+        };
         PaymentOptions: {
             currency: string;
             /** Format: double */
@@ -1904,6 +2299,15 @@ export interface components {
             /** Format: int32 */
             creditCost: number | string;
             subscribed: boolean;
+        };
+        PendingVerificationDto: {
+            /** Format: uuid */
+            userId: string;
+            name: string;
+            email: null | string;
+            city: string;
+            /** Format: date-time */
+            requestedAt: string;
         };
         PhotoDto: {
             /** Format: uuid */
@@ -1927,6 +2331,7 @@ export interface components {
             photoUrl: null | string;
             /** Format: double */
             rating: null | number | string;
+            trip?: null | components["schemas"]["PublicTrip"];
             /** Format: uuid */
             id?: string;
             name?: string;
@@ -1942,6 +2347,7 @@ export interface components {
             usualDays?: components["schemas"]["DayOfWeek"][];
             activityStyle?: null | components["schemas"]["ActivityStyle"];
             lifestyle?: null | components["schemas"]["Lifestyle"];
+            freeToday?: boolean;
         };
         ProfileDetail: {
             photos: components["schemas"]["PhotoDto"][];
@@ -1964,6 +2370,7 @@ export interface components {
             usualDays?: components["schemas"]["DayOfWeek"][];
             activityStyle?: null | components["schemas"]["ActivityStyle"];
             lifestyle?: null | components["schemas"]["Lifestyle"];
+            freeToday?: boolean;
         };
         ProfileUpdate: {
             name: string;
@@ -1979,6 +2386,20 @@ export interface components {
             usualDays?: null | components["schemas"]["DayOfWeek"][];
             activityStyle?: null | components["schemas"]["ActivityStyle"];
             lifestyle?: null | components["schemas"]["Lifestyle"];
+        };
+        PublicTrip: {
+            city: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
+        PushTokenRegistration: {
+            token: string;
+            language: string;
+        };
+        PushTokenRemoval: {
+            token: string;
         };
         RegisterRequest: {
             email: string;
@@ -2034,6 +2455,15 @@ export interface components {
         };
         /** @enum {unknown} */
         TimeOfDay: "morning" | "afternoon" | "evening" | "night";
+        TripDto: {
+            /** Format: uuid */
+            id: string;
+            city: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
         UnlockResult: {
             /** Format: uuid */
             conversationId: string;
@@ -2042,6 +2472,7 @@ export interface components {
         VerificationResult: {
             identityVerified: boolean;
             ageVerified: boolean;
+            pending: boolean;
         };
     };
     responses: never;

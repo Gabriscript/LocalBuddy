@@ -1,8 +1,10 @@
 # LocalBuddy demo server
 
-A hosted copy of the API for showing the app from a phone: invented people, **fake payments and
-fake identity checks**. Not for real users, real money or real personal data. Why it exists and
-what it is not: [ADR-0010](../../docs/adr/0010-demo-environment.md).
+A hosted copy of the API for showing the app from a phone: **fake payments**, no real money. Why
+it exists and what it is not: [ADR-0010](../../docs/adr/0010-demo-environment.md). It also hosts the
+invite-only pilot with real people, so identity checks are **not** automatic: a moderator approves
+each member by hand, and the privacy policy must exist before anyone is invited
+([ADR-0011](../../docs/adr/0011-pilot-on-demo-with-manual-identity-approval.md)).
 
 What runs, from [compose.yaml](compose.yaml):
 

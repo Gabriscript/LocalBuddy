@@ -96,9 +96,9 @@ Milestones:
 
 | | Item | Milestone | Check |
 |---|---|---|---|
-| [x] | English, Italian, Spanish, French with an in-app picker | Demo | typed dictionaries |
+| [x] | English, Italian, Spanish, French, Finnish, Swedish, German with an in-app picker | Demo | typed dictionaries; Finnish, Swedish and German are first drafts |
 | [x] | App copy rewritten to a voice guide: concrete, short, warm; one word for the person who travels; errors no longer blame the connection | Demo | `docs/VOICE.md`; English rewritten, Italian, Spanish and French adapted; read in the browser |
-| [ ] | Gabriele's read of the Italian copy, then a native-speaker review of Spanish and French | Beta | — |
+| [ ] | Gabriele's read of the Italian copy, then a native-speaker review of Spanish, French, Finnish, Swedish and German | Beta | — |
 | [x] | Circular photos centred on the face (`Avatar`); multiline fields show four whole lines | Demo | web preview |
 | [ ] | Splash on an Android 12+ phone: the wordmark must sit inside the system's 192 dp circle (`imageWidth` 184) | Demo | a device |
 | [x] | Screen-reader labels and roles on the web build | Demo | audit of 2026-09-22 |
@@ -129,7 +129,7 @@ coffee, a stay or only a chat. The code and the older texts still assume Italy.
 
 | | Item | Milestone | Check |
 |---|---|---|---|
-| [ ] | Overnight obligations per country: the app only knows Alloggiati Web and the Questura (`obligationRegistered`, `cannotSend`, four languages) | Beta | a host in another country is not told something false |
+| [ ] | Overnight obligations per country: the app only knows Alloggiati Web and the Questura (`obligationRegistered`, `cannotSend`, seven languages) | Beta | a host in another country is not told something false |
 | [ ] | Landing: "obligations spelled out before that option can be switched on" is true for Italy only; check or reword | Beta | `web/` |
 | [ ] | Country on the profile, so rules and texts can follow it | Beta | profile field |
 | [ ] | The no-fee rule (host paid = removed): what each country says about hospitality versus a paid service | Beta | legal read |

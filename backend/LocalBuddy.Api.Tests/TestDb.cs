@@ -1,12 +1,14 @@
 using System.Security.Claims;
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LocalBuddy.Api.Tests;
 
@@ -100,4 +102,11 @@ public sealed class TestIdentity : IDisposable
     public SignInManager<User> SignIn => services.GetRequiredService<SignInManager<User>>();
 
     public void Dispose() => services.Dispose();
+}
+
+public static class TestPush
+{
+    /// A notifier whose pushes go only into `sender`, a fresh fake unless one is given.
+    public static PushNotifier For(LocalBuddyDbContext db, IPushSender? sender = null) =>
+        new(db, sender ?? new FakePushSender(NullLogger<FakePushSender>.Instance), NullLogger<PushNotifier>.Instance);
 }

@@ -1,0 +1,366 @@
+import type { Strings } from './en';
+
+/// Informal "du". First draft: needs review by a native speaker.
+export const sv: Strings = {
+  common: {
+    tryAgain: 'Försök igen',
+    somethingWrong: 'Något gick fel.',
+    goBack: 'Tillbaka',
+    close: 'Stäng',
+    continue: 'Fortsätt',
+    finish: 'Klart',
+    verifyIdentity: 'Verifiera din identitet',
+    verified: 'Verifierad',
+    name: 'Namn',
+    city: 'Stad',
+    email: 'E-post',
+    password: 'Lösenord',
+    iWantToBe: 'Jag vill vara',
+    photoOf: (name: string) => `Foto på ${name}`,
+    yourPhoto: 'Din profilbild',
+    hasCar: 'Har bil',
+    pets: 'Husdjur',
+    smokes: 'Röker',
+    canHostOvernight: 'Kan ta emot över natten',
+    freeToday: 'Ledig i dag',
+    waitingApproval: 'Väntar på godkännande',
+    progress: 'Framsteg',
+    stepOf: (step: number, total: number) => `Steg ${step} av ${total}`,
+  },
+
+  roles: { host: 'Värd', guest: 'Resenär', entrambi: 'Båda' },
+  roleShown: { host: 'Värd', guest: 'Resenär', entrambi: 'Värd och resenär' },
+
+  tabs: { discover: 'Upptäck', chats: 'Chattar', me: 'Jag' },
+
+  timeOfDay: { morning: 'Morgon', afternoon: 'Eftermiddag', evening: 'Kväll', night: 'Natt' },
+
+  days: { monday: 'Mån', tuesday: 'Tis', wednesday: 'Ons', thursday: 'Tor', friday: 'Fre', saturday: 'Lör', sunday: 'Sön' },
+
+  activityStyle: { relaxed: 'Lugna planer', adventurous: 'Äventyrliga planer' },
+
+  lifestyle: { nightlife: 'Nattliv', family: 'Familjeliv' },
+
+  auth: {
+    tagline: 'Träffa någon som bor där.',
+    signIn: 'Logga in',
+    noAccount: 'Ny här? Registrera dig',
+    haveAccount: 'Redan medlem? Logga in',
+    signInFailed: 'Vi kunde inte logga in dig. Försök igen om en stund.',
+    createAccount: 'Skapa konto',
+    passwordHint: 'Minst 8 tecken: stora och små bokstäver, en siffra och ett specialtecken.',
+    changeLater: 'Du kan byta när som helst.',
+    registerFailed: 'Vi kunde inte skapa ditt konto. Försök igen om en stund.',
+  },
+
+  onboarding: {
+    aboutTitle: 'Lite om dig',
+    aboutSubtitle:
+      'Korta svar slår en lång biografi. De visar en främling hur en dag med dig ser ut.',
+    photoTitle: 'Ditt ansikte, din fritid',
+    photoSubtitle: 'Folk säger ja till ett ansikte. Lägg till ett tydligt foto och berätta när du har tid.',
+    changePhoto: 'Byt foto',
+    addPhoto: 'Lägg till ett foto',
+    photoPrivacy: 'Platsdata tas bort från ditt foto innan någon ser det.',
+    whenFree: 'När har du vanligtvis tid?',
+    pickTimes: 'Välj allt som passar. Planer ändras, och det kan det här också.',
+    verifyTitle: 'Verifiera att det är du',
+    verifySubtitle:
+      'Under pilotperioden bekräftar LocalBuddy-teamet varje identitet för hand. Utan det kan ingen skriva till någon, vilket gör det här till en trygg plats att träffa främlingar.',
+    verifyCta: 'Starta kontrollen',
+    verifyPendingBody: 'Tack! LocalBuddy-teamet bekräftar din identitet inom kort.',
+    listingTitle: 'Vad du kan dela',
+    listingSubtitle: 'En eftermiddag ute, en säng för natten eller båda. Du kan ändra det senare.',
+    experience: 'En eftermiddag ute',
+    experienceHint: 'En promenad, en måltid, baren du skulle ta en vän till.',
+    overnight: 'En säng för natten',
+    overnightHint: 'En resenär övernattar hemma hos dig.',
+    obligationsTitle: 'Att ta emot gäster över natten medför juridiska skyldigheter',
+    obligationRegistered:
+      'Jag har kontrollerat vad mitt land kräver av den som tar emot gäster över natten, och allt är i ordning (i Italien: Alloggiati Web hos Questura).',
+    obligationCheck:
+      'Jag kontrollerar varje resenärs id-handling personligen vid ankomsten. Incheckning på distans räcker inte.',
+    obligationSend: 'Jag anmäler mina gäster själv där lagen kräver det.',
+    cannotSend: 'LocalBuddy påminner dig, men skickar aldrig in något åt dig.',
+    confirmAll: 'Jag bekräftar alla tre',
+    chooseOne: 'Välj minst ett för att bli klar.',
+  },
+
+  profileFields: {
+    style: 'Din stil',
+    usualDays: 'Brukar vara ledig',
+    usualDaysHint: 'En fingervisning, inget löfte: den riktiga dagen bestämmer ni i chatten.',
+    activityStyle: 'Dina planer är mest',
+    lifestyle: 'Du lutar åt',
+    both: 'Lite av varje',
+    whatWeDo: 'Vad skulle vi göra tillsammans?',
+    whatWeDoHint: 'En promenad genom ditt kvarter, en marknad du älskar, baren som bara lokalbefolkningen känner till.',
+    whyHost: 'Varför är du värd?',
+    languages: 'Språk du talar',
+    languagesHint: 'Till exempel: italienska, engelska, lite spanska.',
+    facts: 'Det praktiska',
+    haveCar: 'Jag har bil',
+    liftHint: 'Om du vill kan du erbjuda gästerna skjuts, alltid gratis.',
+    smoke: 'Jag röker',
+    havePets: 'Jag har husdjur',
+    visible: 'Synlig för personer utan konto',
+    visibleHint: 'Av: bara LocalBuddy-medlemmar kan se din profil. Du kan ändra det när som helst.',
+  },
+
+  discover: {
+    search: 'Vart ska du?',
+    clearSearch: 'Rensa resmålet',
+    searchTyped: (q: string) => `Sök efter ”${q}”`,
+    inTown: 'I stan nu',
+    arriving: 'Anländer',
+    residents: 'Bor här',
+    undo: 'Ta tillbaka den du senast hoppade över',
+    title: 'Upptäck',
+    subtitle: 'Vem som finns i närheten, och eftermiddagen de har i tankarna.',
+    everyone: 'Alla',
+    hosts: 'Värdar',
+    guests: 'Resenärer',
+    whoToShow: 'Vem du vill träffa',
+    filters: 'Filter',
+    filtersLabel: (n: number) => (n === 1 ? 'Filter, 1 aktivt' : `Filter, ${n} aktiva`),
+    emptyFiltered: 'Ingen matchar allt det här just nu. Försök släppa på något filter.',
+    empty: 'Du har sett alla i närheten. Titta in igen snart, eller prova en annan stad.',
+    changeFilters: 'Ändra filtren',
+    openFilters: 'Öppna filtren',
+  },
+
+  filters: {
+    usualDays: 'Brukar vara ledig',
+    activityStyle: 'Typ av planer',
+    lifestyle: 'Deras scen',
+    title: 'Filter',
+    clear: 'Rensa',
+    showResults: 'Visa personer',
+    whenFree: 'När de har tid',
+    hasPets: 'Har husdjur',
+    any: 'Valfritt',
+    yes: 'Ja',
+    no: 'Nej',
+  },
+
+  profileCard: {
+    verified: 'verifierad',
+    inTown: 'I stan nu',
+    arriving: (date: string) => `Anländer ${date}`,
+    rated: (rating: string) => `betyg ${rating}`,
+    hasCar: 'har bil',
+    hasPets: 'har husdjur',
+    smokes: 'röker',
+    openHint: 'Öppnar hela profilen',
+    passOn: (name: string) => `Hoppa över ${name}`,
+    interestIn: (name: string) => `Visa intresse för ${name}`,
+  },
+
+  profile: {
+    reportOrBlock: 'Rapportera eller blockera',
+    anotherPhotoOf: (name: string) => `Ytterligare ett foto på ${name}`,
+    rating: (rating: string) => `Betyg ${rating}`,
+    whatWeDo: 'Vad vi gör',
+    whyHost: 'Varför jag är värd',
+    languages: 'Språk',
+    reviews: 'Vad folk säger',
+    ratedOutOf5: (n: number) => `Betyg ${n} av 5`,
+    moreReviews: 'Läs fler omdömen',
+    showInterest: 'Visa intresse',
+    unlock: 'Slipp vänta och lås upp chatten',
+  },
+
+  chats: {
+    title: 'Chattar',
+    empty: 'Inga chattar än. När ni båda säger ja börjar det här.',
+    sayHello: 'Säg hej',
+    unlocked: 'Upplåst',
+    unread: (n: number) => (n === 1 ? '1 nytt meddelande' : `${n} nya meddelanden`),
+  },
+
+  requests: {
+    title: 'Förfrågningar',
+    subtitle: 'De vill gärna träffa dig. Säg ja tillbaka så öppnas chatten.',
+    empty: 'Ingen väntar på ditt svar.',
+    count: (n: number) => (n === 1 ? '1 förfrågan' : `${n} förfrågningar`),
+  },
+
+  chat: {
+    back: 'Tillbaka till chattarna',
+    openProfile: (name: string) => `${name}, öppna profilen`,
+    conversation: 'Konversation',
+    moreActions: 'Recensera, rapportera eller blockera',
+    empty: 'Inget här än. Någon måste säga hej först.',
+    youSaid: (text: string) => `Du sa: ${text}`,
+    theySaid: (name: string | undefined, text: string) => `${name ?? 'Personen'} sa: ${text}`,
+    message: 'Skriv ett meddelande',
+    send: 'Skicka meddelande',
+  },
+
+  push: { channel: 'Förfrågningar och meddelanden' },
+  me: {
+    notVerified: 'Inte verifierad än',
+    freeTodayHint: 'Visa att du är redo för ett möte till midnatt.',
+    credits: (n: number) => (n === 1 ? '1 kredit' : `${n} krediter`),
+    editProfile: 'Redigera profil',
+    blocked: 'Blockerade medlemmar',
+    trips: 'Mina resor',
+    signOut: 'Logga ut',
+    language: 'Språk',
+    languageRow: (value: string) => `Språk: ${value}`,
+  },
+
+  language: {
+    phone: (name: string) => `Telefonens språk (${name})`,
+  },
+
+  trips: {
+    title: 'Mina resor',
+    subtitle: 'Berätta när du är i en stad. Folk ser dig som anländer eller i stan nu.',
+    empty: 'Inga kommande resor än.',
+    add: 'Lägg till en resa',
+    pickCity: 'Välj en stad i listan.',
+    from: 'Från (ÅÅÅÅ-MM-DD)',
+    to: 'Till (ÅÅÅÅ-MM-DD)',
+    badDate: 'Använd formatet ÅÅÅÅ-MM-DD, till exempel 2026-12-12.',
+    dateOrder: 'Slutdatumet kan inte vara före startdatumet.',
+    dateOver: 'Välj datum från och med i dag.',
+    save: 'Lägg till resa',
+    remove: (city: string) => `Ta bort resan till ${city}`,
+  },
+
+  blocked: {
+    title: 'Blockerade medlemmar',
+    empty: 'Du har inte blockerat någon. Om du gör det någon gång kan du ångra det här.',
+    unblock: 'Avblockera',
+  },
+
+  editProfile: {
+    title: 'Redigera profil',
+    save: 'Spara ändringar',
+  },
+
+  safety: {
+    report: (name: string) => `Rapportera ${name}`,
+    block: (name: string) => `Blockera ${name}`,
+    sent: 'Rapporten skickad',
+    sendReport: 'Skicka rapport',
+    sentBody:
+      'Tack. En moderator läser varje rapport. Du får inget svar om just den här, och ingen får veta vem som skickade den.',
+    whatHappened: 'Vad hände?',
+    whatHappenedHint: 'Skriv som du skulle berätta för en människa. Det är en moderator som läser det, inte en maskin.',
+    reportNotBlock:
+      'Att rapportera blockerar ingen. Vill du också bli av med personen i flödet och inkorgen, blockera hen.',
+    cancel: 'Avbryt',
+    blockAction: 'Blockera',
+    blockBody: (name: string) =>
+      `${name} ser inte din profil och du ser inte hens. Alla konversationer mellan er stängs åt båda håll.`,
+    undoLater: 'Du kan ångra det här senare under Blockerade medlemmar, i din egen profil.',
+    leaveReview: 'Lämna ett omdöme',
+  },
+
+  review: {
+    sent: 'Omdömet skickat',
+    sentBody:
+      'Tack. Det ligger nu på profilen, där nästa person läser det innan hen tar kontakt.',
+    title: (name: string) => `Recensera ${name}`,
+    send: 'Skicka omdöme',
+    howWasIt: 'Hur var det?',
+    rating: 'Betyg',
+    stars: (n: number) => (n === 1 ? '1 stjärna' : `${n} stjärnor`),
+    comment: 'Något att tillägga?',
+    commentHint:
+      'Valfritt. Det ligger kvar på profilen, så skriv vad nästa person skulle vilja veta.',
+  },
+
+  unlock: {
+    title: 'Lås upp chatten',
+    checking: 'Vi kontrollerar vad det kostar dig.',
+    subscription: 'Din prenumeration täcker det, utan något mer att betala.',
+    credits: (have: number, cost: number) =>
+      `Du har ${have} ${have === 1 ? 'kredit' : 'krediter'} från att vara värd. Det här använder ${cost}.`,
+    money: (price: string) => `${price}, en gång, för just den här personen.`,
+    ctaSubscription: 'Öppna chatten',
+    ctaCredits: (n: number) => (n === 1 ? 'Använd 1 kredit' : `Använd ${n} krediter`),
+    ctaMoney: (price: string) => `Betala ${price}`,
+    body: (name: string) =>
+      `Det här öppnar en chatt med ${name} nu, utan att vänta på att hen visar intresse tillbaka.`,
+    note: 'Det betalar för introduktionen, och för ingenting annat. Tiden ni tillbringar tillsammans betalas aldrig, av någon av er.',
+  },
+
+  match: {
+    dialog: (name: string) => `Du och ${name} sa båda ja`,
+    headline: 'Ni sa båda ja',
+    body: (name: string) => `Chatten med ${name} är öppen, och ingen har betalat för den.`,
+    sayHello: 'Säg hej',
+    theirProfile: 'Deras profil',
+    later: 'Inte nu',
+  },
+
+  skeleton: {
+    profiles: 'Laddar profiler',
+    conversations: 'Laddar konversationer',
+    tips: [
+      'Träffas på en offentlig plats första gången.',
+      'Svara på förfrågningar, även med ett nej. Tystnad är det sämsta svaret.',
+      'Berätta för din värd om allergier eller husdjur innan ni ses.',
+      'Ingen betalar någon på LocalBuddy, och ingen ska be om det.',
+      'Behåll planerna i chatten tills ni ses.',
+      'Berätta om dina planer för en vän innan du går.',
+      'Be om kaffet som lokalbefolkningen dricker, inte turistkaffet.',
+      'En marknad på morgonen slår kön till museet.',
+      'Har du bil? Du kan erbjuda skjuts. Det är alltid gratis.',
+      'Fråga din värd om stället hen skulle ta sina egna vänner till.',
+      'Säg vad du helst vill se. Värdar gillar en fingervisning.',
+      'Säg ja till den lilla planen: en promenad slår ofta ett stort program.',
+    ],
+  },
+
+  field: {
+    showPassword: 'Visa lösenord',
+    hidePassword: 'Dölj lösenord',
+  },
+
+  errors: {
+    account_banned: 'Det här kontot är avstängt och kan inte längre använda LocalBuddy.',
+    account_not_found: 'Det här kontot finns inte längre.',
+    already_responded: 'Du har redan svarat på den här profilen.',
+    already_reviewed: 'Du har redan recenserat den här medlemmen.',
+    already_subscribed: 'Du har redan en aktiv prenumeration.',
+    blocked: 'Den här medlemmen går inte att nå.',
+    compliance_not_acknowledged: 'För att erbjuda övernattning, bekräfta först de tre juridiska skyldigheterna.',
+    empty_file: 'Filen du valde är tom.',
+    empty_message: 'Ett meddelande får inte vara tomt.',
+    file_too_large: 'Foton får vara högst 10 MB.',
+    home_photo_not_allowed: 'Foton på hemmet är bara för värdar som erbjuder övernattning.',
+    identity_verification_required: 'Verifiera din identitet innan du kontaktar andra medlemmar.',
+    invalid_free_until: 'Ledig i dag kan gälla högst 24 timmar från nu.',
+    image_too_large: 'Bilden har för många pixlar. Foton från en mobilkamera går bra.',
+    invalid_credentials:
+      'E-postadressen och lösenordet stämmer inte. Efter 5 felaktiga försök pausas inloggningen i 15 minuter.',
+    invalid_slot:
+      'Varje tidsfönster behöver en känd tid på dagen och en säsong som slutar efter att den börjar.',
+    moderator_only: 'Bara moderatorer kan göra det här.',
+    no_exchange: 'Du kan recensera någon först när ni båda har skrivit i samma konversation.',
+    not_a_resolution: 'En rapport kan bara avslutas som granskad eller avfärdad.',
+    not_an_image: 'Filen är inte en läsbar bild.',
+    rate_limited: 'För många försök i rad. Vänta en minut och försök igen.',
+    registration_failed: 'Vi kunde inte skapa ditt konto. Kontrollera uppgifterna och försök igen.',
+    self_target: 'Det kan du inte göra med din egen profil.',
+    target_not_verified:
+      'Den här medlemmen har inte verifierat sin identitet än, så chatten kan inte låsas upp.',
+    too_many_photos: 'Du kan ha högst 12 foton. Ta bort ett för att lägga till ett nytt.',
+    too_many_slots: 'Du kan välja högst 20 tidsfönster.',
+    invalid_city: 'Välj en stad för resan.',
+    invalid_dates: 'Kontrollera datumen: använd riktiga dagar, och slutet kan inte komma före början.',
+    too_many_trips: 'Du kan ha högst 5 kommande resor. Ta bort en för att lägga till en ny.',
+    trip_over: 'Den resan är redan slut. Välj datum från och med i dag.',
+    trip_home_city: 'Det är staden du bor i. Lägg till resor till platser du besöker.',
+    trip_too_far: 'En resa kan börja högst ett år från nu.',
+    trip_too_long: 'En resa kan vara högst 30 dagar.',
+    under_age: 'Du måste vara 18 eller äldre för att använda LocalBuddy.',
+    unknown_plan: 'Den prenumerationen finns inte. Välj månadsvis eller årsvis.',
+    weak_password:
+      'Kontrollera e-postadressen och använd ett lösenord på minst 8 tecken med en stor bokstav, en liten bokstav, en siffra och ett specialtecken.',
+  },
+};
