@@ -344,6 +344,9 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ActivityStyle")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("AgeVerified")
                         .HasColumnType("boolean");
 
@@ -390,6 +393,9 @@ namespace LocalBuddy.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
+
+                    b.Property<int?>("Lifestyle")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -439,6 +445,9 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<int>("UsualDays")
+                        .HasColumnType("integer");
 
                     b.Property<string>("WhatWeWillDo")
                         .IsRequired()

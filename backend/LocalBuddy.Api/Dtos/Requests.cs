@@ -34,7 +34,11 @@ public record ProfileUpdate(
     bool HasCar,
     bool Smokes,
     bool HasPets,
-    bool ProfileVisibleToAnonymous);
+    bool ProfileVisibleToAnonymous,
+    // Optional so a client that predates them still validates; it clears them, as a PUT does.
+    List<DayOfWeek>? UsualDays = null,
+    ActivityStyle? ActivityStyle = null,
+    Lifestyle? Lifestyle = null);
 
 public record AvailabilitySlot(TimeOfDay TimeOfDay, DateOnly? SeasonStart, DateOnly? SeasonEnd);
 

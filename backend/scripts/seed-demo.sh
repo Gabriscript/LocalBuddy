@@ -42,7 +42,8 @@ body() { printf "%s" "$1" >"$TMP/json"; echo "$TMP/json"; }
 auth() { echo "Authorization: Bearer ${TOKEN[$1]}"; }
 
 # $1 key, $2 name, $3 city, $4 role, $5 portrait, $6 what we will do, $7 why I host,
-# $8 languages, $9 car/smokes/pets as "true false false", $10 times of day, $11 home photo or "-"
+# $8 languages, $9 car/smokes/pets as "true false false", $10 times of day, $11 home photo or "-",
+# $12 optional JSON fields for usual days and style, e.g. '"usualDays":["monday"],"lifestyle":"family"'
 person() {
   local key=$1 email="$1@$DOMAIN" car smokes pets slots="" t
   read -r car smokes pets <<<"$9"
@@ -62,7 +63,7 @@ person() {
   req 204 -X PUT "$API/users/me" -H "$(auth "$key")" -H 'Content-Type: application/json' --data-binary "@$(body "{
     \"name\":\"$2\",\"city\":\"$3\",\"role\":\"$4\",
     \"whatWeWillDo\":\"$6\",\"whyIHost\":\"$7\",\"languagesSpoken\":\"$8\",
-    \"hasCar\":$car,\"smokes\":$smokes,\"hasPets\":$pets,\"profileVisibleToAnonymous\":true}")"
+    \"hasCar\":$car,\"smokes\":$smokes,\"hasPets\":$pets,\"profileVisibleToAnonymous\":true${12:+,${12}}}")"
 
   for t in ${10}; do slots+="${slots:+,}{\"timeOfDay\":\"$t\",\"seasonStart\":null,\"seasonEnd\":null}"; done
   req 204 -X PUT "$API/users/me/availability" -H "$(auth "$key")" -H 'Content-Type: application/json' -d "[$slots]"
@@ -94,23 +95,28 @@ echo "hosts"
 person anna "Anna" "Milano" host p01-anna.jpg \
   "Aperitivo on the Navigli like we do it, not like the guidebook. Then a walk through the old ringhiera courtyards of Isola, and if you want, risotto at mine." \
   "I moved here from Bergamo ten years ago and somebody showed me the real Milano. Now it is my turn." \
-  "Italian, English, a bit of German" "false false true" "afternoon evening" h02-kitchen.jpg
+  "Italian, English, a bit of German" "false false true" "afternoon evening" h02-kitchen.jpg \
+  '"usualDays":["thursday","friday","saturday"],"activityStyle":"relaxed","lifestyle":"nightlife"'
 person marco "Marco" "Napoli" host p02-marco.jpg \
   "Coffee at my bar in the Quartieri Spagnoli, the shrines nobody looks up at, pizza fritta from the lady on the corner. We go by scooter if you are brave." \
   "Napoli has a bad name with people who never came. I like to change their mind, one espresso at a time." \
-  "Italian, Neapolitan, English" "true false false" "morning afternoon" -
+  "Italian, Neapolitan, English" "true false false" "morning afternoon" - \
+  '"usualDays":["monday","tuesday","wednesday"],"activityStyle":"adventurous"'
 person giulia "Giulia" "Bologna" host p03-giulia.jpg \
   "A bike ride under the porticoes up to San Luca, tortellini where the students eat, and the secret window on the canal. I have a spare room with a view on the roofs." \
   "I study architecture and I talk about this city too much. Better to do it with someone who wants to listen." \
-  "Italian, English, Spanish" "false false false" "afternoon evening night" h01-guest-room.jpg
+  "Italian, English, Spanish" "false false false" "afternoon evening night" h01-guest-room.jpg \
+  '"usualDays":["friday","saturday","sunday"],"activityStyle":"adventurous","lifestyle":"nightlife"'
 person rosa "Rosa" "Palermo" host p04-rosa.jpg \
   "Ballarò market in the morning, I teach you to choose the artichokes and to bargain like a Palermitana. After, we cook together at my place." \
   "My children live in Milano and London. When guests come to my table the house is full again." \
-  "Italian, Sicilian, a little English" "false false true" "morning" -
+  "Italian, Sicilian, a little English" "false false true" "morning" - \
+  '"usualDays":["tuesday","wednesday","saturday"],"activityStyle":"relaxed","lifestyle":"family"'
 person amara "Amara" "Torino" host p05-amara.jpg \
   "Bicerin in a historic café, the Quadrilatero at dusk and the Po by bike. On Sundays, the Balon flea market." \
   "Torino is quiet and people think it is cold. It is not, it only needs someone to open the door." \
-  "Italian, English, French" "true false false" "afternoon evening" -
+  "Italian, English, French" "true false false" "afternoon evening" - \
+  '"usualDays":["saturday","sunday"],"lifestyle":"family"'
 
 echo "travellers"
 person wei "Wei" "Roma" guest p06-wei.jpg \

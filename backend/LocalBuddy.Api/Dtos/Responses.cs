@@ -47,6 +47,7 @@ public record MyProfile(
     string WhatWeWillDo, string WhyIHost, string LanguagesSpoken,
     bool IdentityVerified, bool AgeVerified, int CreditsBalance,
     bool HasCar, bool Smokes, bool HasPets, bool ProfileVisibleToAnonymous,
+    List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle,
     List<PhotoDto> Photos, List<AvailabilityDto> Availability, ListingDto? Listing);
 
 /// Result of an authentication attempt.

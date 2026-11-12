@@ -452,6 +452,30 @@
             }
           },
           {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DayOfWeek"
+              }
+            }
+          },
+          {
+            "name": "activityStyle",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ActivityStyle"
+            }
+          },
+          {
+            "name": "lifestyle",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Lifestyle"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -485,6 +509,39 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PageOfProfileCard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discovery/cities": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "maxLength": 80,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -708,6 +765,30 @@
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matches"
+        ],
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": { }
             }
           }
         }
@@ -1723,6 +1804,13 @@
   },
   "components": {
     "schemas": {
+      "ActivityStyle": {
+        "enum": [
+          "relaxed",
+          "adventurous",
+          null
+        ]
+      },
       "AuthResult": {
         "required": [
           "token",
@@ -1846,6 +1934,17 @@
           }
         }
       },
+      "DayOfWeek": {
+        "enum": [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday"
+        ]
+      },
       "IFormFile": {
         "type": "string",
         "format": "binary"
@@ -1868,6 +1967,13 @@
             "format": "uuid"
           }
         }
+      },
+      "Lifestyle": {
+        "enum": [
+          "nightlife",
+          "family",
+          null
+        ]
       },
       "ListingDto": {
         "required": [
@@ -1970,6 +2076,9 @@
           "smokes",
           "hasPets",
           "profileVisibleToAnonymous",
+          "usualDays",
+          "activityStyle",
+          "lifestyle",
           "photos",
           "availability",
           "listing"
@@ -2029,6 +2138,32 @@
           },
           "profileVisibleToAnonymous": {
             "type": "boolean"
+          },
+          "usualDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "activityStyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActivityStyle"
+              }
+            ]
+          },
+          "lifestyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Lifestyle"
+              }
+            ]
           },
           "photos": {
             "type": "array",
@@ -2461,6 +2596,32 @@
           },
           "hasPets": {
             "type": "boolean"
+          },
+          "usualDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "activityStyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActivityStyle"
+              }
+            ]
+          },
+          "lifestyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Lifestyle"
+              }
+            ]
           }
         }
       },
@@ -2537,6 +2698,32 @@
           },
           "hasPets": {
             "type": "boolean"
+          },
+          "usualDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "activityStyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActivityStyle"
+              }
+            ]
+          },
+          "lifestyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Lifestyle"
+              }
+            ]
           }
         }
       },
@@ -2584,6 +2771,35 @@
           },
           "profileVisibleToAnonymous": {
             "type": "boolean"
+          },
+          "usualDays": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "activityStyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActivityStyle"
+              }
+            ]
+          },
+          "lifestyle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Lifestyle"
+              }
+            ]
           }
         }
       },

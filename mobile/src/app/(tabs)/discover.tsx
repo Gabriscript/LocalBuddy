@@ -4,9 +4,10 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
-import type { TimeOfDay } from '@/api/labels';
+import type { ActivityStyle, DayOfWeek, Lifestyle, TimeOfDay } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { Button } from '@/components/Button';
+import { DestinationSearch } from '@/components/DestinationSearch';
 import { FilterSheet } from '@/components/FilterSheet';
 import { IconButton } from '@/components/IconButton';
 import { MatchBurst } from '@/components/MatchBurst';
@@ -27,6 +28,9 @@ type Params = {
   hasCar?: string;
   smokes?: string;
   hasPets?: string;
+  days?: string;
+  activityStyle?: string;
+  lifestyle?: string;
 };
 
 type Card = components['schemas']['ProfileCard'];
@@ -58,37 +62,46 @@ export default function Discover() {
     hasPets: asBool(params.hasPets),
     // One comma-separated param rather than a repeated one: shorter link, one thing to parse.
     timeOfDay: params.timeOfDay ? (params.timeOfDay.split(',') as TimeOfDay[]) : undefined,
+    days: params.days ? (params.days.split(',') as DayOfWeek[]) : undefined,
+    activityStyle: params.activityStyle as ActivityStyle | undefined,
+    lifestyle: params.lifestyle as Lifestyle | undefined,
   };
 
   const [filtering, setFiltering] = useState(false);
-  // Role is not counted: it has its own chips right there, in view.
+  // Role and city are not counted: each has its own control right there, in view.
   const active = [
-    filters.city,
     filters.offersOvernight,
     filters.hasCar,
     filters.smokes,
     filters.hasPets,
     filters.timeOfDay,
+    filters.days,
+    filters.activityStyle,
+    filters.lifestyle,
   ].filter((value) => value !== undefined).length;
 
   function applyFilters(next: DiscoveryFilters) {
     setFiltering(false);
     // Every key the sheet owns, including the cleared ones: setParams merges, so a key left
-    // out would keep its old value. Role is left out on purpose, and survives.
+    // out would keep its old value. Role and city are left out on purpose, and survive.
     router.setParams({
-      city: next.city?.trim() || undefined,
       offersOvernight: next.offersOvernight ? 'true' : undefined,
       timeOfDay: next.timeOfDay?.length ? next.timeOfDay.join(',') : undefined,
       hasCar: asParam(next.hasCar),
       smokes: asParam(next.smokes),
       hasPets: asParam(next.hasPets),
+      days: next.days?.length ? next.days.join(',') : undefined,
+      activityStyle: next.activityStyle ?? undefined,
+      lifestyle: next.lifestyle ?? undefined,
     });
   }
 
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
     useDiscovery(filters);
-  const { interest, pass } = useDecide();
-  const busy = interest.isPending || pass.isPending;
+  const { interest, pass, undoPass } = useDecide();
+  const busy = interest.isPending || pass.isPending || undoPass.isPending;
+  // Who was passed in this visit, latest last: the undo button walks back through them.
+  const [passed, setPassed] = useState<string[]>([]);
 
   // A reciprocal match is the moment the whole product exists for, so it gets a moment of its
   // own instead of a silent navigation. Anything else: the card simply goes.
@@ -121,7 +134,14 @@ export default function Discover() {
     [router]
   );
 
-  const passOn = useCallback((card: Card) => pass.mutate(card.id!), [pass]);
+  const passOn = useCallback(
+    (card: Card) => pass.mutate(card.id!, { onSuccess: () => setPassed((ids) => [...ids, card.id!]) }),
+    [pass]
+  );
+  const undo = () => {
+    const last = passed.at(-1);
+    if (last) undoPass.mutate(last, { onSuccess: () => setPassed((ids) => ids.slice(0, -1)) });
+  };
 
   const renderCard = useCallback(
     ({ item }: { item: Card }) => (
@@ -155,40 +175,47 @@ export default function Discover() {
         }
       />
 
-      {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
-          never the accent. */}
-      <View
-        style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
-        role="radiogroup"
-        aria-label={s.discover.whoToShow}>
-        {roles.map((role) => {
-          const selected = params.role === role.value;
-          return (
-            <Pressable
-              key={role.label}
-              role="radio"
-              aria-checked={selected}
-              onPress={() => router.setParams({ role: role.value })}
-              style={({ pressed }) => [
-                styles.segment,
-                {
-                  backgroundColor: selected ? c.surface : 'transparent',
-                  borderColor: selected ? c.border : 'transparent',
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}>
-              <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
-                {role.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+      <DestinationSearch city={filters.city} onChange={(city) => router.setParams({ city })} />
+
+      <View style={styles.controls}>
+        {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
+            never the accent. */}
+        <View
+          style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
+          role="radiogroup"
+          aria-label={s.discover.whoToShow}>
+          {roles.map((role) => {
+            const selected = params.role === role.value;
+            return (
+              <Pressable
+                key={role.label}
+                role="radio"
+                aria-checked={selected}
+                onPress={() => router.setParams({ role: role.value })}
+                style={({ pressed }) => [
+                  styles.segment,
+                  {
+                    backgroundColor: selected ? c.surface : 'transparent',
+                    borderColor: selected ? c.border : 'transparent',
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}>
+                <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
+                  {role.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {passed.length ? (
+          <IconButton name="arrow-undo" label={s.discover.undo} onPress={undo} tint={c.text} disabled={busy} />
+        ) : null}
       </View>
 
       {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
           own: the feed behind it is still fine. No wrapper — it carries its own inset and
           disappears completely when there is nothing to say. */}
-      <ActionError error={interest.error ?? pass.error} style={styles.note} />
+      <ActionError error={interest.error ?? pass.error ?? undoPass.error} style={styles.note} />
 
       <Screen
         loading={isPending}
@@ -252,9 +279,10 @@ export default function Discover() {
 
 const styles = StyleSheet.create({
   page: { flex: 1 },
+  controls: { flexDirection: 'row', alignItems: 'center', gap: space.sm, margin: space.md },
   segments: {
+    flex: 1,
     flexDirection: 'row',
-    margin: space.md,
     padding: space.xs,
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,

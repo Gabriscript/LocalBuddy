@@ -2,7 +2,6 @@ import { Image, type ImageProps } from 'expo-image';
 import type { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
@@ -45,7 +44,7 @@ export function SceneSheet({
     <View style={[styles.page, { backgroundColor: c.background }]}>
       {/* Decorative: the scene sets a mood and says nothing a screen reader needs. */}
       <Image source={image} contentFit="cover" contentPosition={position} style={photo} accessible={false} aria-hidden />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.page}>
+      <KeyboardAvoidingView behavior="padding" style={styles.page}>
         <ScrollView
           // At least the top 30% stays photograph, however long the form below it gets.
           contentContainerStyle={[styles.scroll, { paddingTop: height * 0.3 }]}

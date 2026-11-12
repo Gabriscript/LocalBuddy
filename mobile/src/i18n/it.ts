@@ -33,6 +33,12 @@ export const it: Strings = {
 
   timeOfDay: { morning: 'Mattina', afternoon: 'Pomeriggio', evening: 'Sera', night: 'Notte' },
 
+  days: { monday: 'Lun', tuesday: 'Mar', wednesday: 'Mer', thursday: 'Gio', friday: 'Ven', saturday: 'Sab', sunday: 'Dom' },
+
+  activityStyle: { relaxed: 'Piani rilassanti', adventurous: 'Piani emozionanti' },
+
+  lifestyle: { nightlife: 'Vita notturna', family: 'Vita di famiglia' },
+
   auth: {
     tagline: 'Conosci qualcuno che ci vive.',
     signIn: 'Accedi',
@@ -79,6 +85,12 @@ export const it: Strings = {
   },
 
   profileFields: {
+    style: 'Il tuo stile',
+    usualDays: 'Di solito libero il',
+    usualDaysHint: "Un'indicazione, non un impegno: il giorno vero lo decidete in chat.",
+    activityStyle: 'I tuoi piani sono più',
+    lifestyle: 'Sei più per',
+    both: "Un po' tutti e due",
     whatWeDo: 'Cosa potremmo fare insieme?',
     whatWeDoHint:
       'Una passeggiata nel tuo quartiere, un mercato che ami, il bar che conosce solo chi vive lì.',
@@ -95,6 +107,10 @@ export const it: Strings = {
   },
 
   discover: {
+    search: 'Dove vai?',
+    clearSearch: 'Cancella la destinazione',
+    searchTyped: (q) => `Cerca "${q}"`,
+    undo: "Riporta l'ultima persona scartata",
     title: 'Scopri',
     subtitle: "Chi c'è vicino, e il pomeriggio che hanno in mente.",
     everyone: 'Tutti',
@@ -110,10 +126,12 @@ export const it: Strings = {
   },
 
   filters: {
+    usualDays: 'Di solito liberi il',
+    activityStyle: 'Tipo di piani',
+    lifestyle: 'Che ambiente',
     title: 'Filtri',
     clear: 'Azzera',
     showResults: 'Mostra le persone',
-    anywhere: 'Ovunque',
     whenFree: 'Quando hanno tempo',
     hasPets: 'Ha animali',
     any: 'Indifferente',

@@ -35,6 +35,12 @@ export const en = {
 
   timeOfDay: { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' },
 
+  days: { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' },
+
+  activityStyle: { relaxed: 'Relaxed plans', adventurous: 'Adventurous plans' },
+
+  lifestyle: { nightlife: 'Night life', family: 'Family life' },
+
   auth: {
     tagline: 'Meet someone who lives there.',
     signIn: 'Sign in',
@@ -80,6 +86,12 @@ export const en = {
   },
 
   profileFields: {
+    style: 'Your style',
+    usualDays: 'Usually free on',
+    usualDaysHint: 'An indication, not a promise: you agree the real day in the chat.',
+    activityStyle: 'Your plans are mostly',
+    lifestyle: 'You lean towards',
+    both: 'A bit of both',
     whatWeDo: 'What would we do together?',
     whatWeDoHint: 'A walk through your neighbourhood, a market you love, the bar only locals know.',
     whyHost: 'Why do you host?',
@@ -94,6 +106,10 @@ export const en = {
   },
 
   discover: {
+    search: 'Where are you going?',
+    clearSearch: 'Clear the destination',
+    searchTyped: (q: string) => `Search "${q}"`,
+    undo: 'Bring back the last person you passed',
     title: 'Discover',
     subtitle: "Who's nearby, and the afternoon they have in mind.",
     everyone: 'Everyone',
@@ -109,10 +125,12 @@ export const en = {
   },
 
   filters: {
+    usualDays: 'Usually free on',
+    activityStyle: 'Kind of plans',
+    lifestyle: 'Their scene',
     title: 'Filters',
     clear: 'Clear',
     showResults: 'Show people',
-    anywhere: 'Anywhere',
     whenFree: "When they're free",
     hasPets: 'Has pets',
     any: 'Any',
