@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933758473186",
+    "project_id": "localbuddy-117a0",
+    "storage_bucket": "localbuddy-117a0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933758473186:android:db7c4c9dafe75c62905fbb",
+        "android_client_info": {
+          "package_name": "com.gabri100steam.localbuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIwG3ZGSEvtXhuvksp17QD440RaUIuXAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
