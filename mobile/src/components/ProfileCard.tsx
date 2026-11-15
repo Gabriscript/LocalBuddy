@@ -9,6 +9,7 @@ import { isoDay, shortDay } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 import { AuthedImage } from './AuthedImage';
+import { Button } from './Button';
 import { IconButton } from './IconButton';
 import { Pill } from './Pill';
 
@@ -19,15 +20,16 @@ const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 /// The photo leads and the text sits underneath it, rather than over a gradient: it keeps
 /// body text at full contrast on every photo, including a bright one.
 ///
-/// The card body and the two decision buttons are siblings, never nested. A tappable card
-/// wrapping tappable buttons is ambiguous about which one a tap meant — and on the web
-/// renderer it is literally a <button> inside a <button>.
+/// The card body and the two answers are siblings, never nested. A tappable card wrapping
+/// tappable buttons is ambiguous about which one a tap meant — and on the web renderer it is
+/// literally a <button> inside a <button>.
 export const ProfileCard = memo(function ProfileCard({
   card,
   onOpen,
   onPass,
   onInterest,
   busy,
+  answering,
 }: {
   card: Card;
   /// These take the card rather than closing over it, so the feed can hand the same three
@@ -37,6 +39,9 @@ export const ProfileCard = memo(function ProfileCard({
   onPass?: (card: Card) => void;
   onInterest?: (card: Card) => void;
   busy?: boolean;
+  /// On the requests screen this person has already asked, so the same button is a yes back
+  /// rather than a question.
+  answering?: boolean;
 }) {
   const c = useColors();
   const s = useStrings();
@@ -78,12 +83,22 @@ export const ProfileCard = memo(function ProfileCard({
         accessibilityLabel={summary}
         accessibilityHint={s.profileCard.openHint}
         style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}>
-        <AuthedImage
-          path={card.photoUrl}
-          size="medium"
-          style={[styles.photo, { backgroundColor: c.surfaceMuted }]}
-          accessibilityLabel={s.common.photoOf(card.name ?? '')}
-        />
+        <View>
+          <AuthedImage
+            path={card.photoUrl}
+            size="medium"
+            style={[styles.photo, { backgroundColor: c.surfaceMuted }]}
+            accessibilityLabel={s.common.photoOf(card.name ?? '')}
+          />
+          {/* What changes today's answer sits on the photograph, where the eye lands first:
+              here now, arriving, free today. Opaque Card pills, so they read on any photo. */}
+          {trip || card.freeToday ? (
+            <View style={styles.today}>
+              {trip ? <Pill icon="airplane-outline" label={trip} tone="strong" surface /> : null}
+              {card.freeToday ? <Pill icon="cafe-outline" label={s.common.freeToday} tone="strong" surface /> : null}
+            </View>
+          ) : null}
+        </View>
 
         <View style={styles.body}>
           <View style={styles.headline}>
@@ -109,11 +124,12 @@ export const ProfileCard = memo(function ProfileCard({
             ) : null}
           </View>
 
-          {trip || card.freeToday ? (
-            <View style={styles.pills}>
-              {trip ? <Pill icon="airplane-outline" label={trip} tone="positive" /> : null}
-              {card.freeToday ? <Pill icon="cafe-outline" label={s.common.freeToday} tone="positive" /> : null}
-            </View>
+          {/* The one line that matters comes before the facts about the person: what an
+              afternoon with them would be is the reason to read on. */}
+          {card.whatWeWillDo ? (
+            <Text style={[type.body, { color: c.text }]} numberOfLines={3}>
+              {card.whatWeWillDo}
+            </Text>
           ) : null}
 
           {/* Left out when empty: an empty row would still take a gap's worth of height. */}
@@ -128,12 +144,6 @@ export const ProfileCard = memo(function ProfileCard({
               {card.lifestyle ? <Pill icon={LIFE_ICON[card.lifestyle]} label={s.lifestyle[card.lifestyle]} /> : null}
             </View>
           ) : null}
-
-          {card.whatWeWillDo ? (
-            <Text style={[type.body, { color: c.text }]} numberOfLines={2}>
-              {card.whatWeWillDo}
-            </Text>
-          ) : null}
         </View>
       </Pressable>
 
@@ -146,15 +156,20 @@ export const ProfileCard = memo(function ProfileCard({
             tint={c.textMuted}
             disabled={busy}
           />
-          <IconButton
-            // A tick, not a heart: the question the card asks is whether to meet this
-            // person, and a heart answers a different one.
-            name="checkmark"
-            label={s.profileCard.interestIn(card.name ?? '')}
-            onPress={() => onInterest(card)}
-            tint={c.primary}
-            disabled={busy}
-          />
+          {/* Said in words. A bare tick asked the member to guess what it would send, and the
+              question a card asks is whether to meet this person: a speech bubble, not a heart. */}
+          <View style={styles.ask}>
+            <Button
+              variant="tinted"
+              icon={answering ? 'checkmark' : 'chatbubble-ellipses-outline'}
+              title={answering ? s.requests.accept : s.profile.ask}
+              accessibilityLabel={
+                answering ? s.profileCard.sayYesTo(card.name ?? '') : s.profileCard.askTo(card.name ?? '')
+              }
+              onPress={() => onInterest(card)}
+              disabled={busy}
+            />
+          </View>
         </View>
       ) : null}
     </View>
@@ -164,9 +179,17 @@ export const ProfileCard = memo(function ProfileCard({
 const styles = StyleSheet.create({
   card: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   // 4:3, declared as a ratio so the row keeps its height before the photo arrives. Taller
-  // than this and the name, the pills and the two decision buttons fall below the fold on a
-  // phone — which turns a one-tap decision into a scroll.
+  // than this and the name, the plan and the two answers no longer share a screen with it.
   photo: { width: '100%', aspectRatio: 4 / 3 },
+  today: {
+    position: 'absolute',
+    top: space.sm + 4,
+    left: space.sm + 4,
+    right: space.sm + 4,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: space.sm,
+  },
   body: { padding: space.md, gap: space.sm },
   headline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   name: { flexShrink: 1 },
@@ -175,8 +198,10 @@ const styles = StyleSheet.create({
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: space.sm,
     paddingHorizontal: space.md,
     paddingBottom: space.md,
   },
+  ask: { flex: 1 },
 });

@@ -12,21 +12,23 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
 import { useStrings } from '@/i18n';
+import { useNotice } from '@/lib/notice';
 import { space, type, useColors } from '@/theme';
 
 type Card = components['schemas']['ProfileCard'];
 type Match = { userId: string; name: string; photoUrl?: string | null; conversationId: string };
 
-/// People who said they would like to meet you. The same cards and the same two decisions as
-/// the feed: the tick is an interest back, which is always a match here, and the cross is a pass
+/// People who said they would like to meet you. The same cards and the same two answers as the
+/// feed: "Say yes" is an interest back, which is always a match here, and the cross is a pass
 /// the other person never hears about.
 export default function Requests() {
   const c = useColors();
   const router = useRouter();
   const s = useStrings();
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } = useRequests();
-  const { interest, pass } = useDecide();
-  const busy = interest.isPending || pass.isPending;
+  const { interest, pass, undoPass } = useDecide();
+  const busy = interest.isPending || pass.isPending || undoPass.isPending;
+  const notice = useNotice();
   const [match, setMatch] = useState<Match | null>(null);
 
   // Stable across renders, so the `memo` on ProfileCard can skip the rows (see Discover).
@@ -46,7 +48,21 @@ export default function Requests() {
       }),
     [interest]
   );
-  const decline = useCallback((card: Card) => pass.mutate(card.id!), [pass]);
+  const decline = useCallback(
+    (card: Card) =>
+      pass.mutate(card.id!, {
+        // Said once it is done, because it is what a host worries about: a no is the one answer
+        // the other person is never told. Undo puts the request back on this screen.
+        onSuccess: () =>
+          notice({
+            title: s.requests.declined(card.name!),
+            body: s.requests.declinedBody,
+            photoPath: card.photoUrl,
+            action: { label: s.common.undo, onPress: () => undoPass.mutate(card.id!) },
+          }),
+      }),
+    [pass, undoPass, notice, s]
+  );
   const showProfile = useCallback(
     (card: Card) => router.push({ pathname: '/user/[id]', params: { id: card.id! } }),
     [router]
@@ -54,7 +70,7 @@ export default function Requests() {
 
   const renderCard = useCallback(
     ({ item }: { item: Card }) => (
-      <ProfileCard card={item} busy={busy} onOpen={showProfile} onPass={decline} onInterest={accept} />
+      <ProfileCard card={item} busy={busy} onOpen={showProfile} onPass={decline} onInterest={accept} answering />
     ),
     [busy, showProfile, decline, accept]
   );
@@ -76,7 +92,7 @@ export default function Requests() {
         <Text style={[type.body, { color: c.textMuted }]}>{s.requests.subtitle}</Text>
       </View>
 
-      <ActionError error={interest.error ?? pass.error} style={styles.note} />
+      <ActionError error={interest.error ?? pass.error ?? undoPass.error} style={styles.note} />
 
       <Screen
         loading={isPending}

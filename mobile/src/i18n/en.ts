@@ -26,6 +26,9 @@ export const en = {
     waitingApproval: 'Waiting for approval',
     progress: 'Progress',
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
+    undo: 'Undo',
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
   },
 
   /// The role choice, as a chip.
@@ -53,6 +56,19 @@ export const en = {
     passwordHint: 'At least 8 characters: upper and lower case, a number and a symbol.',
     changeLater: 'You can switch any time.',
     registerFailed: "We couldn't create your account. Try again in a moment.",
+    /// The welcome screen, in three beats: who you find, how it starts, what it never costs.
+    how: [
+      'Find someone who lives where you are going, or who is visiting your city.',
+      'Ask to meet. When they say yes, the chat opens.',
+      'Nobody pays anybody for the time together.',
+    ],
+    haveAccountShort: 'I already have an account',
+    /// One line under the role chips, for the role that is chosen.
+    roleHint: {
+      host: 'You live here and show people your city.',
+      guest: 'You are visiting, and want to meet someone who lives there.',
+      entrambi: 'A host at home, a traveller away.',
+    },
   },
 
   onboarding: {
@@ -70,6 +86,7 @@ export const en = {
     verifySubtitle:
       'During the pilot, the LocalBuddy team confirms each identity by hand. Nobody can write to anyone without it, which keeps this a safe place to meet strangers.',
     verifyCta: 'Start the check',
+    verifyMeanwhile: 'You can look around in the meantime.',
     verifyPendingBody: 'Thanks! The LocalBuddy team will confirm your identity shortly.',
     listingTitle: 'What you can share',
     listingSubtitle: 'An afternoon out, a bed for the night, or both. You can change this later.',
@@ -116,9 +133,9 @@ export const en = {
     inTown: 'In town now',
     arriving: 'Arriving',
     residents: 'Lives here',
-    undo: 'Bring back the last person you passed',
+    /// Said right after a pass, with the way to take it back.
+    passed: (name: string) => `You passed on ${name}`,
     title: 'Discover',
-    subtitle: "Who's nearby, and the afternoon they have in mind.",
     everyone: 'Everyone',
     hosts: 'Hosts',
     guests: 'Travellers',
@@ -156,7 +173,9 @@ export const en = {
     smokes: 'smokes',
     openHint: 'Opens the full profile',
     passOn: (name: string) => `Pass on ${name}`,
-    interestIn: (name: string) => `Show interest in ${name}`,
+    /// The two answers on a card, named in full: each starts with the words on the button.
+    askTo: (name: string) => `Ask to meet ${name}`,
+    sayYesTo: (name: string) => `Say yes to ${name}`,
   },
 
   profile: {
@@ -169,13 +188,17 @@ export const en = {
     reviews: 'What people say',
     ratedOutOf5: (n: number) => `Rated ${n} out of 5`,
     moreReviews: 'Read more reviews',
-    showInterest: 'Show interest',
+    ask: 'Ask to meet',
+    /// What the app says once the request has left, and what happens next.
+    asked: (name: string) => `You asked ${name} to meet`,
+    askedBody: (name: string) => `When ${name} says yes, the chat opens.`,
     unlock: 'Skip the wait and unlock the chat',
   },
 
   chats: {
     title: 'Chats',
-    empty: 'No chats yet. When you both say yes, this is where it starts.',
+    empty: 'No chats yet. A chat opens when someone says yes to you, or you say yes to them.',
+    findSomeone: "See who's around",
     sayHello: 'Say hello',
     unlocked: 'Unlocked',
     unread: (n: number) => (n === 1 ? '1 new message' : `${n} new messages`),
@@ -186,6 +209,11 @@ export const en = {
     subtitle: "They'd like to meet you. Say yes back and the chat opens.",
     empty: 'Nobody is waiting for your answer.',
     count: (n: number) => (n === 1 ? '1 request' : `${n} requests`),
+    accept: 'Say yes',
+    waiting: (n: number) =>
+      n === 1 ? '1 person would like to meet you' : `${n} people would like to meet you`,
+    declined: (name: string) => `You said no to ${name}`,
+    declinedBody: 'Nobody is told about a no.',
   },
 
   chat: {
@@ -226,11 +254,10 @@ export const en = {
     empty: 'No upcoming trips yet.',
     add: 'Add a trip',
     pickCity: 'Pick a city from the list.',
-    from: 'From (YYYY-MM-DD)',
-    to: 'To (YYYY-MM-DD)',
-    badDate: 'Use the format YYYY-MM-DD, for example 2026-12-12.',
-    dateOrder: 'The end date cannot be before the start date.',
-    dateOver: 'Choose dates from today onwards.',
+    when: 'When are you there?',
+    pickStart: 'Pick the day you arrive.',
+    pickEnd: 'Now the day you leave.',
+    range: (from: string, to: string) => `${from} to ${to}`,
     save: 'Add trip',
     remove: (city: string) => `Remove the trip to ${city}`,
   },

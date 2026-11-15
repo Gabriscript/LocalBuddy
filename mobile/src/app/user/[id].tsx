@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDecide, useProfile, useReviews } from '@/api/hooks';
-import { DAYS, LIFE_ICON, roleName, STYLE_ICON } from '@/api/labels';
+import { DAYS, LIFE_ICON, roleName, STYLE_ICON, TIMES_OF_DAY } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
 import { Button } from '@/components/Button';
@@ -16,6 +16,7 @@ import { SafetySheet } from '@/components/SafetySheet';
 import { Screen } from '@/components/Screen';
 import { UnlockSheet } from '@/components/UnlockSheet';
 import { useLanguage, useStrings } from '@/i18n';
+import { useNotice } from '@/lib/notice';
 import { radius, space, type, useColors } from '@/theme';
 
 const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
@@ -31,8 +32,9 @@ export default function Profile() {
   const { language } = useLanguage();
 
   const { data, isPending, error, refetch } = useProfile(id);
-  const { interest, pass } = useDecide();
+  const { interest, pass, undoPass } = useDecide();
   const busy = interest.isPending || pass.isPending;
+  const notice = useNotice();
   const [safety, setSafety] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
@@ -45,11 +47,32 @@ export default function Profile() {
   /// `mutate` rather than `mutateAsync`: a refusal from the server would otherwise be a
   /// rejected promise nobody awaits, leaving a button that looks like it did nothing. The
   /// refusal goes to `interest.error`, which the action bar shows.
-  function showInterest() {
+  function ask() {
     interest.mutate(id, {
-      // A mutual yes gets its moment; a one-sided one just returns to the feed.
-      onSuccess: (result) =>
-        result.matched && result.conversationId ? setMatched(result.conversationId) : goBack(),
+      // A mutual yes gets its moment. A one-sided one returns to the feed, with a word that it
+      // left and what happens next: without it the tap looked like it had done nothing.
+      onSuccess: (result) => {
+        if (result.matched && result.conversationId) return setMatched(result.conversationId);
+        goBack();
+        if (data) {
+          notice({ title: s.profile.asked(data.name!), body: s.profile.askedBody(data.name!), photoPath: hero?.url });
+        }
+      },
+    });
+  }
+
+  function passOn() {
+    pass.mutate(id, {
+      onSuccess: () => {
+        goBack();
+        if (data) {
+          notice({
+            title: s.discover.passed(data.name!),
+            photoPath: hero?.url,
+            action: { label: s.common.undo, onPress: () => undoPass.mutate(id) },
+          });
+        }
+      },
     });
   }
 
@@ -57,6 +80,12 @@ export default function Profile() {
   // The face leads; the home photos follow the words, as a row of thumbnails.
   const hero = photos.find((p) => p.type === 'profile') ?? photos[0];
   const others = photos.filter((p) => p !== hero);
+  const days = DAYS.filter((day) => data?.usualDays?.includes(day)).map((day) => s.days[day]);
+  const times = TIMES_OF_DAY.filter((time) => data?.availability?.some((slot) => slot.timeOfDay === time)).map(
+    (time) => s.timeOfDay[time]
+  );
+  // "Sat, Sun · Evening": the days and the hours answer one question, so they share one line.
+  const free = [days.join(', '), times.join(', ')].filter(Boolean).join(' · ');
 
   return (
     <Screen loading={isPending} error={error} onRetry={refetch}>
@@ -119,6 +148,7 @@ export default function Profile() {
 
             {/* Left out when empty: an empty row would still take a gap's worth of height. */}
             {typeof data?.rating === 'number' ||
+            data?.freeToday ||
             data?.listing?.offersOvernight ||
             data?.hasCar ||
             data?.hasPets ||
@@ -126,6 +156,7 @@ export default function Profile() {
             data?.activityStyle ||
             data?.lifestyle ? (
               <View style={styles.pills}>
+                {data?.freeToday ? <Pill icon="cafe-outline" label={s.common.freeToday} tone="strong" /> : null}
                 {typeof data?.rating === 'number' ? (
                   <Pill icon="star-outline" label={s.profile.rating(data.rating.toLocaleString(language, ONE_DECIMAL))} />
                 ) : null}
@@ -140,13 +171,29 @@ export default function Profile() {
               </View>
             ) : null}
 
-            <Section title={s.profile.whatWeDo} body={data?.whatWeWillDo} />
+            {/* The letter of introduction, made literal: the one paragraph the profile exists to
+                say, on a sheet of its own, signed by the person who wrote it. */}
+            {data?.whatWeWillDo ? (
+              <View style={[styles.letter, { backgroundColor: c.surface, borderColor: c.border }]}>
+                <Text role="heading" style={[type.label, { color: c.textMuted }]}>
+                  {s.profile.whatWeDo}
+                </Text>
+                <Text style={[type.lead, { color: c.text }]}>{data.whatWeWillDo}</Text>
+                <Text aria-hidden style={[type.title, styles.signature, { color: c.text }]} numberOfLines={1}>
+                  {data.name}
+                </Text>
+              </View>
+            ) : null}
+
             <Section title={s.profile.whyHost} body={data?.whyIHost} />
-            <Section title={s.profile.languages} body={data?.languagesSpoken} />
-            <Section
-              title={s.profileFields.usualDays}
-              body={DAYS.filter((day) => data?.usualDays?.includes(day)).map((day) => s.days[day]).join(', ')}
-            />
+
+            {/* The practical answers, as rows: found at a glance when deciding whether to ask. */}
+            {data?.languagesSpoken || free ? (
+              <View style={[styles.facts, { backgroundColor: c.surface, borderColor: c.border }]}>
+                <Fact icon="chatbubbles-outline" label={s.profile.languages} value={data?.languagesSpoken} />
+                <Fact icon="calendar-outline" label={s.profileFields.usualDays} value={free} />
+              </View>
+            ) : null}
 
             {others.length ? (
               <ScrollView
@@ -191,10 +238,16 @@ export default function Profile() {
               label={s.profileCard.passOn(data?.name ?? '')}
               tint={c.textMuted}
               disabled={busy}
-              onPress={() => pass.mutate(id, { onSuccess: goBack })}
+              onPress={passOn}
             />
             <View style={styles.barItem}>
-              <Button title={s.profile.showInterest} loading={interest.isPending} disabled={busy} onPress={showInterest} />
+              <Button
+                title={s.profile.ask}
+                icon="chatbubble-ellipses-outline"
+                loading={interest.isPending}
+                disabled={busy}
+                onPress={ask}
+              />
             </View>
           </View>
         </View>
@@ -286,6 +339,29 @@ function Reviews({ userId }: { userId: string }) {
   );
 }
 
+/// One practical answer: what it is in Muted Text, the answer under it. Nothing when unanswered.
+function Fact({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string | null;
+}) {
+  const c = useColors();
+  if (!value) return null;
+  return (
+    <View style={styles.fact}>
+      <Ionicons name={icon} size={20} color={c.textMuted} aria-hidden />
+      <View style={styles.factText}>
+        <Text style={[type.caption, { color: c.textMuted }]}>{label}</Text>
+        <Text style={[type.body, { color: c.text }]}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
 function Section({ title, body }: { title: string; body?: string | null }) {
   const c = useColors();
   if (!body) return null;
@@ -308,6 +384,17 @@ const styles = StyleSheet.create({
   body: { padding: space.md, gap: space.lg },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   section: { gap: space.sm },
+  letter: { gap: space.sm, padding: space.lg, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth },
+  // Right-aligned and in the names' own face, the way a letter is signed.
+  signature: { textAlign: 'right', marginTop: space.xs },
+  facts: {
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  fact: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
+  factText: { flex: 1, gap: 2 },
   back: {
     position: 'absolute',
     zIndex: 1,

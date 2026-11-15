@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth';
 import { radius, space, type, useColors } from '@/theme';
 
 const ROLES = ['host', 'guest', 'entrambi'] as const;
+type Role = (typeof ROLES)[number];
 
 /// Step 1 of the five-step onboarding (GUIDELINES §11.1). Everything after this needs a
 /// token, so registration hands straight over to the onboarding stack.
@@ -20,7 +21,13 @@ export default function Register() {
   const { register } = useAuth();
   const router = useRouter();
   const s = useStrings();
-  const [form, setForm] = useState({ name: '', email: '', city: '', password: '', role: 'entrambi' });
+  const [form, setForm] = useState<{ name: string; email: string; city: string; password: string; role: Role }>({
+    name: '',
+    email: '',
+    city: '',
+    password: '',
+    role: 'entrambi',
+  });
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
@@ -42,12 +49,15 @@ export default function Register() {
   }
 
   return (
-    <SceneSheet image={require('../../../assets/images/scenes/s01-wine-window.jpg')}>
+    <SceneSheet
+      image={require('../../../assets/images/scenes/s01-wine-window.jpg')}
+      footer={<Button title={s.common.continue} onPress={submit} loading={busy} disabled={!complete} />}>
       <View style={styles.intro}>
         <Text role="heading" style={[type.display, { color: c.text }]}>
           {s.auth.createAccount}
         </Text>
-        <Text style={[type.body, { color: c.textMuted }]}>{s.common.stepOf(1, 5)}</Text>
+        {/* A traveller has no listing to set up, so one step fewer, as the later steps say. */}
+        <Text style={[type.body, { color: c.textMuted }]}>{s.common.stepOf(1, form.role === 'guest' ? 4 : 5)}</Text>
       </View>
 
       <Field label={s.common.name} value={form.name} onChangeText={set('name')} autoCapitalize="words" />
@@ -80,7 +90,7 @@ export default function Register() {
             return (
               <Pressable
                 key={role}
-                onPress={() => set('role')(role)}
+                onPress={() => setForm((f) => ({ ...f, role }))}
                 role="radio"
                 aria-checked={active}
                 style={({ pressed }) => [
@@ -96,10 +106,12 @@ export default function Register() {
             );
           })}
         </View>
-        <Text style={[type.caption, { color: c.textMuted }]}>{s.auth.changeLater}</Text>
+        {/* The three words are the product's own; this says what the chosen one means. */}
+        <Text style={[type.caption, { color: c.textMuted }]}>
+          {s.auth.roleHint[form.role]} {s.auth.changeLater}
+        </Text>
       </View>
 
-      <Button title={s.common.continue} onPress={submit} loading={busy} disabled={!complete} />
       {/* replace, not push: login already links here, and the two would stack up forever. */}
       <Link href="/login" replace style={[type.label, styles.link, { color: c.text }]}>
         {s.auth.haveAccount}

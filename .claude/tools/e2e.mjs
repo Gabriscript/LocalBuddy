@@ -140,10 +140,10 @@ try {
   check('Requests screen lists Ben', true);
   await shot('3-requests');
   const labels = await evalJs(`[...document.querySelectorAll('[role=button]')].map((e) => e.getAttribute('aria-label')).filter(Boolean)`);
-  const accept = labels.find((l) => /interest|interessat|interesad|intéress/i.test(l) && /Ben/.test(l));
+  const accept = labels.find((l) => /say yes|di' sì|di que sí|dire oui/i.test(l) && /Ben/.test(l));
   check('the card has a labelled accept button', !!accept, JSON.stringify(labels));
   await click(accept.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  await waitFor('the match overlay', async () => /match|hello|ciao|say/i.test(await text()), 10000);
+  await waitFor('the match overlay', async () => /both said yes/i.test(await text()), 10000);
   check('accepting opens the match overlay', true);
   await shot('4-match');
   const conv = await api('/conversations', { token: eva.token });

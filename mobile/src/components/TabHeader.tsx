@@ -22,7 +22,24 @@ const ACTION = 56;
 /// The Night band at the top of a tab screen: the screen's name in Paper, an optional line in
 /// Sky, and one optional control. Two flat circles bleed off the top-right corner; they sit
 /// above the control column and right of the title column, never under either.
-export function TabHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+///
+/// `children` is a row of the screen's own, across the full width under the title: on Discover
+/// the destination search, which is the first thing a traveller knows and so belongs on the
+/// band rather than under it.
+export function TabHeader({
+  title,
+  subtitle,
+  action,
+  children,
+  lightStatusBar = true,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  children?: ReactNode;
+  /// False once the band has scrolled away: the status bar is then over Paper, not Night.
+  lightStatusBar?: boolean;
+}) {
   const c = useColors();
   const insets = useSafeAreaInsets();
   // Only while this tab is on screen: a pushed chat or profile is Paper again, and a light
@@ -31,23 +48,27 @@ export function TabHeader({ title, subtitle, action }: { title: string; subtitle
 
   return (
     <View style={[styles.band, { backgroundColor: c.night, paddingTop: insets.top + TOP }]}>
-      {focused ? <StatusBar style="light" /> : null}
+      {focused && lightStatusBar ? <StatusBar style="light" /> : null}
       <View aria-hidden style={[styles.sky, { top: insets.top + SKY.down - SKY.size / 2, backgroundColor: c.sky }]} />
       <View
         aria-hidden
         style={[styles.coral, { top: insets.top + CORAL.down - CORAL.size / 2, backgroundColor: c.primary }]}
       />
 
-      <View style={styles.text}>
-        <Text role="heading" style={[type.display, { color: c.onNight }]}>
-          {title}
-        </Text>
-        {subtitle ? <Text style={[type.body, { color: c.sky }]}>{subtitle}</Text> : null}
+      <View style={styles.row}>
+        <View style={styles.text}>
+          <Text role="heading" style={[type.display, { color: c.onNight }]}>
+            {title}
+          </Text>
+          {subtitle ? <Text style={[type.body, { color: c.sky }]}>{subtitle}</Text> : null}
+        </View>
+        {/* Bottom-aligned and never higher than just under Sky, so on a wide screen where the
+            subtitle fits on one line the control drops the band a little instead of rising into
+            the circles. */}
+        <View style={[styles.action, action ? styles.actionClear : null]}>{action}</View>
       </View>
-      {/* Bottom-aligned and never higher than just under Sky, so on a wide screen where the
-          subtitle fits on one line the control drops the band a little instead of rising into
-          the circles. */}
-      <View style={[styles.action, action ? styles.actionClear : null]}>{action}</View>
+
+      {children}
     </View>
   );
 }
@@ -57,12 +78,12 @@ const circle = (c: typeof CORAL) =>
 
 const styles = StyleSheet.create({
   band: {
-    flexDirection: 'row',
-    gap: space.sm,
+    gap: space.md,
     paddingHorizontal: space.md,
     paddingBottom: space.lg,
     overflow: 'hidden',
   },
+  row: { flexDirection: 'row', gap: space.sm },
   coral: circle(CORAL),
   sky: circle(SKY),
   text: { flex: 1, gap: space.xs },

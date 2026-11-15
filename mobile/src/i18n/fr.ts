@@ -27,6 +27,9 @@ export const fr: Strings = {
     waitingApproval: "En attente d'approbation",
     progress: 'Progression',
     stepOf: (step, total) => `Étape ${step} sur ${total}`,
+    undo: 'Annuler',
+    previousMonth: 'Mois précédent',
+    nextMonth: 'Mois suivant',
   },
 
   roles: { host: 'Hôte', guest: 'Voyageur', entrambi: 'Les deux' },
@@ -52,6 +55,17 @@ export const fr: Strings = {
     passwordHint: 'Au moins 8 caractères : majuscules et minuscules, un chiffre et un symbole.',
     changeLater: 'Vous pourrez en changer à tout moment.',
     registerFailed: "Nous n'avons pas pu créer votre compte. Réessayez dans un instant.",
+    how: [
+      "Trouvez quelqu'un qui vit là où vous allez, ou qui est de passage dans votre ville.",
+      "Proposez une rencontre. Un oui, et la conversation s'ouvre.",
+      'Personne ne paie personne pour le temps passé ensemble.',
+    ],
+    haveAccountShort: "J'ai déjà un compte",
+    roleHint: {
+      host: 'Vous vivez ici et faites découvrir votre ville.',
+      guest: "Vous êtes de passage et voulez rencontrer quelqu'un du coin.",
+      entrambi: 'Hôte chez vous, voyageur ailleurs.',
+    },
   },
 
   onboarding: {
@@ -70,6 +84,7 @@ export const fr: Strings = {
     verifySubtitle:
       "Pendant le pilote, l'équipe LocalBuddy confirme chaque identité à la main. Sans cela, personne ne peut écrire à personne, ce qui garde ce lieu sûr pour rencontrer des inconnus.",
     verifyCta: 'Lancer la vérification',
+    verifyMeanwhile: 'En attendant, vous pouvez déjà regarder.',
     verifyPendingBody: "Merci ! L'équipe LocalBuddy confirmera bientôt votre identité.",
     listingTitle: 'Ce que vous pouvez partager',
     listingSubtitle:
@@ -119,9 +134,8 @@ export const fr: Strings = {
     inTown: 'En ville maintenant',
     arriving: 'Bientôt là',
     residents: 'Habite ici',
-    undo: 'Faire revenir la dernière personne écartée',
+    passed: (name) => `Vous avez passé le profil de ${name}`,
     title: 'Découvrir',
-    subtitle: "Qui est près de vous, et l'après-midi qu'ils ont en tête.",
     everyone: 'Tout le monde',
     hosts: 'Hôtes',
     guests: 'Voyageurs',
@@ -158,7 +172,8 @@ export const fr: Strings = {
     smokes: 'fume',
     openHint: 'Ouvre le profil complet',
     passOn: (name) => `Passer le profil de ${name}`,
-    interestIn: (name) => `Montrer de l'intérêt pour ${name}`,
+    askTo: (name) => `Proposer une rencontre à ${name}`,
+    sayYesTo: (name) => `Dire oui à ${name}`,
   },
 
   profile: {
@@ -171,13 +186,16 @@ export const fr: Strings = {
     reviews: "Ce qu'on en dit",
     ratedOutOf5: (n) => `Note : ${n} sur 5`,
     moreReviews: "Lire plus d'avis",
-    showInterest: "Montrer de l'intérêt",
+    ask: 'Proposer une rencontre',
+    asked: (name) => `Vous avez proposé une rencontre à ${name}`,
+    askedBody: (name) => `Quand ${name} dit oui, la conversation s'ouvre.`,
     unlock: 'Débloquer la conversation sans attendre',
   },
 
   chats: {
     title: 'Messages',
-    empty: "Aucune conversation pour l'instant. Quand vous dites oui tous les deux, c'est ici que tout commence.",
+    empty: "Aucune conversation pour l'instant. Une conversation s'ouvre quand quelqu'un vous dit oui, ou quand vous le dites.",
+    findSomeone: 'Voir qui est là',
     sayHello: 'Dites bonjour',
     unlocked: 'Débloquée',
     unread: (n) => (n === 1 ? '1 nouveau message' : `${n} nouveaux messages`),
@@ -188,6 +206,11 @@ export const fr: Strings = {
     subtitle: 'Ils aimeraient vous rencontrer. Un oui, et vous discutez.',
     empty: "Personne n'attend votre réponse.",
     count: (n) => (n === 1 ? '1 demande' : `${n} demandes`),
+    accept: 'Dire oui',
+    waiting: (n) =>
+      n <= 1 ? '1 personne aimerait vous rencontrer' : `${n} personnes aimeraient vous rencontrer`,
+    declined: (name) => `Vous avez dit non à ${name}`,
+    declinedBody: "Personne n'est prévenu d'un non.",
   },
 
   chat: {
@@ -225,11 +248,10 @@ export const fr: Strings = {
     empty: 'Aucun voyage à venir.',
     add: 'Ajouter un voyage',
     pickCity: 'Choisissez une ville dans la liste.',
-    from: 'Du (AAAA-MM-JJ)',
-    to: 'Au (AAAA-MM-JJ)',
-    badDate: 'Utilisez le format AAAA-MM-JJ, par exemple 2026-12-12.',
-    dateOrder: 'La date de fin ne peut pas précéder la date de début.',
-    dateOver: "Choisissez des dates à partir d'aujourd'hui.",
+    when: 'Quand y serez-vous ?',
+    pickStart: 'Choisissez le jour de votre arrivée.',
+    pickEnd: 'Puis le jour de votre départ.',
+    range: (from, to) => `Du ${from} au ${to}`,
     save: 'Ajouter le voyage',
     remove: (city) => `Supprimer le voyage à ${city}`,
   },

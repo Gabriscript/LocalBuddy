@@ -26,6 +26,9 @@ export const sv: Strings = {
     waitingApproval: 'Väntar på godkännande',
     progress: 'Framsteg',
     stepOf: (step: number, total: number) => `Steg ${step} av ${total}`,
+    undo: 'Ångra',
+    previousMonth: 'Föregående månad',
+    nextMonth: 'Nästa månad',
   },
 
   roles: { host: 'Värd', guest: 'Resenär', entrambi: 'Båda' },
@@ -51,6 +54,17 @@ export const sv: Strings = {
     passwordHint: 'Minst 8 tecken: stora och små bokstäver, en siffra och ett specialtecken.',
     changeLater: 'Du kan byta när som helst.',
     registerFailed: 'Vi kunde inte skapa ditt konto. Försök igen om en stund.',
+    how: [
+      'Hitta någon som bor dit du ska, eller som besöker din stad.',
+      'Föreslå en träff. När personen säger ja öppnas chatten.',
+      'Ingen betalar någon för tiden tillsammans.',
+    ],
+    haveAccountShort: 'Jag har redan ett konto',
+    roleHint: {
+      host: 'Du bor här och visar folk din stad.',
+      guest: 'Du är på besök och vill träffa någon som bor där.',
+      entrambi: 'Värd hemma, resenär på resa.',
+    },
   },
 
   onboarding: {
@@ -68,6 +82,7 @@ export const sv: Strings = {
     verifySubtitle:
       'Under pilotperioden bekräftar LocalBuddy-teamet varje identitet för hand. Utan det kan ingen skriva till någon, vilket gör det här till en trygg plats att träffa främlingar.',
     verifyCta: 'Starta kontrollen',
+    verifyMeanwhile: 'Under tiden kan du se dig omkring.',
     verifyPendingBody: 'Tack! LocalBuddy-teamet bekräftar din identitet inom kort.',
     listingTitle: 'Vad du kan dela',
     listingSubtitle: 'En eftermiddag ute, en säng för natten eller båda. Du kan ändra det senare.',
@@ -114,9 +129,8 @@ export const sv: Strings = {
     inTown: 'I stan nu',
     arriving: 'Anländer',
     residents: 'Bor här',
-    undo: 'Ta tillbaka den du senast hoppade över',
+    passed: (name: string) => `Du hoppade över ${name}`,
     title: 'Upptäck',
-    subtitle: 'Vem som finns i närheten, och eftermiddagen de har i tankarna.',
     everyone: 'Alla',
     hosts: 'Värdar',
     guests: 'Resenärer',
@@ -153,7 +167,8 @@ export const sv: Strings = {
     smokes: 'röker',
     openHint: 'Öppnar hela profilen',
     passOn: (name: string) => `Hoppa över ${name}`,
-    interestIn: (name: string) => `Visa intresse för ${name}`,
+    askTo: (name: string) => `Föreslå en träff med ${name}`,
+    sayYesTo: (name: string) => `Säg ja till ${name}`,
   },
 
   profile: {
@@ -166,13 +181,16 @@ export const sv: Strings = {
     reviews: 'Vad folk säger',
     ratedOutOf5: (n: number) => `Betyg ${n} av 5`,
     moreReviews: 'Läs fler omdömen',
-    showInterest: 'Visa intresse',
+    ask: 'Föreslå en träff',
+    asked: (name: string) => `Du föreslog en träff med ${name}`,
+    askedBody: (name: string) => `När ${name} säger ja öppnas chatten.`,
     unlock: 'Slipp vänta och lås upp chatten',
   },
 
   chats: {
     title: 'Chattar',
-    empty: 'Inga chattar än. När ni båda säger ja börjar det här.',
+    empty: 'Inga chattar än. En chatt öppnas när någon säger ja till dig, eller när du säger ja.',
+    findSomeone: 'Se vilka som finns',
     sayHello: 'Säg hej',
     unlocked: 'Upplåst',
     unread: (n: number) => (n === 1 ? '1 nytt meddelande' : `${n} nya meddelanden`),
@@ -183,6 +201,11 @@ export const sv: Strings = {
     subtitle: 'De vill gärna träffa dig. Säg ja tillbaka så öppnas chatten.',
     empty: 'Ingen väntar på ditt svar.',
     count: (n: number) => (n === 1 ? '1 förfrågan' : `${n} förfrågningar`),
+    accept: 'Säg ja',
+    waiting: (n: number) =>
+      n === 1 ? '1 person vill gärna träffa dig' : `${n} personer vill gärna träffa dig`,
+    declined: (name: string) => `Du sa nej till ${name}`,
+    declinedBody: 'Ingen får veta om ett nej.',
   },
 
   chat: {
@@ -220,11 +243,10 @@ export const sv: Strings = {
     empty: 'Inga kommande resor än.',
     add: 'Lägg till en resa',
     pickCity: 'Välj en stad i listan.',
-    from: 'Från (ÅÅÅÅ-MM-DD)',
-    to: 'Till (ÅÅÅÅ-MM-DD)',
-    badDate: 'Använd formatet ÅÅÅÅ-MM-DD, till exempel 2026-12-12.',
-    dateOrder: 'Slutdatumet kan inte vara före startdatumet.',
-    dateOver: 'Välj datum från och med i dag.',
+    when: 'När är du där?',
+    pickStart: 'Välj dagen du kommer.',
+    pickEnd: 'Välj sedan dagen du åker.',
+    range: (from: string, to: string) => `${from} till ${to}`,
     save: 'Lägg till resa',
     remove: (city: string) => `Ta bort resan till ${city}`,
   },

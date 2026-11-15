@@ -71,6 +71,8 @@ export const radius = { sm: 8, md: 12, lg: 20, pill: 999 } as const;
 export const type = {
   display: { fontFamily: 'PlayfairDisplay_600SemiBold', fontSize: 32, lineHeight: 40 },
   title: { fontFamily: 'PlayfairDisplay_600SemiBold', fontSize: 22, lineHeight: 30 },
+  /// One size up from body, for the one paragraph a profile exists to say.
+  lead: { fontFamily: 'Geist_400Regular', fontSize: 18, lineHeight: 28 },
   body: { fontFamily: 'Geist_400Regular', fontSize: 16, lineHeight: 24 },
   label: { fontFamily: 'Geist_600SemiBold', fontSize: 14, lineHeight: 20 },
   caption: { fontFamily: 'Geist_400Regular', fontSize: 13, lineHeight: 18 },

@@ -14,6 +14,7 @@ import { ApiError } from '@/api/client';
 import { keys } from '@/api/hooks';
 import { LanguageProvider } from '@/i18n';
 import { AuthProvider } from '@/lib/auth';
+import { NoticeProvider } from '@/lib/notice';
 import { useColors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -62,7 +63,10 @@ export default function RootLayout() {
         <AuthProvider>
           <StatusBar style="auto" />
           <PushRouting />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
+          {/* Around the navigator, so the word that a request left survives the screen changing. */}
+          <NoticeProvider>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }} />
+          </NoticeProvider>
         </AuthProvider>
       </QueryClientProvider>
     </LanguageProvider>

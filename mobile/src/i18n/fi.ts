@@ -26,6 +26,9 @@ export const fi: Strings = {
     waitingApproval: 'Odottaa hyväksyntää',
     progress: 'Eteneminen',
     stepOf: (step: number, total: number) => `Vaihe ${step} / ${total}`,
+    undo: 'Kumoa',
+    previousMonth: 'Edellinen kuukausi',
+    nextMonth: 'Seuraava kuukausi',
   },
 
   roles: { host: 'Isäntä', guest: 'Matkailija', entrambi: 'Molemmat' },
@@ -51,6 +54,17 @@ export const fi: Strings = {
     passwordHint: 'Vähintään 8 merkkiä: isoja ja pieniä kirjaimia, numero ja erikoismerkki.',
     changeLater: 'Voit vaihtaa milloin tahansa.',
     registerFailed: 'Tilin luominen ei onnistunut. Yritä hetken kuluttua uudelleen.',
+    how: [
+      'Löydä joku, joka asuu siellä minne olet menossa, tai joka vierailee kaupungissasi.',
+      'Ehdota tapaamista. Kun hän sanoo kyllä, keskustelu avautuu.',
+      'Kukaan ei maksa kenellekään yhteisestä ajasta.',
+    ],
+    haveAccountShort: 'Minulla on jo tili',
+    roleHint: {
+      host: 'Asut täällä ja näytät kaupunkiasi.',
+      guest: 'Olet käymässä ja haluat tavata jonkun, joka asuu siellä.',
+      entrambi: 'Kotona isäntä, matkoilla matkailija.',
+    },
   },
 
   onboarding: {
@@ -68,6 +82,7 @@ export const fi: Strings = {
     verifySubtitle:
       'Pilottivaiheessa LocalBuddy-tiimi vahvistaa jokaisen henkilöllisyyden käsin. Ilman sitä kukaan ei voi kirjoittaa kenellekään, mikä pitää tämän turvallisena paikkana tavata vieraita.',
     verifyCta: 'Aloita tarkistus',
+    verifyMeanwhile: 'Sillä välin voit katsella ympärillesi.',
     verifyPendingBody: 'Kiitos! LocalBuddy-tiimi vahvistaa henkilöllisyytesi pian.',
     listingTitle: 'Mitä voit jakaa',
     listingSubtitle: 'Iltapäivän kaupungilla, sängyn yöksi tai molemmat. Voit muuttaa tätä myöhemmin.',
@@ -114,9 +129,8 @@ export const fi: Strings = {
     inTown: 'Kaupungissa nyt',
     arriving: 'Saapumassa',
     residents: 'Asuu täällä',
-    undo: 'Tuo takaisin viimeksi ohittamasi henkilö',
+    passed: (name: string) => `Ohitit: ${name}`,
     title: 'Löydä',
-    subtitle: 'Ketä on lähellä, ja millaista iltapäivää he suunnittelevat.',
     everyone: 'Kaikki',
     hosts: 'Isännät',
     guests: 'Matkailijat',
@@ -153,7 +167,8 @@ export const fi: Strings = {
     smokes: 'tupakoi',
     openHint: 'Avaa koko profiilin',
     passOn: (name: string) => `Ohita ${name}`,
-    interestIn: (name: string) => `Osoita kiinnostusta: ${name}`,
+    askTo: (name: string) => `Ehdota tapaamista: ${name}`,
+    sayYesTo: (name: string) => `Sano kyllä: ${name}`,
   },
 
   profile: {
@@ -166,13 +181,16 @@ export const fi: Strings = {
     reviews: 'Mitä ihmiset sanovat',
     ratedOutOf5: (n: number) => `Arvosana ${n} / 5`,
     moreReviews: 'Lue lisää arvosteluja',
-    showInterest: 'Osoita kiinnostusta',
+    ask: 'Ehdota tapaamista',
+    asked: (name: string) => `Ehdotit tapaamista: ${name}`,
+    askedBody: (name: string) => `Kun ${name} sanoo kyllä, keskustelu avautuu.`,
     unlock: 'Ohita odotus ja avaa keskustelu',
   },
 
   chats: {
     title: 'Keskustelut',
-    empty: 'Ei vielä keskusteluja. Kun molemmat sanotte kyllä, se alkaa täältä.',
+    empty: 'Ei vielä keskusteluja. Keskustelu avautuu, kun joku sanoo sinulle kyllä tai sinä sanot kyllä jollekulle.',
+    findSomeone: 'Katso, keitä on paikalla',
     sayHello: 'Sano hei',
     unlocked: 'Avattu',
     unread: (n: number) => (n === 1 ? '1 uusi viesti' : `${n} uutta viestiä`),
@@ -183,6 +201,11 @@ export const fi: Strings = {
     subtitle: 'He haluaisivat tavata sinut. Sano kyllä takaisin, niin keskustelu avautuu.',
     empty: 'Kukaan ei odota vastaustasi.',
     count: (n: number) => (n === 1 ? '1 pyyntö' : `${n} pyyntöä`),
+    accept: 'Sano kyllä',
+    waiting: (n: number) =>
+      n === 1 ? '1 henkilö haluaisi tavata sinut' : `${n} henkilöä haluaisi tavata sinut`,
+    declined: (name: string) => `Sanoit ei: ${name}`,
+    declinedBody: 'Kieltävästä vastauksesta ei kerrota kenellekään.',
   },
 
   chat: {
@@ -220,11 +243,10 @@ export const fi: Strings = {
     empty: 'Ei vielä tulevia matkoja.',
     add: 'Lisää matka',
     pickCity: 'Valitse kaupunki luettelosta.',
-    from: 'Alkaen (VVVV-KK-PP)',
-    to: 'Päättyen (VVVV-KK-PP)',
-    badDate: 'Käytä muotoa VVVV-KK-PP, esimerkiksi 2026-12-12.',
-    dateOrder: 'Päättymispäivä ei voi olla ennen alkamispäivää.',
-    dateOver: 'Valitse päivämäärät tästä päivästä eteenpäin.',
+    when: 'Milloin olet siellä?',
+    pickStart: 'Valitse saapumispäivä.',
+    pickEnd: 'Valitse sitten lähtöpäivä.',
+    range: (from: string, to: string) => `${from} – ${to}`,
     save: 'Lisää matka',
     remove: (city: string) => `Poista matka kaupunkiin ${city}`,
   },

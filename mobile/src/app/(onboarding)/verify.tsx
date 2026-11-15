@@ -49,6 +49,8 @@ export default function Verify() {
       onNext={() =>
         pending ? done() : verify.mutate(undefined, { onSuccess: (result) => !result.pending && done() })
       }>
+      {/* What the wait costs: nothing but writing. Said here, where the wait is announced. */}
+      <Text style={[type.body, { color: c.textMuted }]}>{s.onboarding.verifyMeanwhile}</Text>
       {verify.error ? (
         // Under 18, or an identity already banned: the code says which, in plain words.
         <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>

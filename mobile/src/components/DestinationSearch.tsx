@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useCities, useTrips } from '@/api/hooks';
 import { useStrings } from '@/i18n';
@@ -9,7 +9,19 @@ import { radius, space, type, useColors } from '@/theme';
 /// "Where are you going?": the destination is the first thing a traveller knows, so it gets a box
 /// of its own above the feed rather than a field inside the filters. Suggestions are the cities
 /// where somebody actually lives, so picking one never lands on an empty feed.
-export function DestinationSearch({ city, onChange }: { city?: string; onChange: (city?: string) => void }) {
+export function DestinationSearch({
+  city,
+  onChange,
+  trailing,
+  style,
+}: {
+  city?: string;
+  onChange: (city?: string) => void;
+  /// A control on the same line as the box, to its right: the filters, on Discover.
+  trailing?: ReactNode;
+  /// Replaces the box's own page margins where its parent already has them.
+  style?: StyleProp<ViewStyle>;
+}) {
   const c = useColors();
   const s = useStrings();
   const [text, setText] = useState(city ?? '');
@@ -32,7 +44,8 @@ export function DestinationSearch({ city, onChange }: { city?: string; onChange:
   }
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, style]}>
+      <View style={styles.line}>
       <View style={[styles.box, { backgroundColor: c.surface, borderColor: c.border }]}>
         <Ionicons name="search" size={20} color={c.textMuted} />
         <TextInput
@@ -71,6 +84,8 @@ export function DestinationSearch({ city, onChange }: { city?: string; onChange:
           </Pressable>
         ) : null}
       </View>
+      {trailing}
+      </View>
 
       {open ? (
         <View style={[styles.list, { backgroundColor: c.surface, borderColor: c.border }]}>
@@ -107,7 +122,9 @@ function Row({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; l
 
 const styles = StyleSheet.create({
   wrap: { marginHorizontal: space.md, marginTop: space.md, gap: space.xs },
+  line: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   box: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,

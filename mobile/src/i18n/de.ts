@@ -26,6 +26,9 @@ export const de: Strings = {
     waitingApproval: 'Wartet auf Zustimmung',
     progress: 'Fortschritt',
     stepOf: (step: number, total: number) => `Schritt ${step} von ${total}`,
+    undo: 'Rückgängig',
+    previousMonth: 'Vorheriger Monat',
+    nextMonth: 'Nächster Monat',
   },
 
   roles: { host: 'Gastgeber', guest: 'Reisende', entrambi: 'Beides' },
@@ -51,6 +54,17 @@ export const de: Strings = {
     passwordHint: 'Mindestens 8 Zeichen: Groß- und Kleinbuchstaben, eine Zahl und ein Sonderzeichen.',
     changeLater: 'Du kannst jederzeit wechseln.',
     registerFailed: 'Dein Konto konnte nicht erstellt werden. Versuch es gleich noch einmal.',
+    how: [
+      'Finde jemanden, der dort lebt, wo du hinfährst, oder der gerade deine Stadt besucht.',
+      'Schlag ein Treffen vor. Sagt die Person ja, öffnet sich der Chat.',
+      'Niemand bezahlt jemanden für die gemeinsame Zeit.',
+    ],
+    haveAccountShort: 'Ich habe schon ein Konto',
+    roleHint: {
+      host: 'Du lebst hier und zeigst Leuten deine Stadt.',
+      guest: 'Du bist zu Besuch und möchtest jemanden treffen, der dort lebt.',
+      entrambi: 'Zu Hause Gastgeber, unterwegs auf Reisen.',
+    },
   },
 
   onboarding: {
@@ -68,6 +82,7 @@ export const de: Strings = {
     verifySubtitle:
       'Während der Pilotphase bestätigt das LocalBuddy-Team jede Identität von Hand. Ohne das kann niemand jemandem schreiben, und so bleibt dies ein sicherer Ort, um Fremde zu treffen.',
     verifyCta: 'Prüfung starten',
+    verifyMeanwhile: 'In der Zwischenzeit kannst du dich schon umsehen.',
     verifyPendingBody: 'Danke! Das LocalBuddy-Team bestätigt deine Identität in Kürze.',
     listingTitle: 'Was du teilen kannst',
     listingSubtitle: 'Einen Nachmittag unterwegs, ein Bett für die Nacht oder beides. Du kannst das später ändern.',
@@ -114,9 +129,8 @@ export const de: Strings = {
     inTown: 'Gerade in der Stadt',
     arriving: 'Kommt an',
     residents: 'Wohnt hier',
-    undo: 'Die zuletzt übersprungene Person zurückholen',
+    passed: (name: string) => `Du hast ${name} übersprungen`,
     title: 'Entdecken',
-    subtitle: 'Wer in der Nähe ist und welchen Nachmittag sie sich vorstellen.',
     everyone: 'Alle',
     hosts: 'Gastgeber',
     guests: 'Reisende',
@@ -153,7 +167,8 @@ export const de: Strings = {
     smokes: 'raucht',
     openHint: 'Öffnet das vollständige Profil',
     passOn: (name: string) => `${name} überspringen`,
-    interestIn: (name: string) => `Interesse an ${name} zeigen`,
+    askTo: (name: string) => `Treffen vorschlagen: ${name}`,
+    sayYesTo: (name: string) => `Ja sagen zu ${name}`,
   },
 
   profile: {
@@ -166,13 +181,16 @@ export const de: Strings = {
     reviews: 'Was andere sagen',
     ratedOutOf5: (n: number) => `Bewertet mit ${n} von 5`,
     moreReviews: 'Mehr Bewertungen lesen',
-    showInterest: 'Interesse zeigen',
+    ask: 'Treffen vorschlagen',
+    asked: (name: string) => `Du hast ${name} ein Treffen vorgeschlagen`,
+    askedBody: (name: string) => `Wenn ${name} ja sagt, öffnet sich der Chat.`,
     unlock: 'Nicht warten und den Chat freischalten',
   },
 
   chats: {
     title: 'Chats',
-    empty: 'Noch keine Chats. Wenn ihr beide ja sagt, beginnt es hier.',
+    empty: 'Noch keine Chats. Ein Chat öffnet sich, wenn jemand zu dir ja sagt oder du zu jemandem.',
+    findSomeone: 'Schau, wer da ist',
     sayHello: 'Hallo sagen',
     unlocked: 'Freigeschaltet',
     unread: (n: number) => (n === 1 ? '1 neue Nachricht' : `${n} neue Nachrichten`),
@@ -183,6 +201,11 @@ export const de: Strings = {
     subtitle: 'Diese Personen möchten dich kennenlernen. Sag ebenfalls ja, und der Chat öffnet sich.',
     empty: 'Niemand wartet auf deine Antwort.',
     count: (n: number) => (n === 1 ? '1 Anfrage' : `${n} Anfragen`),
+    accept: 'Ja sagen',
+    waiting: (n: number) =>
+      n === 1 ? '1 Person möchte dich kennenlernen' : `${n} Personen möchten dich kennenlernen`,
+    declined: (name: string) => `Du hast ${name} abgesagt`,
+    declinedBody: 'Über ein Nein wird niemand informiert.',
   },
 
   chat: {
@@ -220,11 +243,10 @@ export const de: Strings = {
     empty: 'Noch keine anstehenden Reisen.',
     add: 'Reise hinzufügen',
     pickCity: 'Wähle eine Stadt aus der Liste.',
-    from: 'Von (JJJJ-MM-TT)',
-    to: 'Bis (JJJJ-MM-TT)',
-    badDate: 'Verwende das Format JJJJ-MM-TT, zum Beispiel 2026-12-12.',
-    dateOrder: 'Das Enddatum darf nicht vor dem Startdatum liegen.',
-    dateOver: 'Wähle Daten ab heute.',
+    when: 'Wann bist du dort?',
+    pickStart: 'Wähle den Tag deiner Ankunft.',
+    pickEnd: 'Jetzt den Tag deiner Abreise.',
+    range: (from: string, to: string) => `${from} bis ${to}`,
     save: 'Reise hinzufügen',
     remove: (city: string) => `Reise nach ${city} entfernen`,
   },

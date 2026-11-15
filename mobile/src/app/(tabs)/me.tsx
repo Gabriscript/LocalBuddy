@@ -63,7 +63,11 @@ export default function Me() {
               }
               tone={data?.identityVerified ? 'positive' : 'neutral'}
             />
-            <Pill icon="sparkles-outline" label={s.me.credits(Number(data?.creditsBalance ?? 0))} />
+            {/* Only once there are some: "0 credits" on day one raises a question the screen
+                never answers. */}
+            {Number(data?.creditsBalance ?? 0) > 0 ? (
+              <Pill icon="sparkles-outline" label={s.me.credits(Number(data?.creditsBalance ?? 0))} />
+            ) : null}
           </View>
 
           {/* The pill above says what is missing; on its own it was a dead end. Nobody can be

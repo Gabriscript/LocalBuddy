@@ -9,16 +9,28 @@ export function Pill({
   icon,
   label,
   tone = 'neutral',
+  surface,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  tone?: 'neutral' | 'positive';
+  /// `positive` is the Verified green and belongs to the identity badge alone; `strong` is
+  /// Text, for a fact that changes what you would do today (in town now, free today).
+  tone?: 'neutral' | 'positive' | 'strong';
+  /// Card with a hairline instead of Sunk Paper, for a pill laid on a photograph: opaque, so
+  /// its words keep their contrast whatever the photo is.
+  surface?: boolean;
 }) {
   const c = useColors();
-  const color = tone === 'positive' ? c.success : c.textMuted;
+  const color = tone === 'positive' ? c.success : tone === 'strong' ? c.text : c.textMuted;
 
   return (
-    <View style={[styles.pill, { backgroundColor: c.surfaceMuted }]}>
+    <View
+      style={[
+        styles.pill,
+        surface
+          ? { backgroundColor: c.surface, borderColor: c.border, borderWidth: StyleSheet.hairlineWidth }
+          : { backgroundColor: c.surfaceMuted },
+      ]}>
       <Ionicons name={icon} size={14} color={color} aria-hidden />
       <Text style={[type.caption, { color }]}>{label}</Text>
     </View>

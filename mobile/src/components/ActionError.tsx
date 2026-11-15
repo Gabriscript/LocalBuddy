@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { useMe } from '@/api/hooks';
 import { useStrings } from '@/i18n';
+import { useNotice } from '@/lib/notice';
 import { radius, space, type, useColors } from '@/theme';
 
 import { Button } from './Button';
@@ -55,6 +57,32 @@ export function ActionError({ error, style }: { error: unknown; style?: StylePro
         />
       ) : null}
     </View>
+  );
+}
+
+/// The same refusal as a notice, for a feed whose top may be far out of sight when a tap on
+/// one of its cards fails. Same words and the same way out as the note above.
+export function useRefusalNotice() {
+  const notice = useNotice();
+  const router = useRouter();
+  const s = useStrings();
+  const pending = !!useMe().data?.identityVerificationPending;
+
+  return useCallback(
+    (error: unknown) => {
+      const unverified = error instanceof ApiError && error.code === 'identity_verification_required';
+      notice({
+        title: unverified && pending ? s.common.waitingApproval : errorMessage(error, s),
+        action:
+          unverified && !pending
+            ? {
+                label: s.common.verifyIdentity,
+                onPress: () => router.push({ pathname: '/verify', params: { from: 'app' } }),
+              }
+            : undefined,
+      });
+    },
+    [notice, router, s, pending]
   );
 }
 

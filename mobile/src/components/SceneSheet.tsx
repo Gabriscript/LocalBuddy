@@ -19,10 +19,14 @@ import { space, useColors } from '@/theme';
 export function SceneSheet({
   image,
   focus,
+  footer,
   children,
 }: {
   image: ImageProps['source'];
   focus?: { y: number; ratio: number };
+  /// Held at the bottom edge, above the keyboard: the button a long form ends in, so it is in
+  /// sight from the first field instead of a scroll away.
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   const c = useColors();
@@ -50,10 +54,23 @@ export function SceneSheet({
           contentContainerStyle={[styles.scroll, { paddingTop: height * 0.3 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <View style={[styles.sheet, { backgroundColor: c.background, paddingBottom: insets.bottom + space.lg }]}>
+          <View
+            style={[
+              styles.sheet,
+              { backgroundColor: c.background, paddingBottom: footer ? space.md : insets.bottom + space.lg },
+            ]}>
             {children}
           </View>
         </ScrollView>
+        {footer ? (
+          <View
+            style={[
+              styles.footer,
+              { backgroundColor: c.background, borderTopColor: c.border, paddingBottom: insets.bottom + space.md },
+            ]}>
+            {footer}
+          </View>
+        ) : null}
       </KeyboardAvoidingView>
     </View>
   );
@@ -64,4 +81,5 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, justifyContent: 'flex-end' },
   // 28, above the 20 of a card: the sheet is the one surface that holds a whole screen.
   sheet: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: space.lg, gap: space.md },
+  footer: { paddingHorizontal: space.lg, paddingTop: space.md, borderTopWidth: StyleSheet.hairlineWidth },
 });

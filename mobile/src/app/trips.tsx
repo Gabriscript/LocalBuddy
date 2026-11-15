@@ -7,19 +7,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTripMutations, useTrips } from '@/api/hooks';
 import { ActionError } from '@/components/ActionError';
 import { Button } from '@/components/Button';
+import { DateRange } from '@/components/DateRange';
 import { DestinationSearch } from '@/components/DestinationSearch';
-import { Field } from '@/components/Field';
 import { Screen } from '@/components/Screen';
 import { useLanguage, useStrings } from '@/i18n';
-import { isoDay, isoDayIn, isValidDay, shortDay } from '@/lib/dates';
+import { isoDayIn, shortDay } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 /// Where I will be, and when. Discovery shows these to people searching the same city, as
 /// "In town now" or "Arriving". The city is picked from the suggestions; a typed one is only
 /// for a place nobody lives in yet (DestinationSearch offers it as its own row).
 ///
-/// shortcut: dates are typed as YYYY-MM-DD, because Expo has no built-in date picker that works
-/// on Android and web alike and a new dependency is not worth it for the pilot.
+/// The dates are tapped on a calendar (DateRange): arrival, then departure. The server's own
+/// limits are the calendar's too, so a day it would refuse cannot be picked.
+const MAX_DAYS = 30;
+const MAX_DAYS_AHEAD = 365;
+
 export default function Trips() {
   const c = useColors();
   const router = useRouter();
@@ -29,18 +32,14 @@ export default function Trips() {
   const { create, remove } = useTripMutations();
 
   const [city, setCity] = useState<string>();
-  const [from, setFrom] = useState(() => isoDayIn(0));
-  const [to, setTo] = useState(() => isoDayIn(6));
+  // A week from today to start with, so the calendar opens showing what a range looks like.
+  const [range, setRange] = useState<{ from?: string; to?: string }>(() => ({ from: isoDayIn(0), to: isoDayIn(6) }));
   const [touched, setTouched] = useState(false);
-
-  const datesOk = isValidDay(from) && isValidDay(to);
-  // ISO day strings compare correctly as text.
-  const orderOk = !datesOk || from <= to;
-  const overOk = !datesOk || to >= isoDay();
+  const { from, to } = range;
 
   function save() {
     setTouched(true);
-    if (!city || !datesOk || !orderOk || !overOk) return;
+    if (!city || !from || !to) return;
     create.mutate({ city, from, to });
   }
 
@@ -110,34 +109,29 @@ export default function Trips() {
             </Text>
           ) : null}
 
-          <Field
-            label={s.trips.from}
-            value={from}
-            onChangeText={setFrom}
-            placeholder="YYYY-MM-DD"
-            keyboardType="numbers-and-punctuation"
-            maxLength={10}
-            error={touched && !isValidDay(from) ? s.trips.badDate : undefined}
-          />
-          <Field
-            label={s.trips.to}
-            value={to}
-            onChangeText={setTo}
-            placeholder="YYYY-MM-DD"
-            keyboardType="numbers-and-punctuation"
-            maxLength={10}
-            error={
-              touched
-                ? !isValidDay(to)
-                  ? s.trips.badDate
-                  : !orderOk
-                    ? s.trips.dateOrder
-                    : !overOk
-                      ? s.trips.dateOver
-                      : undefined
-                : undefined
-            }
-          />
+          <View style={styles.when}>
+            <Text style={[type.label, { color: c.text }]}>{s.trips.when}</Text>
+            {/* One line that is the instruction until both days are chosen, and the answer once
+                they are. Red only when somebody tried to save without finishing. */}
+            <Text
+              accessibilityRole={touched && !to ? 'alert' : undefined}
+              aria-live="polite"
+              style={[type.body, { color: touched && !to ? c.danger : c.textMuted }]}>
+              {from && to
+                ? s.trips.range(shortDay(from, language), shortDay(to, language))
+                : from
+                  ? s.trips.pickEnd
+                  : s.trips.pickStart}
+            </Text>
+            <DateRange
+              from={from}
+              to={to}
+              onChange={setRange}
+              min={isoDayIn(0)}
+              max={isoDayIn(MAX_DAYS_AHEAD)}
+              maxDays={MAX_DAYS}
+            />
+          </View>
 
           <ActionError error={create.error} />
           <Button title={s.trips.save} onPress={save} loading={create.isPending} />
@@ -164,4 +158,5 @@ const styles = StyleSheet.create({
   lastRow: { borderBottomWidth: 0 },
   rowText: { flex: 1 },
   search: { marginHorizontal: -space.md, marginTop: -space.md },
+  when: { gap: space.sm },
 });

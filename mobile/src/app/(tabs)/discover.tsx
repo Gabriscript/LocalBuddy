@@ -1,15 +1,17 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useLocalSearchParams, useRouter, useScrollToTop } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { components } from '@/api/generated';
 import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
 import type { ActivityStyle, DayOfWeek, Lifestyle, TimeOfDay } from '@/api/labels';
-import { ActionError } from '@/components/ActionError';
+import { useRefusalNotice } from '@/components/ActionError';
 import { Button } from '@/components/Button';
 import { DestinationSearch } from '@/components/DestinationSearch';
 import { FilterSheet } from '@/components/FilterSheet';
 import { IconButton } from '@/components/IconButton';
+import { Leaving } from '@/components/Leaving';
 import { MatchBurst } from '@/components/MatchBurst';
 import { ProfileCard } from '@/components/ProfileCard';
 import { LoadingMore, Screen } from '@/components/Screen';
@@ -18,6 +20,7 @@ import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
 import { isoDay } from '@/lib/dates';
+import { useNotice } from '@/lib/notice';
 import { radius, space, type, useColors } from '@/theme';
 
 /// Route params are strings; the query takes booleans and a list of times of day.
@@ -40,12 +43,17 @@ type Match = { userId: string; name: string; photoUrl?: string | null; conversat
 
 const asBool = (value?: string) => (value === undefined ? undefined : value === 'true');
 const asParam = (value?: boolean) => (value === undefined ? undefined : String(value));
+/// One array for "nothing to list yet", so the list is not handed a new one on every render.
+const NOBODY: Card[] = [];
 
 export default function Discover() {
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const clearance = useTabBarClearance();
   const router = useRouter();
   const s = useStrings();
+  const notice = useNotice();
+  const refuse = useRefusalNotice();
   const roles = [
     { value: undefined, label: s.discover.everyone },
     { value: 'host', label: s.discover.hosts },
@@ -105,27 +113,32 @@ export default function Discover() {
     useDiscovery(filters);
   const { interest, pass, undoPass } = useDecide();
   const busy = interest.isPending || pass.isPending || undoPass.isPending;
-  // Who was passed in this visit, latest last: the undo button walks back through them.
-  const [passed, setPassed] = useState<string[]>([]);
-  // The stack belongs to one feed: another city or filter set starts it over.
+  // Who has been answered in this visit. Their card folds away at once, without waiting for
+  // the server, and comes back if the server refuses or the pass is undone.
+  const [answered, setAnswered] = useState<string[]>([]);
+  // The list belongs to one feed: another city or filter set starts it over.
   const feedKey = JSON.stringify(filters);
   const [stackKey, setStackKey] = useState(feedKey);
   if (stackKey !== feedKey) {
     setStackKey(feedKey);
-    setPassed([]);
+    setAnswered([]);
   }
+  const leave = useCallback((id: string) => setAnswered((ids) => [...ids, id]), []);
+  const stay = useCallback((id: string) => setAnswered((ids) => ids.filter((other) => other !== id)), []);
 
   // A reciprocal match is the moment the whole product exists for, so it gets a moment of its
-  // own instead of a silent navigation. Anything else: the card simply goes.
+  // own instead of a silent navigation. A request that only left gets a quieter word: it went,
+  // and this is what happens next.
   const [match, setMatch] = useState<Match | null>(null);
 
   /// `mutate`, not `mutateAsync`: a refusal from the server is a rejected promise nobody
-  /// awaits, and an unverified member got a tick that silently did nothing. This way the
-  /// refusal lands in `interest.error`, where the screen can say it out loud.
+  /// awaits, and an unverified member got a tap that silently did nothing. This way the refusal
+  /// reaches `onError`, which says it out loud wherever the feed is scrolled to.
   ///
   /// These three are stable across renders so that the `memo` on ProfileCard can do its job.
-  const showInterest = useCallback(
-    (card: Card) =>
+  const ask = useCallback(
+    (card: Card) => {
+      leave(card.id!);
       interest.mutate(card.id!, {
         onSuccess: (result) => {
           if (result.matched && result.conversationId) {
@@ -135,10 +148,21 @@ export default function Discover() {
               photoUrl: card.photoUrl,
               conversationId: result.conversationId,
             });
+          } else {
+            notice({
+              title: s.profile.asked(card.name!),
+              body: s.profile.askedBody(card.name!),
+              photoPath: card.photoUrl,
+            });
           }
         },
-      }),
-    [interest]
+        onError: (failure) => {
+          stay(card.id!);
+          refuse(failure);
+        },
+      });
+    },
+    [interest, notice, refuse, leave, stay, s]
   );
 
   const showProfile = useCallback(
@@ -147,14 +171,28 @@ export default function Discover() {
   );
 
   const passOn = useCallback(
-    (card: Card) => pass.mutate(card.id!, { onSuccess: () => setPassed((ids) => [...ids, card.id!]) }),
-    [pass]
+    (card: Card) => {
+      leave(card.id!);
+      pass.mutate(card.id!, {
+        // A cross has no words on it, so the first one explains itself here, with the way back.
+        onSuccess: () =>
+          notice({
+            title: s.discover.passed(card.name!),
+            photoPath: card.photoUrl,
+            action: {
+              label: s.common.undo,
+              // On success or refusal (e.g. 404) the card is released: a failure must not hide it.
+              onPress: () => undoPass.mutate(card.id!, { onSettled: () => stay(card.id!) }),
+            },
+          }),
+        onError: (failure) => {
+          stay(card.id!);
+          refuse(failure);
+        },
+      });
+    },
+    [pass, undoPass, notice, refuse, leave, stay, s]
   );
-  const undo = () => {
-    const last = passed.at(-1);
-    // On success or refusal (e.g. 404) the id leaves the stack: a failure must not retry forever.
-    if (last) undoPass.mutate(last, { onSettled: () => setPassed((ids) => ids.filter((id) => id !== last)) });
-  };
 
   // With a city set the server orders the feed: in town now, arriving by date, then residents.
   // A header is drawn where that group changes, so it needs no markers from the server.
@@ -165,122 +203,136 @@ export default function Discover() {
     ({ item, index }: { item: Card; index: number }) => {
       const heading = showGroups && group(item) !== group(items[index - 1]) ? group(item) : null;
       return (
-        <View style={styles.group}>
-          {heading ? (
-            <Text role="heading" style={[type.label, { color: c.textMuted }]}>
-              {s.discover[heading]}
-            </Text>
-          ) : null}
-          <ProfileCard
-            card={item}
-            busy={busy}
-            onOpen={showProfile}
-            onPass={passOn}
-            onInterest={showInterest}
-          />
-        </View>
+        <Leaving leaving={answered.includes(item.id!)}>
+          <View style={styles.item}>
+            {heading ? (
+              <Text role="heading" style={[type.label, { color: c.textMuted }]}>
+                {s.discover[heading]}
+              </Text>
+            ) : null}
+            <ProfileCard card={item} busy={busy} onOpen={showProfile} onPass={passOn} onInterest={ask} />
+          </View>
+        </Leaving>
       );
     },
-    [busy, showProfile, passOn, showInterest, showGroups, items, c.textMuted, s]
+    [busy, showProfile, passOn, ask, showGroups, items, answered, c.textMuted, s]
+  );
+
+  // The whole top of the screen scrolls away with the feed, so a person gets the full height
+  // of the phone. Tapping the Discover tab again brings the search back.
+  const list = useRef<FlatList<Card>>(null);
+  useScrollToTop(list);
+  // Past the band the status bar is over Paper: its icons turn dark, and a strip of Paper keeps
+  // the cards from running under the clock.
+  const band = useRef(0);
+  const [pastBand, setPastBand] = useState(false);
+
+  const header = (
+    <View>
+      <View onLayout={(event) => (band.current = event.nativeEvent.layout.height)}>
+        <TabHeader title={s.discover.title} lightStatusBar={!pastBand}>
+          <DestinationSearch
+            city={filters.city}
+            onChange={(city) => router.setParams({ city })}
+            style={styles.search}
+            trailing={
+              <IconButton
+                name="options-outline"
+                // The count is in the label too: a badge read as "Filters" would hide that the
+                // feed is already narrowed.
+                label={active ? s.discover.filtersLabel(active) : s.discover.filters}
+                onPress={() => setFiltering(true)}
+                tint={c.onNight}
+                band
+                badge={active}
+              />
+            }
+          />
+        </TabHeader>
+      </View>
+
+      {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
+          never the accent. */}
+      <View
+        style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
+        role="radiogroup"
+        aria-label={s.discover.whoToShow}>
+        {roles.map((role) => {
+          const selected = params.role === role.value;
+          return (
+            <Pressable
+              key={role.label}
+              role="radio"
+              aria-checked={selected}
+              onPress={() => router.setParams({ role: role.value })}
+              style={({ pressed }) => [
+                styles.segment,
+                {
+                  backgroundColor: selected ? c.surface : 'transparent',
+                  borderColor: selected ? c.border : 'transparent',
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}>
+              <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
+                {role.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 
   return (
     <View style={[styles.page, { backgroundColor: c.background }]}>
-      <TabHeader
-        title={s.discover.title}
-        subtitle={s.discover.subtitle}
-        action={
-          <IconButton
-            name="options-outline"
-            // The count is in the label too: a badge read as "Filters" would hide that the feed
-            // is already narrowed.
-            label={active ? s.discover.filtersLabel(active) : s.discover.filters}
-            onPress={() => setFiltering(true)}
-            tint={c.onNight}
-            band
-            badge={active}
-          />
+      <FlatList
+        ref={list}
+        // Loading, a failure and an empty feed are drawn inside the list too, so the search and
+        // the filters above them never unmount while somebody is typing in them.
+        data={isPending || error ? NOBODY : items}
+        keyExtractor={(card) => card.id!}
+        ListHeaderComponent={header}
+        ListEmptyComponent={
+          <View style={styles.state}>
+            <Screen
+              loading={isPending}
+              skeleton={<FeedSkeleton />}
+              error={error}
+              onRetry={refetch}
+              empty={active ? s.discover.emptyFiltered : s.discover.empty}
+              // Telling somebody to widen their filters without handing them the filters is
+              // advice, not a way out.
+              emptyAction={
+                <Button
+                  title={active ? s.discover.changeFilters : s.discover.openFilters}
+                  variant="secondary"
+                  onPress={() => setFiltering(true)}
+                />
+              }>
+              {null}
+            </Screen>
+          </View>
         }
+        // The last card clears the floating tab bar instead of hiding behind it.
+        contentContainerStyle={[styles.list, { paddingBottom: clearance }]}
+        showsVerticalScrollIndicator={false}
+        // A tap on a suggested city lands while the keyboard is still up.
+        keyboardShouldPersistTaps="handled"
+        onScroll={(event) => {
+          const past = event.nativeEvent.contentOffset.y > band.current - insets.top;
+          if (past !== pastBand) setPastBand(past);
+        }}
+        scrollEventThrottle={32}
+        onRefresh={refetch}
+        refreshing={isRefetching}
+        // The feed is paged: without this it stopped at the first page and looked finished.
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.6}
+        ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
+        renderItem={renderCard}
       />
 
-      <DestinationSearch city={filters.city} onChange={(city) => router.setParams({ city })} />
-
-      <View style={styles.controls}>
-        {/* A segmented control: Sunk track, the chosen option a Card thumb. Selection is tone,
-            never the accent. */}
-        <View
-          style={[styles.segments, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
-          role="radiogroup"
-          aria-label={s.discover.whoToShow}>
-          {roles.map((role) => {
-            const selected = params.role === role.value;
-            return (
-              <Pressable
-                key={role.label}
-                role="radio"
-                aria-checked={selected}
-                onPress={() => router.setParams({ role: role.value })}
-                style={({ pressed }) => [
-                  styles.segment,
-                  {
-                    backgroundColor: selected ? c.surface : 'transparent',
-                    borderColor: selected ? c.border : 'transparent',
-                    opacity: pressed ? 0.7 : 1,
-                  },
-                ]}>
-                <Text style={[type.label, { color: selected ? c.text : c.textMuted }]} numberOfLines={1}>
-                  {role.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        {passed.length ? (
-          <IconButton name="arrow-undo" label={s.discover.undo} onPress={undo} tint={c.text} disabled={busy} />
-        ) : null}
-      </View>
-
-      {/* A failed pass or tick belongs next to the card it failed on, not on a screen of its
-          own: the feed behind it is still fine. No wrapper — it carries its own inset and
-          disappears completely when there is nothing to say. */}
-      <ActionError error={interest.error ?? pass.error ?? undoPass.error} style={styles.note} />
-
-      <Screen
-        loading={isPending}
-        skeleton={<FeedSkeleton />}
-        error={error}
-        onRetry={refetch}
-        empty={
-          items.length
-            ? undefined
-            : active
-              ? s.discover.emptyFiltered
-              : s.discover.empty
-        }
-        // Telling somebody to widen their filters without handing them the filters is advice,
-        // not a way out.
-        emptyAction={
-          <Button
-            title={active ? s.discover.changeFilters : s.discover.openFilters}
-            variant="secondary"
-            onPress={() => setFiltering(true)}
-          />
-        }>
-        <FlatList
-          data={items}
-          keyExtractor={(card) => card.id!}
-          // The last card clears the floating tab bar instead of hiding behind it.
-          contentContainerStyle={[styles.list, { paddingBottom: clearance }]}
-          showsVerticalScrollIndicator={false}
-          onRefresh={refetch}
-          refreshing={isRefetching}
-          // The feed is paged: without this it stopped at the first page and looked finished.
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.6}
-          ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
-          renderItem={renderCard}
-        />
-      </Screen>
+      {pastBand ? <View style={[styles.statusBar, { height: insets.top, backgroundColor: c.background }]} /> : null}
 
       {filtering ? (
         <FilterSheet value={filters} onClose={() => setFiltering(false)} onApply={applyFilters} />
@@ -307,10 +359,11 @@ export default function Discover() {
 
 const styles = StyleSheet.create({
   page: { flex: 1 },
-  controls: { flexDirection: 'row', alignItems: 'center', gap: space.sm, margin: space.md },
+  // The band already insets its content, so the search drops its own page margins.
+  search: { marginHorizontal: 0, marginTop: 0 },
   segments: {
-    flex: 1,
     flexDirection: 'row',
+    margin: space.md,
     padding: space.xs,
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
@@ -324,7 +377,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  note: { marginHorizontal: space.md, marginBottom: space.md },
-  list: { paddingHorizontal: space.md, gap: space.lg },
-  group: { gap: space.sm },
+  // Grows, so a short state (nobody here) sits in the middle of what is left of the screen.
+  list: { flexGrow: 1 },
+  state: { flexGrow: 1, minHeight: 320 },
+  // The space under a card belongs to the card, so it folds away with it (see Leaving).
+  item: { marginHorizontal: space.md, marginBottom: space.lg, gap: space.sm },
+  statusBar: { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' },
 });

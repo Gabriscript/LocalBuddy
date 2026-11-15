@@ -26,6 +26,9 @@ export const it: Strings = {
     waitingApproval: 'In attesa di approvazione',
     progress: 'Avanzamento',
     stepOf: (step, total) => `Passaggio ${step} di ${total}`,
+    undo: 'Annulla',
+    previousMonth: 'Mese precedente',
+    nextMonth: 'Mese successivo',
   },
 
   roles: { host: 'Host', guest: 'Viaggiatore', entrambi: 'Entrambi' },
@@ -51,6 +54,17 @@ export const it: Strings = {
     passwordHint: 'Almeno 8 caratteri: una maiuscola, una minuscola, un numero e un simbolo.',
     changeLater: 'Puoi cambiarlo quando vuoi.',
     registerFailed: 'Non siamo riusciti a creare il tuo account. Riprova tra poco.',
+    how: [
+      'Trova qualcuno che vive dove stai andando, o che è di passaggio nella tua città.',
+      'Proponi un incontro. Quando dice sì, la chat si apre.',
+      'Nessuno paga nessuno per il tempo passato insieme.',
+    ],
+    haveAccountShort: 'Ho già un account',
+    roleHint: {
+      host: 'Vivi qui e fai vedere la tua città.',
+      guest: 'Sei di passaggio e vuoi conoscere qualcuno che ci vive.',
+      entrambi: 'Host a casa tua, viaggiatore quando parti.',
+    },
   },
 
   onboarding: {
@@ -68,6 +82,7 @@ export const it: Strings = {
     verifySubtitle:
       'Durante il pilota, il team di LocalBuddy conferma ogni identità a mano. Senza, nessuno può scrivere a nessuno: è così che qui puoi incontrare sconosciuti in sicurezza.',
     verifyCta: 'Inizia il controllo',
+    verifyMeanwhile: "Intanto puoi dare un'occhiata in giro.",
     verifyPendingBody: 'Grazie! Il team di LocalBuddy confermerà presto la tua identità.',
     listingTitle: 'Cosa puoi condividere',
     listingSubtitle: 'Un pomeriggio fuori, un letto per la notte, o tutti e due. Puoi cambiarlo più avanti.',
@@ -116,9 +131,8 @@ export const it: Strings = {
     inTown: 'In città ora',
     arriving: 'In arrivo',
     residents: 'Vive qui',
-    undo: "Riporta l'ultima persona scartata",
+    passed: (name) => `Hai saltato ${name}`,
     title: 'Scopri',
-    subtitle: "Chi c'è vicino, e il pomeriggio che hanno in mente.",
     everyone: 'Tutti',
     hosts: 'Host',
     guests: 'Viaggiatori',
@@ -155,7 +169,8 @@ export const it: Strings = {
     smokes: 'fuma',
     openHint: 'Apre il profilo completo',
     passOn: (name) => `Salta ${name}`,
-    interestIn: (name) => `Mostra interesse per ${name}`,
+    askTo: (name) => `Proponi un incontro a ${name}`,
+    sayYesTo: (name) => `Di' sì a ${name}`,
   },
 
   profile: {
@@ -168,13 +183,16 @@ export const it: Strings = {
     reviews: 'Cosa dicono',
     ratedOutOf5: (n) => `Valutazione ${n} su 5`,
     moreReviews: 'Leggi altre recensioni',
-    showInterest: 'Mostra interesse',
+    ask: 'Proponi un incontro',
+    asked: (name) => `Hai proposto un incontro a ${name}`,
+    askedBody: (name) => `Quando ${name} dice sì, la chat si apre.`,
     unlock: 'Sblocca subito la chat',
   },
 
   chats: {
     title: 'Chat',
-    empty: 'Ancora nessuna chat. Quando dite sì tutti e due, si comincia da qui.',
+    empty: 'Ancora nessuna chat. Una chat si apre quando qualcuno ti dice sì, o quando lo dici tu.',
+    findSomeone: "Guarda chi c'è",
     sayHello: 'Saluta',
     unlocked: 'Sbloccata',
     unread: (n) => (n === 1 ? '1 messaggio nuovo' : `${n} messaggi nuovi`),
@@ -185,6 +203,10 @@ export const it: Strings = {
     subtitle: "Vorrebbero conoscerti. Di' sì anche tu e la chat si apre.",
     empty: 'Nessuno aspetta una tua risposta.',
     count: (n) => (n === 1 ? '1 richiesta' : `${n} richieste`),
+    accept: "Di' sì",
+    waiting: (n) => (n === 1 ? '1 persona vorrebbe conoscerti' : `${n} persone vorrebbero conoscerti`),
+    declined: (name) => `Hai detto no a ${name}`,
+    declinedBody: 'Di un no non viene avvisato nessuno.',
   },
 
   chat: {
@@ -222,11 +244,10 @@ export const it: Strings = {
     empty: 'Nessun viaggio in programma.',
     add: 'Aggiungi un viaggio',
     pickCity: "Scegli una città dall'elenco.",
-    from: 'Dal (AAAA-MM-GG)',
-    to: 'Al (AAAA-MM-GG)',
-    badDate: 'Usa il formato AAAA-MM-GG, per esempio 2026-12-12.',
-    dateOrder: 'La data di fine non può precedere quella di inizio.',
-    dateOver: 'Scegli date da oggi in poi.',
+    when: 'Quando ci sei?',
+    pickStart: 'Scegli il giorno in cui arrivi.',
+    pickEnd: 'Ora il giorno in cui riparti.',
+    range: (from, to) => `Dal ${from} al ${to}`,
     save: 'Aggiungi viaggio',
     remove: (city) => `Rimuovi il viaggio a ${city}`,
   },

@@ -1,16 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
 import { useConversations, useProfile, useRequestCount, useRequests } from '@/api/hooks';
 import { Avatar } from '@/components/Avatar';
+import { Button } from '@/components/Button';
 import { LoadingMore, Screen } from '@/components/Screen';
 import { ChatListSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
 import { useStrings } from '@/i18n';
-import { space, type, useColors } from '@/theme';
+import { radius, space, type, useColors } from '@/theme';
 
 type Conversation = components['schemas']['ConversationSummary'];
 type Card = components['schemas']['ProfileCard'];
@@ -18,6 +19,7 @@ type Card = components['schemas']['ProfileCard'];
 export default function Chats() {
   const c = useColors();
   const clearance = useTabBarClearance();
+  const router = useRouter();
   const s = useStrings();
   const { items, isPending, error, refetch, isRefetching, loadMore, isFetchingNextPage } =
     useConversations();
@@ -27,7 +29,7 @@ export default function Chats() {
   return (
     <View style={[styles.page, { backgroundColor: c.background }]}>
       <TabHeader title={s.chats.title} />
-      <RequestStrip cards={requests.items} count={requestCount.data ?? 0} />
+      <RequestCard cards={requests.items} count={requestCount.data ?? 0} />
 
       <Screen
         loading={isPending}
@@ -35,7 +37,11 @@ export default function Chats() {
         error={error}
         onRetry={refetch}
         empty={items.length ? undefined : s.chats.empty}
-        emptyIcon="chatbubble-outline">
+        emptyIcon="chatbubble-outline"
+        // An empty inbox on day one is the normal state, so it hands over the next step.
+        emptyAction={
+          <Button title={s.chats.findSomeone} variant="secondary" onPress={() => router.navigate('/discover')} />
+        }>
         <FlatList
           data={items}
           keyExtractor={(conversation) => conversation.id!}
@@ -57,50 +63,54 @@ export default function Chats() {
   );
 }
 
-const STRIP = 8;
+const FACES = 3;
 
-/// Who is waiting for an answer, as a row of faces above the inbox. Nothing at all when nobody
-/// is: the empty state belongs to the requests screen. The header is the one control for
-/// assistive technology; the faces are a bigger target for the same place.
-function RequestStrip({ cards, count }: { cards: Card[]; count: number }) {
+/// Who is waiting for an answer, as one card above the inbox: their faces, a sentence that says
+/// what they want, and their first names. Nothing at all when nobody is: the empty state
+/// belongs to the requests screen. One control, so a screen reader hears it once, in full.
+function RequestCard({ cards, count }: { cards: Card[]; count: number }) {
   const c = useColors();
   const router = useRouter();
   const s = useStrings();
   if (!count || !cards.length) return null;
 
-  const open = () => router.push('/requests');
+  const shown = cards.slice(0, FACES);
+  const names = shown.map((card) => card.name?.split(' ')[0]).filter(Boolean).join(', ');
   return (
-    <View style={[styles.requests, { borderBottomColor: c.border }]}>
-      <Pressable
-        onPress={open}
-        accessibilityRole="button"
-        accessibilityLabel={`${s.requests.title}, ${s.requests.count(count)}`}
-        style={({ pressed }) => [styles.requestsHead, { opacity: pressed ? 0.7 : 1 }]}>
-        <Text style={[type.label, { color: c.text }]}>{s.requests.title}</Text>
-        <Text style={[type.label, styles.figure, { color: c.textMuted }]}>{count}</Text>
-      </Pressable>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.faces}>
-        {cards.slice(0, STRIP).map((card) => (
-          <Pressable
+    <Pressable
+      onPress={() => router.push('/requests')}
+      accessibilityRole="button"
+      accessibilityLabel={`${s.requests.title}, ${s.requests.waiting(count)}, ${names}`}
+      android_ripple={{ color: c.border }}
+      style={({ pressed }) => [
+        styles.requests,
+        { backgroundColor: pressed ? c.surfaceMuted : c.surface, borderColor: c.border },
+      ]}>
+      {/* Overlapping, each ringed in the card's own colour so the faces stay apart. */}
+      <View style={styles.faces} aria-hidden>
+        {shown.map((card, index) => (
+          <Avatar
             key={card.id}
-            onPress={open}
+            path={card.photoUrl}
+            size={44}
+            photoSize="thumb"
             aria-hidden
-            focusable={false}
-            style={({ pressed }) => [styles.face, { opacity: pressed ? 0.7 : 1 }]}>
-            <Avatar
-              path={card.photoUrl}
-              size={56}
-              photoSize="thumb"
-              aria-hidden
-              style={[styles.facePhoto, { backgroundColor: c.surfaceMuted, borderColor: c.border }]}
-            />
-            <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
-              {card.name?.split(' ')[0]}
-            </Text>
-          </Pressable>
+            style={[
+              styles.face,
+              { backgroundColor: c.surfaceMuted, borderColor: c.surface, marginLeft: index ? -14 : 0 },
+            ]}
+          />
         ))}
-      </ScrollView>
-    </View>
+      </View>
+      <View style={styles.rowText}>
+        <Text style={[type.caption, { color: c.textMuted }]}>{s.requests.title}</Text>
+        <Text style={[type.label, { color: c.text }]}>{s.requests.waiting(count)}</Text>
+        <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
+          {names}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
+    </Pressable>
   );
 }
 
@@ -169,18 +179,19 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  requests: { paddingVertical: space.md, gap: space.sm, borderBottomWidth: StyleSheet.hairlineWidth },
-  requestsHead: {
-    minHeight: 44,
+  requests: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.sm,
-    paddingHorizontal: space.md,
+    gap: space.md,
+    margin: space.md,
+    marginBottom: space.sm,
+    padding: space.md,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   figure: { fontVariant: ['tabular-nums'] },
-  faces: { paddingHorizontal: space.md, gap: space.md },
-  face: { width: 56, alignItems: 'center', gap: space.xs },
-  facePhoto: { borderWidth: StyleSheet.hairlineWidth },
+  faces: { flexDirection: 'row' },
+  face: { borderWidth: 2 },
   rowText: { flex: 1, gap: 2 },
   unread: { minWidth: 24, height: 24, paddingHorizontal: 6, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

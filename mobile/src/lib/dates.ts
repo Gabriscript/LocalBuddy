@@ -22,14 +22,6 @@ export function isoDayIn(days: number): string {
   return isoDay(date);
 }
 
-/// A real calendar day: `2026-02-31` has the right shape and is still not one.
-export function isValidDay(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, m, d] = value.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
-}
-
 /// "12 Dec" in the app's language. Read as a local day, so no time zone can shift it.
 export function shortDay(value: string, language: string): string {
   const [y, m, d] = value.split('-').map(Number);
