@@ -191,6 +191,7 @@ export const sv: Strings = {
     title: 'Chattar',
     empty: 'Inga chattar än. En chatt öppnas när någon säger ja till dig, eller när du säger ja.',
     findSomeone: 'Se vilka som finns',
+    waiting: 'Väntar på svar',
     sayHello: 'Säg hej',
     unlocked: 'Upplåst',
     unread: (n: number) => (n === 1 ? '1 nytt meddelande' : `${n} nya meddelanden`),

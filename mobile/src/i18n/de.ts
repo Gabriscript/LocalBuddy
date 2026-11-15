@@ -191,6 +191,7 @@ export const de: Strings = {
     title: 'Chats',
     empty: 'Noch keine Chats. Ein Chat öffnet sich, wenn jemand zu dir ja sagt oder du zu jemandem.',
     findSomeone: 'Schau, wer da ist',
+    waiting: 'Warten auf Antwort',
     sayHello: 'Hallo sagen',
     unlocked: 'Freigeschaltet',
     unread: (n: number) => (n === 1 ? '1 neue Nachricht' : `${n} neue Nachrichten`),

@@ -195,6 +195,7 @@ export const es: Strings = {
     title: 'Chats',
     empty: 'Aún no hay chats. Un chat se abre cuando alguien te dice que sí, o cuando lo dices tú.',
     findSomeone: 'Mira quién hay',
+    waiting: 'Esperando respuesta',
     sayHello: 'Saluda',
     unlocked: 'Desbloqueado',
     unread: (n) => (n === 1 ? '1 mensaje nuevo' : `${n} mensajes nuevos`),

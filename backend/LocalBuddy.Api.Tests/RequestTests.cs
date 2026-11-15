@@ -104,4 +104,66 @@ public class RequestTests
         Assert.Empty(await RequestsOf(t, anna));
         Assert.Empty(await RequestsOf(t, bruno));
     }
+
+    // ---- The other side: who I asked, and have no yes from yet ---------------------------------
+
+    static async Task<List<Guid>> SentBy(TestDb t, Guid me) =>
+        (await Matches(t, me).Sent()).Value!.Items.Select(card => card.Id).ToList();
+
+    [Fact]
+    public async Task What_I_asked_is_listed_newest_first()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
+        await Matches(t, anna).Interest(bruno);
+        await Task.Delay(2); // version 7 ids order by the millisecond
+        await Matches(t, anna).Interest(carla);
+
+        Assert.Equal([carla, bruno], await SentBy(t, anna));
+        // Asking is one-sided: it puts nothing on the list of the person asked.
+        Assert.Empty(await SentBy(t, bruno));
+    }
+
+    [Fact]
+    public async Task A_yes_takes_it_off_the_list_and_a_no_does_not()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"));
+        await Matches(t, anna).Interest(bruno);
+        await Matches(t, anna).Interest(carla);
+
+        await Matches(t, bruno).Interest(anna);
+        await Matches(t, carla).Pass(anna);
+
+        // Bruno is a chat now. Carla declined, and a decline is never told: were she to leave
+        // the list, the list itself would be telling.
+        Assert.Equal([carla], await SentBy(t, anna));
+    }
+
+    [Fact]
+    public async Task A_pass_of_mine_is_not_something_I_asked()
+    {
+        using var t = new TestDb();
+        var (anna, bruno) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"));
+        await Matches(t, anna).Pass(bruno);
+
+        Assert.Empty(await SentBy(t, anna));
+    }
+
+    [Fact]
+    public async Task A_block_in_either_direction_or_a_ban_hides_who_I_asked()
+    {
+        using var t = new TestDb();
+        var (anna, bruno, carla, dario) =
+            (t.AddVerifiedUser("anna"), t.AddVerifiedUser("bruno"), t.AddVerifiedUser("carla"), t.AddVerifiedUser("dario"));
+        foreach (var asked in new[] { bruno, carla, dario }) await Matches(t, anna).Interest(asked);
+
+        t.Db.Blocks.AddRange(
+            new Block { Id = Guid.NewGuid(), BlockerId = anna, BlockedId = bruno },
+            new Block { Id = Guid.NewGuid(), BlockerId = carla, BlockedId = anna });
+        (await t.Db.Users.FindAsync(dario))!.BannedAt = DateTime.UtcNow;
+        await t.Db.SaveChangesAsync();
+
+        Assert.Empty(await SentBy(t, anna));
+    }
 }

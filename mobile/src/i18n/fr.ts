@@ -196,6 +196,7 @@ export const fr: Strings = {
     title: 'Messages',
     empty: "Aucune conversation pour l'instant. Une conversation s'ouvre quand quelqu'un vous dit oui, ou quand vous le dites.",
     findSomeone: 'Voir qui est là',
+    waiting: 'En attente de réponse',
     sayHello: 'Dites bonjour',
     unlocked: 'Débloquée',
     unread: (n) => (n === 1 ? '1 nouveau message' : `${n} nouveaux messages`),

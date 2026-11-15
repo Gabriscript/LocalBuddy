@@ -29,6 +29,7 @@ export const keys = {
   /// The count shares the prefix, so invalidating `requests` refreshes the badge with the list.
   requests: ['requests'] as const,
   requestCount: ['requests', 'count'] as const,
+  sentRequests: ['requests', 'sent'] as const,
   paymentOptions: ['payment-options'] as const,
 };
 
@@ -120,6 +121,16 @@ export function useRequests() {
   return usePages(
     keys.requests,
     async (page) => unwrap(await api.GET('/api/v1/users/me/requests', { params: { query: { page } } })),
+    POLL.requests
+  );
+}
+
+/// The other side: people I asked who have not said yes yet. A server that predates the route
+/// answers 404, which a screen reads as nobody waiting rather than as a broken inbox.
+export function useSentRequests() {
+  return usePages(
+    keys.sentRequests,
+    async (page) => unwrap(await api.GET('/api/v1/users/me/requests/sent', { params: { query: { page } } })),
     POLL.requests
   );
 }

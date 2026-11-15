@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
-import { useConversations, useProfile, useRequestCount, useRequests } from '@/api/hooks';
+import { useConversations, useProfile, useRequestCount, useRequests, useSentRequests } from '@/api/hooks';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { LoadingMore, Screen } from '@/components/Screen';
@@ -25,11 +25,13 @@ export default function Chats() {
     useConversations();
   const requests = useRequests();
   const requestCount = useRequestCount();
+  const sent = useSentRequests();
 
   return (
     <View style={[styles.page, { backgroundColor: c.background }]}>
       <TabHeader title={s.chats.title} />
       <RequestCard cards={requests.items} count={requestCount.data ?? 0} />
+      <Waiting cards={sent.items} />
 
       <Screen
         loading={isPending}
@@ -51,6 +53,7 @@ export default function Chats() {
             refetch();
             requests.refetch();
             requestCount.refetch();
+            sent.refetch();
           }}
           refreshing={isRefetching}
           onEndReached={loadMore}
@@ -111,6 +114,38 @@ function RequestCard({ cards, count }: { cards: Card[]; count: number }) {
       </View>
       <Ionicons name="chevron-forward" size={20} color={c.textMuted} aria-hidden />
     </Pressable>
+  );
+}
+
+/// Who I asked and have no yes from yet, as a row of faces: the proof that a request went, for
+/// as long as it is unanswered. Each face opens that person's profile. Nothing when nobody is.
+function Waiting({ cards }: { cards: Card[] }) {
+  const c = useColors();
+  const router = useRouter();
+  const s = useStrings();
+  if (!cards.length) return null;
+
+  return (
+    <View style={styles.waiting}>
+      <Text role="heading" style={[type.caption, styles.waitingHead, { color: c.textMuted }]}>
+        {s.chats.waiting}
+      </Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.waitingFaces}>
+        {cards.map((card) => (
+          <Pressable
+            key={card.id}
+            onPress={() => router.push({ pathname: '/user/[id]', params: { id: card.id! } })}
+            accessibilityRole="button"
+            accessibilityLabel={card.name ?? ''}
+            style={({ pressed }) => [styles.waitingFace, { opacity: pressed ? 0.7 : 1 }]}>
+            <Avatar path={card.photoUrl} size={48} photoSize="thumb" aria-hidden style={{ backgroundColor: c.surfaceMuted }} />
+            <Text style={[type.caption, { color: c.textMuted }]} numberOfLines={1}>
+              {card.name?.split(' ')[0]}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -191,6 +226,10 @@ const styles = StyleSheet.create({
   },
   figure: { fontVariant: ['tabular-nums'] },
   faces: { flexDirection: 'row' },
+  waiting: { paddingTop: space.sm, paddingBottom: space.md, gap: space.sm },
+  waitingHead: { paddingHorizontal: space.md },
+  waitingFaces: { paddingHorizontal: space.md, gap: space.md },
+  waitingFace: { width: 56, alignItems: 'center', gap: space.xs },
   face: { borderWidth: 2 },
   rowText: { flex: 1, gap: 2 },
   unread: { minWidth: 24, height: 24, paddingHorizontal: 6, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },

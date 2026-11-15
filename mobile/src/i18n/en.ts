@@ -199,6 +199,8 @@ export const en = {
     title: 'Chats',
     empty: 'No chats yet. A chat opens when someone says yes to you, or you say yes to them.',
     findSomeone: "See who's around",
+    /// Above the inbox: the people asked who have not said yes yet.
+    waiting: 'Waiting for an answer',
     sayHello: 'Say hello',
     unlocked: 'Unlocked',
     unread: (n: number) => (n === 1 ? '1 new message' : `${n} new messages`),

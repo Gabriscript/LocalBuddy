@@ -191,6 +191,7 @@ export const fi: Strings = {
     title: 'Keskustelut',
     empty: 'Ei vielä keskusteluja. Keskustelu avautuu, kun joku sanoo sinulle kyllä tai sinä sanot kyllä jollekulle.',
     findSomeone: 'Katso, keitä on paikalla',
+    waiting: 'Odottaa vastausta',
     sayHello: 'Sano hei',
     unlocked: 'Avattu',
     unread: (n: number) => (n === 1 ? '1 uusi viesti' : `${n} uutta viestiä`),

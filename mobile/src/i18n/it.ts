@@ -193,6 +193,7 @@ export const it: Strings = {
     title: 'Chat',
     empty: 'Ancora nessuna chat. Una chat si apre quando qualcuno ti dice sì, o quando lo dici tu.',
     findSomeone: "Guarda chi c'è",
+    waiting: 'In attesa di risposta',
     sayHello: 'Saluta',
     unlocked: 'Sbloccata',
     unread: (n) => (n === 1 ? '1 messaggio nuovo' : `${n} messaggi nuovi`),

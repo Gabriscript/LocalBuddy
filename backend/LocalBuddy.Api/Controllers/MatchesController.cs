@@ -89,13 +89,43 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
     {
         (page, pageSize) = Page<ProfileCard>.Clamp(page, pageSize);
 
-        var rows = await (
-                from m in PendingRequestsTo(User.Id())
-                join u in db.Users on m.InitiatorId equals u.Id
-                // Version 7 ids are time-ordered, so this is newest request first without a
-                // timestamp column. The id is unique, so pages cannot overlap either.
-                orderby m.Id descending
-                select u)
+        return await CardsAsync(
+            from m in PendingRequestsTo(User.Id())
+            join u in db.Users on m.InitiatorId equals u.Id
+            // Version 7 ids are time-ordered, so this is newest request first without a
+            // timestamp column. The id is unique, so pages cannot overlap either.
+            orderby m.Id descending
+            select u,
+            page, pageSize);
+    }
+
+    /// The same thing seen from the asker's side: people I asked to meet who have not said yes.
+    /// Without it a request leaves and is never seen again, and nobody can tell whom they are
+    /// still waiting for. Somebody who declined stays on the list on purpose: a decline is never
+    /// told (see Interest), and a request that vanished would be telling. Hidden: anyone blocked
+    /// in either direction, and banned accounts (ADR-0005).
+    [HttpGet("me/requests/sent")]
+    [ProducesResponseType<Page<ProfileCard>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<Page<ProfileCard>>> Sent(int page = 0, int pageSize = Page<ProfileCard>.DefaultSize)
+    {
+        (page, pageSize) = Page<ProfileCard>.Clamp(page, pageSize);
+        var me = User.Id();
+        var blocked = db.BlockedIdsFor(me);
+
+        return await CardsAsync(
+            from m in db.Matches
+            where m.InitiatorId == me && m.Status == MatchStatus.Pending && !blocked.Contains(m.TargetId)
+            join u in db.Users on m.TargetId equals u.Id
+            where u.BannedAt == null
+            orderby m.Id descending
+            select u,
+            page, pageSize);
+    }
+
+    /// One page of people as the cards the feed shows, in the order the query gives them.
+    async Task<Page<ProfileCard>> CardsAsync(IQueryable<User> people, int page, int pageSize)
+    {
+        var rows = await people
             .Skip(page * pageSize)
             .Take(pageSize + 1)
             .Select(u => new
