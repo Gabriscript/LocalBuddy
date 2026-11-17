@@ -23,6 +23,7 @@ export const en = {
     smokes: 'Smokes',
     canHostOvernight: 'Can host overnight',
     freeToday: 'Free today',
+    references: (n: number) => (n === 1 ? '1 reference' : `${n} references`),
     waitingApproval: 'Waiting for approval',
     progress: 'Progress',
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -114,6 +115,9 @@ export const en = {
     both: 'A bit of both',
     whatWeDo: 'What would we do together?',
     whatWeDoHint: 'A walk through your neighbourhood, a market you love, the bar only locals know.',
+    /// The same first field, for a member who travels and does not host.
+    whatToDo: 'What would you like to do?',
+    whatToDoHint: 'A sauna, a walk, a coffee with a local, a football match: whatever you would enjoy.',
     whyHost: 'Why do you host?',
     languages: 'Languages you speak',
     languagesHint: 'For example: Italian, English, a little Spanish.',
@@ -146,6 +150,19 @@ export const en = {
     empty: 'You have seen everyone nearby. Check back soon, or try another city.',
     changeFilters: 'Change the filters',
     openFilters: 'Open the filters',
+    /// Over a city feed where nobody visiting overlaps my own trip there.
+    notOnYourDates: 'Nobody else is there on your dates yet. These people are around before or after.',
+  },
+
+  /// The line under the destination search on Discover: my own trip, or the way to add one.
+  tripBar: {
+    noTrip: 'Going somewhere? Tell us where and when.',
+    addTrip: 'Add a trip',
+    yourTrip: (city: string, from: string, to: string) => `Your trip: ${city} · ${from} – ${to}`,
+    seeWho: "See who's there",
+    yourDates: (from: string, to: string) => `Your trip: ${from} – ${to}`,
+    goingTo: (city: string) => `Going to ${city}? Add your dates`,
+    addDates: 'Add dates',
   },
 
   filters: {
@@ -165,9 +182,9 @@ export const en = {
   /// The parts of a discovery card's accessible label, read out as one sentence.
   profileCard: {
     verified: 'verified',
-    inTown: 'In town now',
-    arriving: (date: string) => `Arriving ${date}`,
-    rated: (rating: string) => `rated ${rating}`,
+    inTownUntil: (to: string) => `In town until ${to}`,
+    arriving: (from: string, to: string) => `Arriving ${from} – ${to}`,
+    sameDays: 'Same days as you',
     hasCar: 'has a car',
     hasPets: 'has pets',
     smokes: 'smokes',
@@ -181,19 +198,44 @@ export const en = {
   profile: {
     reportOrBlock: 'Report or block',
     anotherPhotoOf: (name: string) => `Another photo of ${name}`,
-    rating: (rating: string) => `${rating} rating`,
     whatWeDo: "What we'll do",
     whyHost: 'Why I host',
     languages: 'Languages',
-    reviews: 'What people say',
-    ratedOutOf5: (n: number) => `Rated ${n} out of 5`,
-    moreReviews: 'Read more reviews',
+    references: 'References',
+    fromTravellers: (n: number) => `${n} from travellers`,
+    fromHosts: (n: number) => `${n} from hosts`,
+    seeAllReferences: (n: number) => `See all ${n} references`,
+    noReferences: 'No references yet.',
+    /// How the author met this member, beside their name: "Host" and "Traveller" come from roles.
+    metUp: 'Met up',
+    recommended: 'Recommended',
+    notRecommended: 'Not recommended',
     ask: 'Ask to meet',
     /// What the app says once the request has left, and what happens next.
     asked: (name: string) => `You asked ${name} to meet`,
     askedBody: (name: string) => `When ${name} says yes, the chat opens.`,
     askedWaiting: 'Asked · waiting for an answer',
     unlock: 'Skip the wait and unlock the chat',
+    /// Above the profile of someone who asked me, when they wrote a note.
+    noteTitle: (name: string) => `${name} wrote to you`,
+    /// Over my own profile, opened from "Preview my profile".
+    previewBanner: 'This is how other members see your profile.',
+  },
+
+  /// The sheet "Ask to meet" opens: an optional note the other person reads before answering.
+  askSheet: {
+    title: (name: string) => `Ask ${name} to meet`,
+    noteLabel: (name: string) => `Your note to ${name} (optional)`,
+    placeholder: "Say hello, and why you'd like to meet.",
+    helper: (name: string) => `${name} reads this before answering. If they say yes, the chat opens with it.`,
+    charsLeft: (n: number) => `${n} left`,
+    send: 'Send request',
+    /// Prefilled when I have a trip to their city.
+    suggestVisiting: (name: string, city: string, from: string, to: string) =>
+      `Hi ${name}! I'll be in ${city} ${from} – ${to} and I'd love to meet you. `,
+    /// Prefilled when we are both visiting the same city on overlapping days (my dates).
+    suggestSame: (name: string, city: string, from: string, to: string) =>
+      `Hi ${name}! I'll be in ${city} ${from} – ${to} too. Would you like to meet up? `,
   },
 
   chats: {
@@ -201,7 +243,7 @@ export const en = {
     empty: 'No chats yet. A chat opens when someone says yes to you, or you say yes to them.',
     findSomeone: "See who's around",
     /// Above the inbox: the people asked who have not said yes yet.
-    waiting: 'Waiting for an answer',
+    waiting: 'Waiting for their answer',
     sayHello: 'Say hello',
     unlocked: 'Unlocked',
     unread: (n: number) => (n === 1 ? '1 new message' : `${n} new messages`),
@@ -215,15 +257,18 @@ export const en = {
     accept: 'Say yes',
     waiting: (n: number) =>
       n === 1 ? '1 person would like to meet you' : `${n} people would like to meet you`,
+    andMore: (n: number) => (n === 1 ? 'and 1 more' : `and ${n} more`),
     declined: (name: string) => `You said no to ${name}`,
     declinedBody: 'Nobody is told about a no.',
+    /// The caption over the note that came with a request.
+    noteFrom: (name: string) => `${name} wrote:`,
   },
 
   chat: {
     back: 'Back to chats',
     openProfile: (name: string) => `${name}, open their profile`,
     conversation: 'Conversation',
-    moreActions: 'Review, report or block',
+    moreActions: 'Leave a reference, report or block',
     empty: 'Nothing here yet. Someone has to say hello first.',
     youSaid: (text: string) => `You said: ${text}`,
     /// The name is missing until the other member's profile has loaded.
@@ -237,8 +282,8 @@ export const en = {
   me: {
     notVerified: 'Not verified yet',
     freeTodayHint: 'Show that you are up for a meeting until midnight.',
-    credits: (n: number) => (n === 1 ? '1 credit' : `${n} credits`),
     editProfile: 'Edit profile',
+    previewProfile: 'Preview my profile',
     blocked: 'Blocked members',
     trips: 'My trips',
     signOut: 'Sign out',
@@ -263,10 +308,16 @@ export const en = {
     add: 'Add a trip',
     pickCity: 'Pick a city from the list.',
     when: 'When are you there?',
-    pickStart: 'Pick the day you arrive.',
-    pickEnd: 'Now the day you leave.',
+    tapDays: 'Tap your arrival day, then your last day.',
+    pickEnd: 'Now tap your last day.',
     range: (from: string, to: string) => `${from} to ${to}`,
     save: 'Add trip',
+    saveChanges: 'Save changes',
+    edit: (city: string) => `Edit the trip to ${city}`,
+    /// The form heading while a trip is loaded into it.
+    editHeading: (city: string) => `Edit your trip to ${city}`,
+    saved: 'Trip saved',
+    savedBody: (city: string, from: string, to: string) => `${city} · ${from} – ${to}`,
     remove: (city: string) => `Remove the trip to ${city}`,
   },
 
@@ -298,32 +349,30 @@ export const en = {
     blockBody: (name: string) =>
       `${name} will not see your profile and you will not see theirs. Any conversation between you closes in both directions.`,
     undoLater: 'You can undo this later from Blocked members, in your own profile.',
-    leaveReview: 'Leave a review',
+    leaveReference: 'Leave a reference',
   },
 
   review: {
-    sent: 'Review sent',
-    sentBody:
-      'Thank you. It is on their profile now, where the next person will read it before getting in touch.',
-    title: (name: string) => `Review ${name}`,
-    send: 'Send review',
-    howWasIt: 'How was it?',
-    rating: 'Rating',
-    stars: (n: number) => (n === 1 ? '1 star' : `${n} stars`),
-    comment: 'Anything to add?',
-    commentHint:
-      'Optional. It stays on their profile, so write what the next person would want to know.',
+    title: (name: string) => `Leave a reference for ${name}`,
+    recommend: (name: string) => `Would you recommend ${name}?`,
+    yes: 'Yes',
+    no: 'No',
+    howMet: 'How did you meet?',
+    iHosted: (name: string) => `I hosted ${name}`,
+    theyHosted: (name: string) => `${name} hosted me`,
+    metUp: 'We met up',
+    howWent: 'How did it go?',
+    hint: 'It stays on their profile, so write what the next person would want to know.',
+    publish: 'Publish',
+    published: 'Reference published',
   },
 
   unlock: {
     title: 'Unlock the chat',
     checking: 'Checking what this costs you.',
     subscription: 'Your subscription covers it, with nothing more to pay.',
-    credits: (have: number, cost: number) =>
-      `You have ${have} ${have === 1 ? 'credit' : 'credits'} from hosting. This uses ${cost}.`,
     money: (price: string) => `${price}, once, for this one person.`,
     ctaSubscription: 'Open the chat',
-    ctaCredits: (n: number) => (n === 1 ? 'Use 1 credit' : `Use ${n} credits`),
     ctaMoney: (price: string) => `Pay ${price}`,
     body: (name: string) =>
       `This opens a chat with ${name} now, without waiting for them to show interest back.`,
@@ -371,7 +420,7 @@ export const en = {
     account_banned: 'This account is suspended and can no longer use LocalBuddy.',
     account_not_found: 'This account no longer exists.',
     already_responded: 'You have already responded to this profile.',
-    already_reviewed: 'You have already reviewed this member.',
+    already_reviewed: 'You have already left a reference for this member.',
     already_subscribed: 'You already have an active subscription.',
     blocked: 'This member is not reachable.',
     compliance_not_acknowledged: 'To offer a place to stay, first confirm the three legal obligations.',
@@ -387,7 +436,9 @@ export const en = {
     invalid_slot:
       'Each availability slot needs a known time of day, and a season that ends after it starts.',
     moderator_only: 'Only moderators can do this.',
-    no_exchange: 'You can review someone only after you have both written in the same conversation.',
+    no_exchange: 'You can leave a reference once you have both written in a chat.',
+    invalid_context: 'Something went wrong.',
+    rating_or_recommend_required: 'Something went wrong.',
     not_a_resolution: 'A report can only be closed as reviewed or dismissed.',
     not_an_image: 'That file is not a readable image.',
     rate_limited: 'Too many tries in a row. Wait a minute and try again.',

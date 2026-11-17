@@ -1,12 +1,14 @@
 import { useLocalSearchParams, useRouter, useScrollToTop } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ApiError } from '@/api/client';
 import type { components } from '@/api/generated';
-import { useDecide, useDiscovery, type DiscoveryFilters } from '@/api/hooks';
+import { useDecide, useDiscovery, useMe, useRequests, useTrips, type DiscoveryFilters } from '@/api/hooks';
 import type { ActivityStyle, DayOfWeek, Lifestyle, TimeOfDay } from '@/api/labels';
 import { useRefusalNotice } from '@/components/ActionError';
+import { AskSheet } from '@/components/AskSheet';
 import { Button } from '@/components/Button';
 import { DestinationSearch } from '@/components/DestinationSearch';
 import { FilterSheet } from '@/components/FilterSheet';
@@ -18,8 +20,9 @@ import { LoadingMore, Screen } from '@/components/Screen';
 import { FeedSkeleton } from '@/components/Skeleton';
 import { useTabBarClearance } from '@/components/TabBar';
 import { TabHeader } from '@/components/TabHeader';
+import { TripBar } from '@/components/TripBar';
 import { useStrings } from '@/i18n';
-import { isoDay } from '@/lib/dates';
+import { isoDay, overlaps } from '@/lib/dates';
 import { useNotice } from '@/lib/notice';
 import { radius, space, type, useColors } from '@/theme';
 
@@ -45,6 +48,10 @@ const asBool = (value?: string) => (value === undefined ? undefined : value === 
 const asParam = (value?: boolean) => (value === undefined ? undefined : String(value));
 /// One array for "nothing to list yet", so the list is not handed a new one on every render.
 const NOBODY: Card[] = [];
+/// The accounts Discover has already opened on their own trip in this app session. Per account,
+/// so signing out and in as somebody else opens on theirs; once only, so a city the member
+/// cleared or changed is never put back.
+const openedOnTrip = new Set<string>();
 
 export default function Discover() {
   const c = useColors();
@@ -77,6 +84,21 @@ export default function Discover() {
     activityStyle: params.activityStyle as ActivityStyle | undefined,
     lifestyle: params.lifestyle as Lifestyle | undefined,
   };
+
+  // A member with a trip lands on the people of that city: the first time Discover shows for
+  // this account, unless a city is already chosen. Waits for both queries, which may arrive
+  // after the first render.
+  const myId = useMe().data?.id;
+  const { items: myTrips, isPending: tripsPending } = useTrips();
+  const today = isoDay();
+  const cityParam = params.city;
+  useEffect(() => {
+    if (!myId || tripsPending || openedOnTrip.has(myId)) return;
+    openedOnTrip.add(myId);
+    if (cityParam) return;
+    const next = myTrips.filter((trip) => trip.to >= today).sort((a, b) => a.from.localeCompare(b.from))[0];
+    if (next) router.setParams({ city: next.city });
+  }, [myId, tripsPending, myTrips, cityParam, today, router]);
 
   const [filtering, setFiltering] = useState(false);
   // Role and city are not counted: each has its own control right there, in view.
@@ -130,17 +152,23 @@ export default function Discover() {
   // own instead of a silent navigation. A request that only left gets a quieter word: it went,
   // and this is what happens next.
   const [match, setMatch] = useState<Match | null>(null);
+  // Whose "Ask to meet" sheet is open.
+  const [asking, setAsking] = useState<Card | null>(null);
 
   /// `mutate`, not `mutateAsync`: a refusal from the server is a rejected promise nobody
   /// awaits, and an unverified member got a tap that silently did nothing. This way the refusal
   /// reaches `onError`, which says it out loud wherever the feed is scrolled to.
   ///
   /// These three are stable across renders so that the `memo` on ProfileCard can do its job.
-  const ask = useCallback(
-    (card: Card) => {
+  ///
+  /// `note` is undefined only for a yes back, sent without the sheet. From the sheet, any refusal
+  /// but the unverified one stays in it, beside the words the member wrote.
+  const send = useCallback(
+    (card: Card, note?: string) => {
       leave(card.id!);
-      interest.mutate(card.id!, {
+      interest.mutate({ id: card.id!, note }, {
         onSuccess: (result) => {
+          setAsking(null);
           if (result.matched && result.conversationId) {
             setMatch({
               userId: card.id!,
@@ -158,11 +186,27 @@ export default function Discover() {
         },
         onError: (failure) => {
           stay(card.id!);
-          refuse(failure);
+          const unverified = failure instanceof ApiError && failure.code === 'identity_verification_required';
+          if (note === undefined || unverified) {
+            setAsking(null);
+            refuse(failure);
+          }
         },
       });
     },
     [interest, notice, refuse, leave, stay, s]
+  );
+
+  // Someone who already asked me gets the yes at once: there is nothing left to explain.
+  // shortcut: only the loaded pages of my requests count, enough for a demo-sized list.
+  const requests = useRequests().items;
+  const ask = useCallback(
+    (card: Card) => {
+      if (requests.some((asker) => asker.id === card.id)) return send(card);
+      interest.reset(); // the sheet opens without the last card's refusal
+      setAsking(card);
+    },
+    [requests, send, interest]
   );
 
   const showProfile = useCallback(
@@ -199,6 +243,17 @@ export default function Discover() {
   const group = (card?: Card) =>
     !card?.trip ? 'residents' : card.trip.from <= isoDay() ? 'inTown' : 'arriving';
   const showGroups = !!filters.city;
+
+  // Visitors are here, but none on my own dates in this city: said once, so the feed does not
+  // read as "nobody overlaps" only after scrolling every card. Only over loaded visitor cards.
+  const myTripsHere = myTrips.filter(
+    (trip) => trip.to >= today && !!filters.city && trip.city.toLowerCase() === filters.city.toLowerCase()
+  );
+  const visitors = isPending || error ? NOBODY : items.filter((card) => card.trip);
+  const nobodyOnMyDates =
+    myTripsHere.length > 0 &&
+    visitors.length > 0 &&
+    !visitors.some((card) => myTripsHere.some((mine) => overlaps(mine, card.trip!)));
   const renderCard = useCallback(
     ({ item, index }: { item: Card; index: number }) => {
       const heading = showGroups && group(item) !== group(items[index - 1]) ? group(item) : null;
@@ -248,6 +303,8 @@ export default function Discover() {
               />
             }
           />
+          {/* My own trip, tied to the feed: the dates live under Me, where nobody found them. */}
+          <TripBar city={filters.city} onSeeCity={(city) => router.setParams({ city })} />
         </TabHeader>
       </View>
 
@@ -280,6 +337,10 @@ export default function Discover() {
           );
         })}
       </View>
+
+      {nobodyOnMyDates ? (
+        <Text style={[type.body, styles.notOnMyDates, { color: c.textMuted }]}>{s.discover.notOnYourDates}</Text>
+      ) : null}
     </View>
   );
 
@@ -338,6 +399,16 @@ export default function Discover() {
         <FilterSheet value={filters} onClose={() => setFiltering(false)} onApply={applyFilters} />
       ) : null}
 
+      {asking ? (
+        <AskSheet
+          user={{ name: asking.name!, city: asking.city!, trip: asking.trip }}
+          pending={interest.isPending}
+          error={interest.error}
+          onSend={(note) => send(asking, note)}
+          onClose={() => setAsking(null)}
+        />
+      ) : null}
+
       {match ? (
         <MatchBurst
           name={match.name}
@@ -377,6 +448,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
   },
+  notOnMyDates: { marginHorizontal: space.md, marginBottom: space.md },
   // Grows, so a short state (nobody here) sits in the middle of what is left of the screen.
   list: { flexGrow: 1 },
   state: { flexGrow: 1, minHeight: 320 },

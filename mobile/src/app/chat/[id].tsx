@@ -18,13 +18,14 @@ import { Avatar } from '@/components/Avatar';
 import { ReviewSheet } from '@/components/ReviewSheet';
 import { SafetySheet } from '@/components/SafetySheet';
 import { LoadingMore, Screen } from '@/components/Screen';
-import { useStrings } from '@/i18n';
+import { useLanguage, useStrings } from '@/i18n';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Chat() {
   const c = useColors();
   const router = useRouter();
   const s = useStrings();
+  const { language } = useLanguage();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { items, isPending, error, refetch, loadMore, isFetchingNextPage } = useMessages(id);
@@ -65,7 +66,8 @@ export default function Chat() {
           { paddingTop: insets.top + space.sm, backgroundColor: c.surface, borderBottomColor: c.border },
         ]}>
         <Pressable
-          onPress={() => router.back()}
+          // To the Chats tab, not back in history, which may be Requests: the label says chats.
+          onPress={() => router.navigate('/chats')}
           accessibilityRole="button"
           accessibilityLabel={s.chat.back}
           hitSlop={8}
@@ -124,22 +126,30 @@ export default function Chat() {
             onEndReachedThreshold={0.4}
             ListFooterComponent={<LoadingMore visible={isFetchingNextPage} />}
             renderItem={({ item }) => {
-              // Tonal, not accented: mine is Card with a hairline, theirs Sunk Paper, and coral
-              // stays with the send button. The 6pt corner is the tail, on the sender's side.
+              // Mine is Coral with its own label colour, theirs Sunk Paper: testers could not tell
+              // the two apart when mine was Card. The 6pt corner is the tail, on the sender's side,
+              // and the time sits under the bubble on the same side.
               const mine = item.senderId === me?.id;
+              const time = new Date(item.sentAt).toLocaleTimeString(language, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hourCycle: 'h23',
+              });
               return (
                 <View
                   accessible
-                  aria-label={mine ? s.chat.youSaid(item.content) : s.chat.theySaid(other?.name, item.content)}
-                  style={[
-                    styles.bubble,
-                    mine
-                      ? [styles.mine, { backgroundColor: c.surface, borderColor: c.border }]
-                      : [styles.theirs, { backgroundColor: c.surfaceMuted }],
-                  ]}>
-                  <Text style={[type.body, { color: c.text }]}>
-                    {item.content}
-                  </Text>
+                  aria-label={`${mine ? s.chat.youSaid(item.content) : s.chat.theySaid(other?.name, item.content)}, ${time}`}
+                  style={[styles.message, mine ? styles.mine : styles.theirs]}>
+                  <View
+                    style={[
+                      styles.bubble,
+                      mine
+                        ? [styles.mineBubble, { backgroundColor: c.primary }]
+                        : [styles.theirBubble, { backgroundColor: c.surfaceMuted }],
+                    ]}>
+                    <Text style={[type.body, { color: mine ? c.onPrimary : c.text }]}>{item.content}</Text>
+                  </View>
+                  <Text style={[type.caption, { color: c.textMuted }]}>{time}</Text>
                 </View>
               );
             }}
@@ -210,9 +220,12 @@ const styles = StyleSheet.create({
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   title: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   list: { padding: space.md, gap: space.sm },
-  bubble: { maxWidth: '80%', paddingHorizontal: space.md, paddingVertical: space.sm + 2, borderRadius: 18 },
-  mine: { alignSelf: 'flex-end', borderBottomRightRadius: 6, borderWidth: StyleSheet.hairlineWidth },
-  theirs: { alignSelf: 'flex-start', borderBottomLeftRadius: 6 },
+  message: { maxWidth: '80%', gap: 2 },
+  mine: { alignSelf: 'flex-end', alignItems: 'flex-end' },
+  theirs: { alignSelf: 'flex-start', alignItems: 'flex-start' },
+  bubble: { paddingHorizontal: space.md, paddingVertical: space.sm + 2, borderRadius: 18 },
+  mineBubble: { borderBottomRightRadius: 6 },
+  theirBubble: { borderBottomLeftRadius: 6 },
   note: { marginHorizontal: space.sm, marginBottom: space.sm },
   composer: {
     flexDirection: 'row',

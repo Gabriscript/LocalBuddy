@@ -22,6 +22,12 @@ export function isoDayIn(days: number): string {
   return isoDay(date);
 }
 
+/// Whether two stays share at least one day. Both ends are included: leaving on the day the
+/// other arrives still counts.
+export function overlaps(a: { from: string; to: string }, b: { from: string; to: string }): boolean {
+  return a.from <= b.to && b.from <= a.to;
+}
+
 /// "12 Dec" in the app's language. Read as a local day, so no time zone can shift it.
 export function shortDay(value: string, language: string): string {
   const [y, m, d] = value.split('-').map(Number);

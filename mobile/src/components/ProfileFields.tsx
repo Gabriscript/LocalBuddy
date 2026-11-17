@@ -62,9 +62,10 @@ export function ProfileFields({
 
   return (
     <>
+      {/* A traveller has no neighbourhood to show: they are asked what they would enjoy. */}
       <Field
-        label={s.profileFields.whatWeDo}
-        hint={s.profileFields.whatWeDoHint}
+        label={hosts ? s.profileFields.whatWeDo : s.profileFields.whatToDo}
+        hint={hosts ? s.profileFields.whatWeDoHint : s.profileFields.whatToDoHint}
         value={draft.whatWeWillDo}
         onChangeText={set('whatWeWillDo')}
         multiline

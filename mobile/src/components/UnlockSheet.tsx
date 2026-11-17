@@ -29,35 +29,26 @@ export function UnlockSheet({
   const { data: options } = usePaymentOptions();
   const unlock = useUnlock();
 
-  const credits = Number(options?.credits ?? 0);
-  const creditCost = Number(options?.creditCost ?? 1);
   const price = options
     ? new Intl.NumberFormat(language, { style: 'currency', currency: options.currency }).format(
         Number(options.unlockPrice)
       )
     : '';
 
-  // The server spends a subscription first, then credits, then money. This says the same thing
-  // in the same order, so nobody is surprised by what happened.
-  const pays = !options
-    ? 'unknown'
-    : options.subscribed
-      ? 'subscription'
-      : credits >= creditCost
-        ? 'credits'
-        : 'money';
+  // A subscription first, then money, as the server spends them. Credits are leaving the app and
+  // are no longer offered here. shortcut: the server still spends credits before money, so a
+  // member who has some is shown a price that their credits pay; goes once the server drops them.
+  const pays = !options ? 'unknown' : options.subscribed ? 'subscription' : 'money';
 
   const cost = {
     unknown: s.unlock.checking,
     subscription: s.unlock.subscription,
-    credits: s.unlock.credits(credits, creditCost),
     money: s.unlock.money(price),
   }[pays];
 
   const cta = {
     unknown: s.unlock.title,
     subscription: s.unlock.ctaSubscription,
-    credits: s.unlock.ctaCredits(creditCost),
     money: s.unlock.ctaMoney(price),
   }[pays];
 

@@ -554,7 +554,13 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": null | components["schemas"]["InterestRequest"];
+                    "text/json": null | components["schemas"]["InterestRequest"];
+                    "application/*+json": null | components["schemas"]["InterestRequest"];
+                };
+            };
             responses: {
                 /** @description OK */
                 200: {
@@ -2242,6 +2248,9 @@ export interface components {
         };
         /** Format: binary */
         IFormFile: string;
+        InterestRequest: {
+            note?: null | string;
+        };
         InterestResult: {
             matched: boolean;
             /** Format: uuid */
@@ -2311,9 +2320,11 @@ export interface components {
         NewReview: {
             /** Format: uuid */
             subjectId: string;
-            /** Format: int32 */
-            rating: number | string;
             comment: string;
+            /** Format: int32 */
+            rating?: null | number | string;
+            recommend?: null | boolean;
+            context?: null | components["schemas"]["ReferenceContext"];
         };
         NewTrip: {
             city: string;
@@ -2423,7 +2434,14 @@ export interface components {
             photoUrl: null | string;
             /** Format: double */
             rating: null | number | string;
+            /** Format: int32 */
+            references?: number | string;
+            /** Format: int32 */
+            referencesAsHost?: number | string;
+            /** Format: int32 */
+            referencesAsTraveller?: number | string;
             trip?: null | components["schemas"]["PublicTrip"];
+            note?: null | string;
             /** Format: uuid */
             id?: string;
             name?: string;
@@ -2447,6 +2465,12 @@ export interface components {
             listing: null | components["schemas"]["ListingDto"];
             /** Format: double */
             rating: null | number | string;
+            /** Format: int32 */
+            references?: number | string;
+            /** Format: int32 */
+            referencesAsHost?: number | string;
+            /** Format: int32 */
+            referencesAsTraveller?: number | string;
             /** Format: uuid */
             id?: string;
             name?: string;
@@ -2493,6 +2517,8 @@ export interface components {
         PushTokenRemoval: {
             token: string;
         };
+        /** @enum {unknown} */
+        ReferenceContext: "hosted" | "wasHosted" | "metUp" | null;
         RegisterRequest: {
             email: string;
             password: string;
@@ -2530,6 +2556,10 @@ export interface components {
             comment: string;
             /** Format: date-time */
             createdAt: string;
+            recommend: null | boolean;
+            context: null | components["schemas"]["ReferenceContext"];
+            authorName: string;
+            authorPhotoUrl: null | string;
         };
         SendMessage: {
             content: string;

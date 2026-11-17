@@ -3,9 +3,10 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { components } from '@/api/generated';
+import { useTrips } from '@/api/hooks';
 import { LIFE_ICON, roleName, STYLE_ICON } from '@/api/labels';
 import { useLanguage, useStrings } from '@/i18n';
-import { isoDay, shortDay } from '@/lib/dates';
+import { isoDay, overlaps, shortDay } from '@/lib/dates';
 import { radius, space, type, useColors } from '@/theme';
 
 import { AuthedImage } from './AuthedImage';
@@ -14,8 +15,6 @@ import { IconButton } from './IconButton';
 import { Pill } from './Pill';
 
 type Card = components['schemas']['ProfileCard'];
-
-const ONE_DECIMAL = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
 /// The photo leads and the text sits underneath it, rather than over a gradient: it keeps
 /// body text at full contrast on every photo, including a bright one.
@@ -46,15 +45,21 @@ export const ProfileCard = memo(function ProfileCard({
   const c = useColors();
   const s = useStrings();
   const { language } = useLanguage();
-  const rating =
-    typeof card.rating === 'number' ? card.rating.toLocaleString(language, ONE_DECIMAL) : null;
+  // Counts, not stars (ADR-0017). Nothing at 0, as the rating showed nothing when absent.
+  const references = Number(card.references ?? 0) ? s.common.references(Number(card.references)) : null;
   const role = roleName(card.role, s);
-  // Only present when the feed is filtered to a city this member is visiting.
+  // Only present when the feed is filtered to a city this member is visiting. The whole stay
+  // is shown, so a traveller can tell whether it still overlaps their own.
   const trip = card.trip
     ? card.trip.from <= isoDay()
-      ? s.profileCard.inTown
-      : s.profileCard.arriving(shortDay(card.trip.from, language))
+      ? s.profileCard.inTownUntil(shortDay(card.trip.to, language))
+      : s.profileCard.arriving(shortDay(card.trip.from, language), shortDay(card.trip.to, language))
     : null;
+  // Read here rather than passed in, so the feed's props stay as they are; the query is cached.
+  const { items: myTrips } = useTrips();
+  const sameDays =
+    !!card.trip &&
+    myTrips.some((mine) => mine.city.toLowerCase() === card.trip!.city.toLowerCase() && overlaps(mine, card.trip!));
 
   // A card is one control, so a screen reader hears its label and nothing else. The label
   // therefore carries everything the card shows — the pills and the plan included, or pass and
@@ -64,9 +69,10 @@ export const ProfileCard = memo(function ProfileCard({
     card.city,
     role,
     trip,
+    sameDays ? s.profileCard.sameDays : null,
     card.freeToday ? s.common.freeToday : null,
     card.identityVerified ? s.profileCard.verified : null,
-    rating ? s.profileCard.rated(rating) : null,
+    references,
     card.hasCar ? s.profileCard.hasCar : null,
     card.hasPets ? s.profileCard.hasPets : null,
     card.smokes ? s.profileCard.smokes : null,
@@ -95,6 +101,7 @@ export const ProfileCard = memo(function ProfileCard({
           {trip || card.freeToday ? (
             <View style={styles.today}>
               {trip ? <Pill icon="airplane-outline" label={trip} tone="strong" surface /> : null}
+              {sameDays ? <Pill icon="calendar-outline" label={s.profileCard.sameDays} tone="strong" surface /> : null}
               {card.freeToday ? <Pill icon="cafe-outline" label={s.common.freeToday} tone="strong" surface /> : null}
             </View>
           ) : null}
@@ -110,16 +117,15 @@ export const ProfileCard = memo(function ProfileCard({
             ) : null}
           </View>
 
-          <View style={styles.rating}>
+          <View style={styles.meta}>
             <Text style={[type.caption, { color: c.textMuted }]}>
               {card.city} · {role}
             </Text>
-            {rating ? (
+            {references ? (
               <>
                 <Text style={[type.caption, { color: c.textMuted }]}>·</Text>
-                <Ionicons name="star" size={12} color={c.textMuted} aria-hidden />
-                {/* Tabular figures: a rating going from 4.9 to 5.0 must not nudge the row. */}
-                <Text style={[type.caption, styles.figure, { color: c.textMuted }]}>{rating}</Text>
+                <Ionicons name="thumbs-up-outline" size={12} color={c.textMuted} aria-hidden />
+                <Text style={[type.caption, { color: c.textMuted }]}>{references}</Text>
               </>
             ) : null}
           </View>
@@ -146,6 +152,17 @@ export const ProfileCard = memo(function ProfileCard({
           ) : null}
         </View>
       </Pressable>
+
+      {/* What the asker wrote, read before answering (ADR-0015). Their words, so their tone: Sunk
+          Paper, like their side of a chat. Outside the card's button, so it is read on its own. */}
+      {answering && card.note ? (
+        <View style={[styles.note, { backgroundColor: c.surfaceMuted }]}>
+          <Text style={[type.caption, { color: c.textMuted }]}>{s.requests.noteFrom(card.name ?? '')}</Text>
+          <Text style={[type.body, { color: c.text }]} numberOfLines={5}>
+            {card.note}
+          </Text>
+        </View>
+      ) : null}
 
       {onPass && onInterest ? (
         <View style={styles.actions}>
@@ -193,9 +210,9 @@ const styles = StyleSheet.create({
   body: { padding: space.md, gap: space.sm },
   headline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   name: { flexShrink: 1 },
-  rating: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.xs },
-  figure: { fontVariant: ['tabular-nums'] },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.xs },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  note: { gap: space.xs, marginHorizontal: space.md, marginBottom: space.md, padding: space.md, borderRadius: radius.md },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',

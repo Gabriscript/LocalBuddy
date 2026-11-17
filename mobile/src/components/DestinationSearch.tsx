@@ -32,10 +32,20 @@ export function DestinationSearch({
     if (!focused.current) setText(city ?? '');
   }, [city]);
   const typed = text.trim();
-  const { data: cities = [] } = useCities(typed);
+  const { data: cities = [], isPlaceholderData: stale } = useCities(typed);
   // My own upcoming trips are the likeliest next search, so they lead the empty box.
   const { items: trips } = useTrips();
   const tripCities = typed ? [] : [...new Set(trips.map((trip) => trip.city))];
+
+  // Enter does what tapping the first suggestion would: testers typed "Helsinki", pressed Enter
+  // and saw nothing happen. An exact match wins, then the server's first suggestion, which may
+  // name the city in its other language ("florence" suggests "Firenze"). A list still showing the
+  // last keystroke's answer is not trusted for that: the typed text itself is searched instead.
+  function submit() {
+    const lower = typed.toLowerCase();
+    if (!lower) return pick(undefined);
+    pick(cities.find((name) => name.toLowerCase() === lower) ?? (stale ? undefined : cities[0]) ?? typed);
+  }
 
   function pick(next?: string) {
     setText(next ?? '');
@@ -65,7 +75,7 @@ export function DestinationSearch({
             focused.current = false;
             setTimeout(() => setOpen(false), 200);
           }}
-          onSubmitEditing={() => pick(typed)}
+          onSubmitEditing={submit}
           placeholder={s.discover.search}
           placeholderTextColor={c.textMuted}
           accessibilityLabel={s.discover.search}
@@ -113,9 +123,11 @@ function Row({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; l
       accessibilityRole="button"
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}>
       <Ionicons name={icon} size={18} color={c.textMuted} />
-      <Text style={[type.body, { color: c.text }]} numberOfLines={1}>
+      <Text style={[type.body, styles.label, { color: c.text }]} numberOfLines={1}>
         {label}
       </Text>
+      {/* Says the row is a choice to tap, not a line of text. */}
+      <Ionicons name="chevron-forward" size={18} color={c.textMuted} aria-hidden />
     </Pressable>
   );
 }
@@ -135,5 +147,6 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, minHeight: 52 },
   list: { borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, paddingVertical: space.xs },
+  label: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44, paddingHorizontal: space.md },
 });

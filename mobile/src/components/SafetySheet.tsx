@@ -26,7 +26,7 @@ export function SafetySheet({
   onClose: () => void;
   /// Called once the block has landed. The caller leaves the screen: the member is gone from it.
   onBlocked: () => void;
-  /// Passed only where a review is possible, which is a conversation.
+  /// Passed only where a reference is possible, which is a conversation.
   onReview?: () => void;
 }) {
   const c = useColors();
@@ -128,7 +128,7 @@ export function SafetySheet({
 
   return (
     <Sheet title={titles.menu} onClose={onClose}>
-      {onReview ? <Action icon="star-outline" label={s.safety.leaveReview} onPress={onReview} /> : null}
+      {onReview ? <Action icon="thumbs-up-outline" label={s.safety.leaveReference} onPress={onReview} /> : null}
       <Action icon="flag-outline" label={titles.report} onPress={() => setStep('report')} />
       <Action
         icon="remove-circle-outline"

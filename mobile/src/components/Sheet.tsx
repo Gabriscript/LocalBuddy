@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useStrings } from '@/i18n';
@@ -26,6 +26,9 @@ export function Sheet({
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+      {/* The same keyboard handling as the chat and the sign-in pages: the sheet rides up on the
+          keyboard, so a text field in it (the note of a request) and its buttons stay in view. */}
+      <KeyboardAvoidingView behavior="padding" style={styles.root}>
       {/* Tapping beside the sheet closes it, the way a sheet does. Hidden from screen
           readers, which have the Close button instead. */}
       <Pressable
@@ -71,6 +74,7 @@ export function Sheet({
           <View style={{ height: insets.bottom }} />
         )}
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -78,11 +82,8 @@ export function Sheet({
 const styles = StyleSheet.create({
   // Colour comes from the theme: the one hand-written veil in the app was also the thinnest.
   backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  root: { flex: 1, justifyContent: 'flex-end' },
   sheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
     maxHeight: '85%',
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,

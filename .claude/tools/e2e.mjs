@@ -1,6 +1,7 @@
 // End-to-end walk of the main flows against the local stack (API :5200, Expo web :8081), driven through
 // headless Chrome. Two throwaway accounts @e2e.localbuddy.test are created through the real API and
-// deleted at the end, so the demo data is untouched.
+// deleted at the end, so the demo data is untouched. Ben asks Eva with a note in the app; Eva reads
+// it on her request, says yes, and the chat opens with it.
 //   node .claude/tools/e2e.mjs <outDir>      (prints PASS/FAIL per step, exits 1 on the first failure)
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, mkdtempSync } from 'node:fs';
@@ -106,15 +107,31 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
 
-  // 1. Two people exist; Ben says he would like to meet Eva, who has not answered.
+  // 1. Two people exist; Ben asks Eva to meet from her profile, with a note (ADR-0015).
   const eva = await makeUser('e2e-eva', 'Eva'); users.push(eva);
   const ben = await makeUser('e2e-ben', 'Ben'); users.push(ben);
-  const said = await api(`/users/${eva.id}/interest`, { method: 'POST', token: ben.token });
-  check('Ben shows interest in Eva (no match yet)', said.status === 200 && said.json.matched === false, JSON.stringify(said));
+  await go('/login');
+  await evalJs(`localStorage.setItem('localbuddy.token', ${JSON.stringify(ben.token)}); true`);
+  await go(`/user/${eva.id}`);
+  await click('Ask to meet');
+  await waitFor('the ask sheet', async () => (await text()).includes('Ask Eva to meet'));
+  check('"Ask to meet" opens the note sheet', true);
+  await sleep(1000); // the sheet slides up before its field and buttons stay put
+  const note = 'Hei Eva! Sauna by the sea one evening?';
+  await typeInto(0, note);
+  check('the note is typed into the sheet', (await evalJs(`document.querySelector('textarea')?.value`)) === note);
+  await shot('0-ask-sheet');
+  await click('^Send request$');
+  await waitFor('the waiting button', async () => (await text()).includes('Asked · waiting for an answer'));
+  check('after sending, the profile stays and says it is waiting', (await url()) === `/user/${eva.id}`, await url());
+  await shot('0-asked');
   const count = await api('/users/me/requests/count', { token: eva.token });
   check('Eva has one request', count.json?.count === 1, JSON.stringify(count));
+  const asked = await api('/users/me/requests', { token: eva.token });
+  check('the request carries the note', asked.json?.items?.[0]?.note === note, JSON.stringify(asked.json));
 
   // 2. Eva signs in through the real form.
+  await evalJs(`localStorage.removeItem('localbuddy.token'); true`);
   await go('/login');
   await waitFor('the login form', async () => (await text()).includes('Sign in'));
   await typeInto(0, eva.email);
@@ -138,6 +155,8 @@ try {
   await waitFor('/requests', async () => (await url()) === '/requests');
   await waitFor('Ben card', async () => (await text()).includes('Ben'));
   check('Requests screen lists Ben', true);
+  const onCard = await text();
+  check('the request card shows his note', onCard.includes('Ben wrote:') && onCard.includes(note));
   await shot('3-requests');
   const labels = await evalJs(`[...document.querySelectorAll('[role=button]')].map((e) => e.getAttribute('aria-label')).filter(Boolean)`);
   const accept = labels.find((l) => /say yes|di' sì|di que sí|dire oui/i.test(l) && /Ben/.test(l));
@@ -150,12 +169,18 @@ try {
   check('a conversation now exists on the server', conv.json?.items?.length === 1, JSON.stringify(conv.json));
   const left = await api('/users/me/requests/count', { token: eva.token });
   check('the request count is back to 0', left.json?.count === 0, JSON.stringify(left.json));
+  // Page 0 is newest first, so the first message of the chat is the last item.
+  const opened = (await api(`/conversations/${conv.json.items[0].id}/messages`, { token: eva.token })).json?.items ?? [];
+  const first = opened[opened.length - 1];
+  check('the chat opens with Ben\'s note, sent by Ben', first?.content === note && first?.senderId === ben.id, JSON.stringify(opened));
 
   // 5. Say hello: the chat opens and Eva writes; Ben reads it through the API.
   await sleep(1500); // the three choices fly out of the photo before they can be pressed
   await click('^Say hello$');
   await waitFor('the chat', async () => (await url()).startsWith('/chat/'));
   check('"say hello" opens the chat', true);
+  await waitFor('the note in the chat', async () => (await text()).includes(note));
+  check('the chat shows the note as its first message', true);
   const message = 'Hei Ben, welcome to Helsinki!';
   await typeInto(0, message);
   await click('^Send message$');

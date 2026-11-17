@@ -34,7 +34,8 @@ export default function Requests() {
   // Stable across renders, so the `memo` on ProfileCard can skip the rows (see Discover).
   const accept = useCallback(
     (card: Card) =>
-      interest.mutate(card.id!, {
+      // A yes needs no note: the chat opens with theirs (ADR-0015).
+      interest.mutate({ id: card.id! }, {
         onSuccess: (result) => {
           if (result.matched && result.conversationId) {
             setMatch({

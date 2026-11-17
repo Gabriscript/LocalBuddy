@@ -24,6 +24,7 @@ export const fr: Strings = {
     smokes: 'Fume',
     canHostOvernight: 'Peut héberger pour la nuit',
     freeToday: "Libre aujourd'hui",
+    references: (n: number) => (n === 1 ? '1 référence' : `${n} références`),
     waitingApproval: "En attente d'approbation",
     progress: 'Progression',
     stepOf: (step, total) => `Étape ${step} sur ${total}`,
@@ -114,6 +115,8 @@ export const fr: Strings = {
     whatWeDo: 'Que ferions-nous ensemble ?',
     whatWeDoHint:
       'Une balade dans votre quartier, un marché que vous aimez, le bar que seuls les gens du coin connaissent.',
+    whatToDo: "Qu'aimeriez-vous faire ?",
+    whatToDoHint: "Un sauna, une balade, un café avec quelqu'un du coin, un match de foot : ce qui vous ferait plaisir.",
     whyHost: 'Pourquoi accueillez-vous des voyageurs ?',
     languages: 'Langues que vous parlez',
     languagesHint: "Par exemple : italien, anglais, un peu d'espagnol.",
@@ -146,6 +149,17 @@ export const fr: Strings = {
     empty: 'Vous avez vu tout le monde dans le coin. Repassez bientôt, ou essayez une autre ville.',
     changeFilters: 'Modifier les filtres',
     openFilters: 'Ouvrir les filtres',
+    notOnYourDates: "Personne d'autre n'y est encore à vos dates. Ces personnes y sont avant ou après.",
+  },
+
+  tripBar: {
+    noTrip: 'Vous partez ? Dites-nous où et quand.',
+    addTrip: 'Ajouter un voyage',
+    yourTrip: (city: string, from: string, to: string) => `Votre voyage : ${city} · ${from} – ${to}`,
+    seeWho: 'Voir qui est là',
+    yourDates: (from: string, to: string) => `Votre voyage : ${from} – ${to}`,
+    goingTo: (city: string) => `Vous allez à ${city} ? Ajoutez vos dates`,
+    addDates: 'Ajouter des dates',
   },
 
   filters: {
@@ -164,9 +178,9 @@ export const fr: Strings = {
 
   profileCard: {
     verified: 'identité vérifiée',
-    inTown: 'En ville maintenant',
-    arriving: (date) => `Arrive le ${date}`,
-    rated: (rating) => `note ${rating}`,
+    inTownUntil: (to: string) => `En ville jusqu'au ${to}`,
+    arriving: (from: string, to: string) => `Arrive : ${from} – ${to}`,
+    sameDays: 'Mêmes dates que vous',
     hasCar: 'a une voiture',
     hasPets: 'a des animaux',
     smokes: 'fume',
@@ -179,25 +193,45 @@ export const fr: Strings = {
   profile: {
     reportOrBlock: 'Signaler ou bloquer',
     anotherPhotoOf: (name) => `Une autre photo de ${name}`,
-    rating: (rating) => `Note ${rating}`,
     whatWeDo: 'Ce que nous ferons',
     whyHost: "Pourquoi j'accueille",
     languages: 'Langues',
-    reviews: "Ce qu'on en dit",
-    ratedOutOf5: (n) => `Note : ${n} sur 5`,
-    moreReviews: "Lire plus d'avis",
+    references: 'Références',
+    fromTravellers: (n: number) => `${n} de voyageurs`,
+    fromHosts: (n: number) => `${n} d'hôtes`,
+    seeAllReferences: (n: number) => `Voir les ${n} références`,
+    noReferences: 'Pas encore de références.',
+    /// How the author met this member, beside their name: "Host" and "Traveller" come from roles.
+    metUp: 'Rencontre',
+    recommended: 'Recommandé',
+    notRecommended: 'Non recommandé',
     ask: 'Proposer une rencontre',
     asked: (name) => `Vous avez proposé une rencontre à ${name}`,
     askedBody: (name) => `Quand ${name} dit oui, la conversation s'ouvre.`,
     askedWaiting: 'Proposée · en attente de réponse',
     unlock: 'Débloquer la conversation sans attendre',
+    noteTitle: (name) => `${name} vous a écrit`,
+    previewBanner: 'Voici comment les autres membres voient votre profil.',
+  },
+
+  askSheet: {
+    title: (name) => `Proposer une rencontre à ${name}`,
+    noteLabel: (name) => `Votre message pour ${name} (facultatif)`,
+    placeholder: 'Dites bonjour, et pourquoi vous aimeriez vous rencontrer.',
+    helper: (name) => `${name} le lit avant de répondre. En cas de oui, la conversation s'ouvre avec ce message.`,
+    charsLeft: (n) => (n <= 1 ? `${n} caractère restant` : `${n} caractères restants`),
+    send: 'Envoyer',
+    suggestVisiting: (name, city, from, to) =>
+      `Bonjour ${name} ! Je serai à ${city} du ${from} au ${to} et j'aimerais beaucoup vous rencontrer. `,
+    suggestSame: (name, city, from, to) =>
+      `Bonjour ${name} ! Je serai aussi à ${city} du ${from} au ${to}. Ça vous dirait qu'on se rencontre ? `,
   },
 
   chats: {
     title: 'Messages',
     empty: "Aucune conversation pour l'instant. Une conversation s'ouvre quand quelqu'un vous dit oui, ou quand vous le dites.",
     findSomeone: 'Voir qui est là',
-    waiting: 'En attente de réponse',
+    waiting: 'En attente de leur réponse',
     sayHello: 'Dites bonjour',
     unlocked: 'Débloquée',
     unread: (n) => (n === 1 ? '1 nouveau message' : `${n} nouveaux messages`),
@@ -211,15 +245,17 @@ export const fr: Strings = {
     accept: 'Dire oui',
     waiting: (n) =>
       n <= 1 ? '1 personne aimerait vous rencontrer' : `${n} personnes aimeraient vous rencontrer`,
+    andMore: (n: number) => (n === 1 ? 'et 1 autre' : `et ${n} autres`),
     declined: (name) => `Vous avez dit non à ${name}`,
     declinedBody: "Personne n'est prévenu d'un non.",
+    noteFrom: (name) => `${name} a écrit :`,
   },
 
   chat: {
     back: 'Retour aux messages',
     openProfile: (name) => `${name}, ouvrir son profil`,
     conversation: 'Conversation',
-    moreActions: 'Laisser un avis, signaler ou bloquer',
+    moreActions: 'Laisser une référence, signaler ou bloquer',
     empty: "Rien pour l'instant. Il faut bien que quelqu'un dise bonjour en premier.",
     youSaid: (text) => `Vous avez écrit : ${text}`,
     theySaid: (name, text) => `${name ?? "L'autre personne"} a écrit : ${text}`,
@@ -231,8 +267,8 @@ export const fr: Strings = {
   me: {
     notVerified: 'Identité pas encore vérifiée',
     freeTodayHint: "Montrez que vous avez envie de vous voir jusqu'à minuit.",
-    credits: (n) => (n <= 1 ? `${n} crédit` : `${n} crédits`),
     editProfile: 'Modifier le profil',
+    previewProfile: 'Aperçu de mon profil',
     blocked: 'Membres bloqués',
     trips: 'Mes voyages',
     signOut: 'Se déconnecter',
@@ -256,10 +292,15 @@ export const fr: Strings = {
     add: 'Ajouter un voyage',
     pickCity: 'Choisissez une ville dans la liste.',
     when: 'Quand y serez-vous ?',
-    pickStart: 'Choisissez le jour de votre arrivée.',
-    pickEnd: 'Puis le jour de votre départ.',
+    tapDays: 'Touchez le jour de votre arrivée, puis votre dernier jour.',
+    pickEnd: 'Touchez maintenant votre dernier jour.',
     range: (from, to) => `Du ${from} au ${to}`,
     save: 'Ajouter le voyage',
+    saveChanges: 'Enregistrer les modifications',
+    edit: (city: string) => `Modifier le voyage à ${city}`,
+    editHeading: (city: string) => `Modifier votre voyage à ${city}`,
+    saved: 'Voyage enregistré',
+    savedBody: (city: string, from: string, to: string) => `${city} · ${from} – ${to}`,
     remove: (city) => `Supprimer le voyage à ${city}`,
   },
 
@@ -292,32 +333,30 @@ export const fr: Strings = {
     blockBody: (name) =>
       `${name} ne verra pas votre profil et vous ne verrez pas le sien. Toute conversation entre vous se ferme dans les deux sens.`,
     undoLater: "Vous pourrez l'annuler plus tard depuis Membres bloqués, dans votre profil.",
-    leaveReview: 'Laisser un avis',
+    leaveReference: 'Laisser une référence',
   },
 
   review: {
-    sent: 'Avis envoyé',
-    sentBody:
-      'Merci. Il est maintenant sur son profil, où la prochaine personne le lira avant de prendre contact.',
-    title: (name) => `Donner un avis sur ${name}`,
-    send: "Envoyer l'avis",
-    howWasIt: "Comment ça s'est passé ?",
-    rating: 'Note',
-    stars: (n) => (n <= 1 ? `${n} étoile` : `${n} étoiles`),
-    comment: 'Quelque chose à ajouter ?',
-    commentHint:
-      'Facultatif. Il reste sur son profil, alors écrivez ce que la prochaine personne voudrait savoir.',
+    title: (name: string) => `Laisser une référence pour ${name}`,
+    recommend: (name: string) => `Recommanderiez-vous ${name} ?`,
+    yes: 'Oui',
+    no: 'Non',
+    howMet: 'Comment vous êtes-vous rencontrés ?',
+    iHosted: (name: string) => `${name} était chez moi`,
+    theyHosted: (name: string) => `J'étais chez ${name}`,
+    metUp: 'On s\'est retrouvés',
+    howWent: 'Comment ça s\'est passé ?',
+    hint: 'Elle reste sur son profil, alors écrivez ce que la prochaine personne voudrait savoir.',
+    publish: 'Publier',
+    published: 'Référence publiée',
   },
 
   unlock: {
     title: 'Débloquer la conversation',
     checking: 'Vérification de ce que cela vous coûte.',
     subscription: 'Votre abonnement le couvre, sans rien de plus à payer.',
-    credits: (have, cost) =>
-      `Vous avez ${have <= 1 ? `${have} crédit gagné` : `${have} crédits gagnés`} en hébergeant. Ceci en utilise ${cost}.`,
     money: (price) => `${price}, une seule fois, pour cette personne.`,
     ctaSubscription: 'Ouvrir la conversation',
-    ctaCredits: (n) => (n <= 1 ? `Utiliser ${n} crédit` : `Utiliser ${n} crédits`),
     ctaMoney: (price) => `Payer ${price}`,
     body: (name) =>
       `Cela ouvre la conversation avec ${name} dès maintenant, sans attendre son intérêt en retour.`,
@@ -361,7 +400,7 @@ export const fr: Strings = {
     account_banned: 'Ce compte est suspendu et ne peut plus utiliser LocalBuddy.',
     account_not_found: "Ce compte n'existe plus.",
     already_responded: 'Vous avez déjà répondu à ce profil.',
-    already_reviewed: 'Vous avez déjà laissé un avis sur cette personne.',
+    already_reviewed: 'Vous avez déjà laissé une référence à cette personne.',
     already_subscribed: 'Vous avez déjà un abonnement actif.',
     blocked: "Cette personne n'est pas joignable.",
     compliance_not_acknowledged:
@@ -379,8 +418,9 @@ export const fr: Strings = {
     invalid_slot:
       'Chaque créneau de disponibilité doit avoir un moment de la journée valide, et une saison qui se termine après son début.',
     moderator_only: 'Seuls les modérateurs peuvent faire cela.',
-    no_exchange:
-      "Vous ne pouvez laisser un avis qu'après vous être écrit tous les deux dans la même conversation.",
+    no_exchange: 'Vous pourrez laisser une référence quand vous vous serez écrit tous les deux dans une discussion.',
+    invalid_context: 'Une erreur est survenue.',
+    rating_or_recommend_required: 'Une erreur est survenue.',
     not_a_resolution: 'Un signalement ne peut être clos que comme examiné ou classé.',
     not_an_image: "Ce fichier n'est pas une image lisible.",
     rate_limited: "Trop d'essais d'affilée. Attendez une minute et réessayez.",

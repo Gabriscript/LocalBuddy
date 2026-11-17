@@ -78,7 +78,14 @@ function RequestCard({ cards, count }: { cards: Card[]; count: number }) {
   if (!count || !cards.length) return null;
 
   const shown = cards.slice(0, FACES);
-  const names = shown.map((card) => card.name?.split(' ')[0]).filter(Boolean).join(', ');
+  // The count can be larger than the faces: the rest are said, or "4 people" named only three.
+  const more = count - shown.length;
+  const names = [
+    shown.map((card) => card.name?.split(' ')[0]).filter(Boolean).join(', '),
+    more > 0 ? s.requests.andMore(more) : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
     <Pressable
       onPress={() => router.push('/requests')}

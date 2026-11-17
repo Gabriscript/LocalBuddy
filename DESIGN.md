@@ -233,7 +233,7 @@ Three things float over content rather than sitting in it: the filter sheet, the
 
 ### Conversation
 - The header is Card with a hairline below it: back, a small round photo, the name and the city.
-- Their bubbles are Sunk Paper; mine are Card with a hairline. Coral belongs to the send button alone. 18px corners, with the corner on the sender's side cut to 6px as the tail.
+- Their bubbles are Sunk Paper; mine are Coral with `onPrimary` text (5.2:1 light, 4.7:1 dark). Changed 2026-11-17: with Card bubbles, three testers out of five could not tell their messages from the other person's. Each message carries its time (HH:mm) as a muted caption under the bubble, on the bubble's side. 18px corners, with the corner on the sender's side cut to 6px as the tail.
 - The composer floats above the bottom inset: a Sunk Paper capsule with a hairline and a round Coral send button.
 
 ### Inputs

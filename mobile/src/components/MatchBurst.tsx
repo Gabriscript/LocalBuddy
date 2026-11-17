@@ -106,81 +106,85 @@ export function MatchBurst({
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={() => leave(onClose)}>
+      {/* The page under the veil: the strong scrim alone let the screen behind it be read
+          through the photo. The page colour under it makes the two one opaque colour. */}
       <View
         role="dialog"
         aria-modal
         aria-label={s.match.dialog(name)}
-        style={[styles.backdrop, { backgroundColor: c.scrimStrong }]}>
-        {/* The stage is a fixed 320pt: turn a phone on its side, or raise the text size, and
-            without somewhere to scroll the actions fall off the bottom of the screen. */}
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.headline}>
-            <Text role="heading" style={[type.display, styles.centred, { color: c.onOverlay }]}>
-              {s.match.headline}
-            </Text>
-            <Text style={[type.body, styles.centred, { color: c.onOverlay }]}>
-              {s.match.body(name)}
-            </Text>
-          </View>
-
-          <View style={styles.stage}>
-            <Animated.View style={[styles.ring, { transform: [{ rotate: spin }] }]}>
-              {actions.map((action, index) => {
-                const { x, y } = pointOnCircle(index, actions.length, ORBIT);
-                return (
-                  <Animated.View
-                    key={action.label}
-                    style={[
-                      styles.satellite,
-                      {
-                        opacity: progress,
-                        transform: [
-                          {
-                            translateX: progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, x],
-                            }),
-                          },
-                          {
-                            translateY: progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, y],
-                            }),
-                          },
-                          { scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
-                          { rotate: counterSpin },
-                        ],
-                      },
-                    ]}>
-                    <Pressable
-                      onPress={() => leave(action.onPress)}
-                      accessibilityRole="button"
-                      accessibilityLabel={action.label}
-                      style={({ pressed }) => [
-                        styles.satelliteButton,
-                        { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 },
+        style={[styles.backdrop, { backgroundColor: c.background }]}>
+        <View style={[styles.backdrop, { backgroundColor: c.scrimStrong }]}>
+          {/* The stage is a fixed 320pt: turn a phone on its side, or raise the text size, and
+              without somewhere to scroll the actions fall off the bottom of the screen. */}
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.headline}>
+              <Text role="heading" style={[type.display, styles.centred, { color: c.onOverlay }]}>
+                {s.match.headline}
+              </Text>
+              <Text style={[type.body, styles.centred, { color: c.onOverlay }]}>
+                {s.match.body(name)}
+              </Text>
+            </View>
+  
+            <View style={styles.stage}>
+              <Animated.View style={[styles.ring, { transform: [{ rotate: spin }] }]}>
+                {actions.map((action, index) => {
+                  const { x, y } = pointOnCircle(index, actions.length, ORBIT);
+                  return (
+                    <Animated.View
+                      key={action.label}
+                      style={[
+                        styles.satellite,
+                        {
+                          opacity: progress,
+                          transform: [
+                            {
+                              translateX: progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, x],
+                              }),
+                            },
+                            {
+                              translateY: progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, y],
+                              }),
+                            },
+                            { scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) },
+                            { rotate: counterSpin },
+                          ],
+                        },
                       ]}>
-                      <Ionicons name={action.icon} size={24} color={c.text} aria-hidden />
-                    </Pressable>
-                    <Text style={[type.caption, styles.centred, { color: c.onOverlay }]}>
-                      {action.label}
-                    </Text>
-                  </Animated.View>
-                );
-              })}
-            </Animated.View>
-
-            <Avatar
-              path={photoPath}
-              size={PLANET}
-              photoSize="medium"
-              style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
-              accessibilityLabel={s.common.photoOf(name)}
-            />
-          </View>
-        </ScrollView>
+                      <Pressable
+                        onPress={() => leave(action.onPress)}
+                        accessibilityRole="button"
+                        accessibilityLabel={action.label}
+                        style={({ pressed }) => [
+                          styles.satelliteButton,
+                          { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 },
+                        ]}>
+                        <Ionicons name={action.icon} size={24} color={c.text} aria-hidden />
+                      </Pressable>
+                      <Text style={[type.caption, styles.centred, { color: c.onOverlay }]}>
+                        {action.label}
+                      </Text>
+                    </Animated.View>
+                  );
+                })}
+              </Animated.View>
+  
+              <Avatar
+                path={photoPath}
+                size={PLANET}
+                photoSize="medium"
+                style={[styles.planet, { backgroundColor: c.surfaceMuted, borderColor: c.surface }]}
+                accessibilityLabel={s.common.photoOf(name)}
+              />
+            </View>
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );

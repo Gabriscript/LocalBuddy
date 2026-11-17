@@ -223,9 +223,17 @@ export function useDecide() {
     client.invalidateQueries({ queryKey: keys.requests });
   };
 
+  /// The note travels only when there is one: no body means no note to the server (ADR-0015).
   const interest = useMutation({
-    mutationFn: async (targetId: string) =>
-      unwrap(await api.POST('/api/v1/users/{targetId}/interest', { params: { path: { targetId } } })),
+    mutationFn: async ({ id, note }: { id: string; note?: string }) => {
+      const text = note?.trim();
+      return unwrap(
+        await api.POST('/api/v1/users/{targetId}/interest', {
+          params: { path: { targetId: id } },
+          body: text ? { note: text } : undefined,
+        })
+      );
+    },
     onSuccess: () => {
       forget();
       client.invalidateQueries({ queryKey: keys.conversations });
@@ -343,7 +351,7 @@ export function useUnlock() {
       unwrap(await api.POST('/api/v1/users/{targetId}/unlock', { params: { path: { targetId } } })),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: keys.conversations });
-      // Credits may have gone down, and they are shown on the member's own profile.
+      // The server may have spent credits, which my own profile carries.
       client.invalidateQueries({ queryKey: keys.me });
       client.invalidateQueries({ queryKey: keys.paymentOptions });
       client.invalidateQueries({ queryKey: ['discovery'] });
@@ -363,12 +371,16 @@ export function useReviews(userId: string) {
   );
 }
 
-/// A review moves the subject's rating, so their profile and their card in the feed are both
-/// stale the moment it lands.
+/// A reference moves the subject's counts, so their profile and their card in the feed are both
+/// stale the moment it lands. No `rating`: the server derives it from the thumb (ADR-0017).
 export function useCreateReview(subjectId: string) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { rating: number; comment: string }) =>
+    mutationFn: async (body: {
+      recommend: boolean;
+      context: NonNullable<components['schemas']['ReferenceContext']>;
+      comment: string;
+    }) =>
       unwrap(await api.POST('/api/v1/reviews', { body: { subjectId, ...body } })),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: keys.reviews(subjectId) });

@@ -72,11 +72,6 @@ export default function Me() {
               }
               tone={data?.identityVerified ? 'positive' : 'neutral'}
             />
-            {/* Only once there are some: "0 credits" on day one raises a question the screen
-                never answers. */}
-            {Number(data?.creditsBalance ?? 0) > 0 ? (
-              <Pill icon="sparkles-outline" label={s.me.credits(Number(data?.creditsBalance ?? 0))} />
-            ) : null}
           </View>
 
           {/* The pill above says what is missing; on its own it was a dead end. Nobody can be
@@ -103,6 +98,12 @@ export default function Me() {
 
           <View style={[styles.rows, { backgroundColor: c.surface, borderColor: c.border }]}>
             <Row icon="create-outline" label={s.me.editProfile} onPress={() => router.push('/edit-profile')} />
+            {/* My profile as other members see it: testers wrote it blind. */}
+            <Row
+              icon="eye-outline"
+              label={s.me.previewProfile}
+              onPress={() => data?.id && router.push({ pathname: '/user/[id]', params: { id: data.id } })}
+            />
             <Row icon="airplane-outline" label={s.me.trips} onPress={() => router.push('/trips')} />
             <Row icon="hand-left-outline" label={s.me.blocked} onPress={() => router.push('/blocked')} />
             {/* One control whose words carry both the setting and its value, so a screen reader
