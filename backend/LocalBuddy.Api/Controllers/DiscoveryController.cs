@@ -1,6 +1,7 @@
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
@@ -48,18 +49,19 @@ public class DiscoveryController(LocalBuddyDbContext db) : ControllerBase
         // With a city, the feed is its residents plus its visitors: members with an active trip there.
         var today = Trip.Today;
         var hasCity = !string.IsNullOrWhiteSpace(city);
-        var place = hasCity ? city!.Trim().ToLower() : "";
+        // Every name of a known city (ADR-0016): "Florence" finds the people of Firenze.
+        var place = hasCity ? CityNames.Names(city!) : [];
         // A resident is not a visitor at home, even with a trip saved before they moved there.
-        var tripsHere = db.Trips.Where(t => hasCity && t.To >= today && t.City.ToLower() == place
-                                            && !db.Users.Any(u => u.Id == t.UserId && u.City.ToLower() == place));
+        var tripsHere = db.Trips.Where(t => hasCity && t.To >= today && place.Contains(t.City.ToLower())
+                                            && !db.Users.Any(u => u.Id == t.UserId && place.Contains(u.City.ToLower())));
 
-        if (hasCity) q = q.Where(u => u.City.ToLower() == place || tripsHere.Any(t => t.UserId == u.Id));
+        if (hasCity) q = q.Where(u => place.Contains(u.City.ToLower()) || tripsHere.Any(t => t.UserId == u.Id));
         // A host visiting the city is a traveller there, so "guest" takes in every visitor,
         // and "host" means somebody who lives there: a visitor has no home in that city to show.
         if (role == "guest" && hasCity)
             q = q.Where(u => u.Role == role || u.Role == "entrambi" || tripsHere.Any(t => t.UserId == u.Id));
         else if (role == "host" && hasCity)
-            q = q.Where(u => (u.Role == role || u.Role == "entrambi") && u.City.ToLower() == place);
+            q = q.Where(u => (u.Role == role || u.Role == "entrambi") && place.Contains(u.City.ToLower()));
         else if (!string.IsNullOrWhiteSpace(role)) q = q.Where(u => u.Role == role || u.Role == "entrambi");
         if (hasCar is not null) q = q.Where(u => u.HasCar == hasCar);
         if (smokes is not null) q = q.Where(u => u.Smokes == smokes);
@@ -98,7 +100,10 @@ public class DiscoveryController(LocalBuddyDbContext db) : ControllerBase
                 User = u,
                 PhotoId = db.Photos.Where(p => p.UserId == u.Id && p.Type == PhotoType.Profile)
                                    .Select(p => (Guid?)p.Id).FirstOrDefault(),
-                Rating = db.Reviews.Where(r => r.SubjectId == u.Id).Average(r => (double?)r.Rating)
+                Rating = db.Reviews.Where(r => r.SubjectId == u.Id).Average(r => (double?)r.Rating),
+                References = db.Reviews.Count(r => r.SubjectId == u.Id),
+                AsHost = db.Reviews.Count(r => r.SubjectId == u.Id && r.Context == ReferenceContext.WasHosted),
+                AsTraveller = db.Reviews.Count(r => r.SubjectId == u.Id && r.Context == ReferenceContext.Hosted)
             })
             .ToListAsync();
 
@@ -113,7 +118,10 @@ public class DiscoveryController(LocalBuddyDbContext db) : ControllerBase
             PublicProfile.From(r.User),
             r.PhotoId is null ? null : PhotoDto.UrlFor(r.PhotoId.Value),
             r.Rating,
-            trips.TryGetValue(r.User.Id, out var t) ? new PublicTrip(t.City, t.From, t.To) : null)).ToList();
+            trips.TryGetValue(r.User.Id, out var t) ? new PublicTrip(t.City, t.From, t.To) : null)
+        {
+            References = r.References, ReferencesAsHost = r.AsHost, ReferencesAsTraveller = r.AsTraveller
+        }).ToList();
 
         return Page<ProfileCard>.From(cards, page, pageSize);
     }
@@ -126,13 +134,28 @@ public class DiscoveryController(LocalBuddyDbContext db) : ControllerBase
     {
         var me = User.Id();
         var prefix = (q ?? "").Trim().ToLower();
+        // ADR-0016: a known city answers to any of its names ("flo" offers Firenze), once, canonically.
+        var known = CityNames.CanonicalsWithAliasPrefix(prefix);
+        var members = db.Users.Where(u => u.Id != me && u.BannedAt == null && u.City != "");
         // shortcut: accents count ("mal" misses Málaga); add Postgres unaccent if real users trip on it.
-        return await db.Users
-            .Where(u => u.Id != me && u.BannedAt == null && u.City != "" && u.City.ToLower().StartsWith(prefix))
+        var others = await members
+            .Where(u => u.City.ToLower().StartsWith(prefix) && !known.Contains(u.City.ToLower()))
             .GroupBy(u => u.City.ToLower())
             .OrderByDescending(g => g.Count()).ThenBy(g => g.Key)
-            .Select(g => g.Min(u => u.City)!)
+            .Select(g => new { g.Key, Count = g.Count(), Name = g.Min(u => u.City)! })
             .Take(8)
             .ToListAsync();
+        // At most one row per name in the table, so merging the spellings of a city here stays small.
+        var named = (await members.Where(u => known.Contains(u.City.ToLower()))
+                .GroupBy(u => u.City.ToLower())
+                .Select(g => new { g.Key, Count = g.Count() })
+                .ToListAsync())
+            .GroupBy(x => CityNames.Canonical(x.Key))
+            .Select(g => new { Key = g.Key.ToLowerInvariant(), Count = g.Sum(x => x.Count), Name = g.Key });
+        return others.Concat(named)
+            .OrderByDescending(x => x.Count).ThenBy(x => x.Key, StringComparer.Ordinal)
+            .Take(8)
+            .Select(x => x.Name)
+            .ToList();
     }
 }

@@ -127,6 +127,7 @@ public class LocalBuddyDbContext(DbContextOptions<LocalBuddyDbContext> options)
             u.Property(x => x.IdentitySubjectHash).HasMaxLength(Limits.SubjectHash);
         });
         b.Entity<Message>().Property(x => x.Content).HasMaxLength(Limits.Message);
+        b.Entity<Match>().Property(x => x.Note).HasMaxLength(Limits.Note);
         b.Entity<Review>().Property(x => x.Comment).HasMaxLength(Limits.Comment);
         b.Entity<Report>().Property(x => x.Reason).HasMaxLength(Limits.Reason);
         b.Entity<Photo>().Property(x => x.Url).HasMaxLength(Limits.Url);

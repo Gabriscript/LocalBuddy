@@ -21,6 +21,9 @@ code; each one notes its original date.
 | [0011](0011-pilot-on-demo-with-manual-identity-approval.md) | The pilot runs on Demo, with identities approved by hand | proposed | 2026-11-12 |
 | [0012](0012-push-through-expo-best-effort.md) | Push notifications through Expo, best effort | accepted | 2026-11-12 |
 | [0014](0014-demo-data-reset.md) | Demo data seeded by the API, reset from the app | proposed | 2026-11-16 |
+| [0015](0015-note-with-a-request.md) | A note with a request, shown to the person asked | proposed | 2026-11-17 |
+| [0016](0016-city-names-in-two-languages.md) | Known cities answer to their names in two languages | proposed | 2026-11-17 |
+| [0017](0017-references-instead-of-credits.md) | References instead of credits and stars | proposed | 2026-11-17 |
 
 ## Adding one
 

@@ -8,3 +8,7 @@ TestResults/
 
 # copies made by the local backup hook
 backup/
+
+# demo cast portraits (Pexels, real people under invented names): never in the public repository, ADR-0014
+demo-photos/pexels/
+deploy/demo/demo-photos/

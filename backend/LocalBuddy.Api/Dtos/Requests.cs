@@ -67,10 +67,14 @@ public record AvailabilitySlot(TimeOfDay TimeOfDay, DateOnly? SeasonStart, DateO
 
 public record ListingUpdate(bool OffersExperience, bool OffersOvernight, bool OvernightComplianceAck);
 
+/// A reference (ADR-0017): `rating` or `recommend`, or both. Old apps send only `rating`.
+/// Rating sits after Comment so it can default: a parameter without one is required in the contract.
 public record NewReview(
     Guid SubjectId,
-    [Range(1, 5)] int Rating,
-    [StringLength(Limits.Comment)] string Comment);
+    [StringLength(Limits.Comment)] string Comment,
+    [Range(1, 5)] int? Rating = null,
+    bool? Recommend = null,
+    ReferenceContext? Context = null);
 
 public record NewReport(
     Guid ReportedId,
@@ -78,6 +82,10 @@ public record NewReport(
 
 public record SendMessage(
     [Required, StringLength(Limits.Message, MinimumLength = 1)] string Content);
+
+/// The optional note sent with "ask to meet" (ADR-0015). Its length is checked after trimming, in
+/// MatchesController.Interest, so it carries no StringLength here.
+public record InterestRequest(string? Note = null);
 
 public record SubscribeRequest([Required, StringLength(Limits.Role)] string PlanType);
 

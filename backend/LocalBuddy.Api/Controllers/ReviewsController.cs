@@ -22,6 +22,12 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
     {
         var me = User.Id();
         if (me == req.SubjectId) return this.Invalid("self_target", "You cannot review yourself.");
+        // ADR-0017: a thumb, a rating from an older app, or both; never neither.
+        if (req.Rating is null && req.Recommend is null)
+            return this.Invalid("rating_or_recommend_required", "A reference needs a rating or a recommendation.");
+        // JSON binds any number into an enum, and an unknown one would be stored as it came.
+        if (req.Context is { } context && !Enum.IsDefined(context))
+            return this.Invalid("invalid_context", "How you met must be hosted, wasHosted or metUp.");
 
         // Only people who actually got in touch can review each other, and an open chat is not
         // enough: a paid unlock opens one that the other side may never have answered. Both have
@@ -45,7 +51,10 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
             Id = Guid.CreateVersion7(),
             AuthorId = me,
             SubjectId = req.SubjectId,
-            Rating = req.Rating,
+            // Each filled from the other when missing, so the average and the thumb both keep a meaning.
+            Rating = req.Rating ?? (req.Recommend == true ? 5 : 1),
+            Recommend = req.Recommend ?? req.Rating >= 4,
+            Context = req.Context,
             Comment = req.Comment
         };
         db.Reviews.Add(review);
@@ -59,7 +68,16 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
                       .ExecuteUpdateAsync(s => s.SetProperty(u => u.CreditsBalance, u => u.CreditsBalance + Pricing.HostReviewReward));
 
         await transaction.CommitAsync();
-        return Created($"/api/v1/users/{req.SubjectId}/reviews", ReviewDto.From(review));
+
+        var author = await db.Users.Where(u => u.Id == me)
+            .Select(u => new
+            {
+                u.Name,
+                PhotoId = db.Photos.Where(p => p.UserId == u.Id && p.Type == PhotoType.Profile)
+                                   .Select(p => (Guid?)p.Id).FirstOrDefault()
+            })
+            .SingleAsync();
+        return Created($"/api/v1/users/{req.SubjectId}/reviews", ReviewDto.From(review, author.Name, author.PhotoId));
     }
 
     [HttpGet("users/{userId:guid}/reviews")]
@@ -76,13 +94,22 @@ public class ReviewsController(LocalBuddyDbContext db) : ControllerBase
 
         (page, pageSize) = Page<ReviewDto>.Clamp(page, pageSize);
 
-        var rows = await db.Reviews.Where(r => r.SubjectId == userId)
-                                   .OrderByDescending(r => r.CreatedAt)
-                                   .Skip(page * pageSize)
-                                   .Take(pageSize + 1)
-                                   .Select(r => ReviewDto.From(r))
-                                   .ToListAsync();
+        // The author's name and photo in the same query, not one lookup per reference.
+        var rows = await (from r in db.Reviews
+                          where r.SubjectId == userId
+                          join u in db.Users on r.AuthorId equals u.Id
+                          orderby r.CreatedAt descending
+                          select new
+                          {
+                              Review = r,
+                              u.Name,
+                              PhotoId = db.Photos.Where(p => p.UserId == u.Id && p.Type == PhotoType.Profile)
+                                                 .Select(p => (Guid?)p.Id).FirstOrDefault()
+                          })
+                         .Skip(page * pageSize)
+                         .Take(pageSize + 1)
+                         .ToListAsync();
 
-        return Page<ReviewDto>.From(rows, page, pageSize);
+        return Page<ReviewDto>.From(rows.Select(x => ReviewDto.From(x.Review, x.Name, x.PhotoId)).ToList(), page, pageSize);
     }
 }

@@ -1,6 +1,7 @@
 using LocalBuddy.Api.Data;
 using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ public class TripsController(LocalBuddyDbContext db) : ControllerBase
     {
         var me = User.Id();
         var today = Trip.Today;
-        var city = trip.City.Trim();
+        var city = CityNames.Canonical(trip.City); // ADR-0016: "Florence" is stored as Firenze
 
         if (city.Length == 0) return this.Invalid("invalid_city", "A trip needs a city.");
         if (trip.From > trip.To) return this.Invalid("invalid_dates", "A trip cannot end before it starts.");
@@ -40,7 +41,7 @@ public class TripsController(LocalBuddyDbContext db) : ControllerBase
 
         // A trip home would put a resident at the top of their own city's feed as a visitor.
         var home = await db.Users.Where(u => u.Id == me).Select(u => u.City).FirstAsync();
-        if (string.Equals(city, home.Trim(), StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(city, CityNames.Canonical(home), StringComparison.OrdinalIgnoreCase))
             return this.Invalid("trip_home_city", "A trip goes somewhere other than the city you live in.");
 
         // shortcut: two simultaneous posts can both pass the cap and make six; lock per user if it matters.

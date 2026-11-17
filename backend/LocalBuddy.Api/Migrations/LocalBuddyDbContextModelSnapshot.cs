@@ -140,6 +140,10 @@ namespace LocalBuddy.Api.Migrations
                     b.Property<DateTime?>("MatchedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -316,11 +320,17 @@ namespace LocalBuddy.Api.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
+                    b.Property<int?>("Context")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
+
+                    b.Property<bool?>("Recommend")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uuid");

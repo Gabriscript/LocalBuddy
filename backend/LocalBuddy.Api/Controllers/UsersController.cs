@@ -61,12 +61,29 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         var profile = PublicProfile.From(user);
         if (User.Identity?.IsAuthenticated != true) profile = profile with { FreeToday = false };
 
+        // The rating and the reference counts (ADR-0017) in one query; no row when nobody wrote one.
+        var references = await db.Reviews.Where(r => r.SubjectId == id)
+            .GroupBy(r => r.SubjectId)
+            .Select(g => new
+            {
+                Rating = g.Average(r => (double?)r.Rating),
+                Total = g.Count(),
+                AsHost = g.Count(r => r.Context == ReferenceContext.WasHosted),
+                AsTraveller = g.Count(r => r.Context == ReferenceContext.Hosted)
+            })
+            .FirstOrDefaultAsync();
+
         return new ProfileDetail(
             profile,
             photos.Select(PhotoDto.From).ToList(),
             user.Availabilities.Select(AvailabilityDto.From).ToList(),
             ListingDto.From(user.Listing),
-            await db.Reviews.Where(r => r.SubjectId == id).AverageAsync(r => (double?)r.Rating));
+            references?.Rating)
+        {
+            References = references?.Total ?? 0,
+            ReferencesAsHost = references?.AsHost ?? 0,
+            ReferencesAsTraveller = references?.AsTraveller ?? 0
+        };
     }
 
     IQueryable<User> WithProfile() =>
@@ -85,7 +102,7 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
         var user = await db.Users.FindAsync(User.Id());
         if (user is null) return NotFound();
 
-        (user.Name, user.City, user.Role) = (update.Name, update.City, update.Role);
+        (user.Name, user.City, user.Role) = (update.Name, CityNames.Canonical(update.City), update.Role);
         (user.WhatWeWillDo, user.WhyIHost, user.LanguagesSpoken) =
             (update.WhatWeWillDo, update.WhyIHost, update.LanguagesSpoken);
         (user.HasCar, user.Smokes, user.HasPets) = (update.HasCar, update.Smokes, update.HasPets);

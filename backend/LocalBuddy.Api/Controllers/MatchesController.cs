@@ -4,6 +4,7 @@ using LocalBuddy.Api.Models;
 using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocalBuddy.Api.Controllers;
@@ -20,14 +21,22 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
 {
     /// Free path to a conversation: both sides express interest (GUIDELINES §3).
     /// 201 with a Location when the interest was reciprocal and a chat opened, 200 otherwise.
+    /// The body is optional: apps that predate the note (ADR-0015) send none at all.
     [HttpPost("{targetId:guid}/interest")]
     [RequiresVerifiedIdentity]
     [ProducesResponseType<InterestResult>(StatusCodes.Status200OK)]
     [ProducesResponseType<InterestResult>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Interest(Guid targetId)
+    public async Task<IActionResult> Interest(
+        Guid targetId, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] InterestRequest? request = null)
     {
+        // Measured after trimming, so padding neither counts against the limit nor gets stored.
+        var note = request?.Note?.Trim();
+        if (note?.Length > Limits.Note)
+            return this.Invalid("invalid_request", $"A note can be at most {Limits.Note} characters.");
+        if (note == "") note = null;
+
         var me = User.Id();
         if (me == targetId) return this.Invalid("self_target", "You cannot express interest in yourself.");
         // A banned account is gone as far as other members are concerned (ADR-0005).
@@ -53,7 +62,9 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
             InitiatorId = me,
             TargetId = targetId,
             Status = matched ? MatchStatus.Matched : MatchStatus.Pending,
-            MatchedAt = matched ? DateTime.UtcNow : null
+            MatchedAt = matched ? DateTime.UtcNow : null,
+            // A yes to their request carries no note of mine: the chat opens with theirs.
+            Note = matched ? null : note
         });
 
         if (!matched)
@@ -70,7 +81,19 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
         theirs!.Status = MatchStatus.Matched;
         theirs.MatchedAt = DateTime.UtcNow;
 
-        var (conversation, _) = await conversations.OpenAsync(me, targetId, unlockedByPayment: false);
+        var (conversation, created) = await conversations.OpenAsync(me, targetId, unlockedByPayment: false);
+
+        // Their note becomes the chat's first message, from them, so the reason they asked is still
+        // there once the request is gone (ADR-0015). Unread for me, like any message from the other
+        // side. A chat that already existed (a paid unlock) is left as it is.
+        if (created && theirs.Note is not null)
+            db.Messages.Add(new Message
+            {
+                Id = Guid.CreateVersion7(),
+                ConversationId = conversation.Id,
+                SenderId = targetId,
+                Content = theirs.Note
+            });
 
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -88,15 +111,34 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
     public async Task<ActionResult<Page<ProfileCard>>> Requests(int page = 0, int pageSize = Page<ProfileCard>.DefaultSize)
     {
         (page, pageSize) = Page<ProfileCard>.Clamp(page, pageSize);
+        var me = User.Id();
 
-        return await CardsAsync(
-            from m in PendingRequestsTo(User.Id())
+        var cards = await CardsAsync(
+            from m in PendingRequestsTo(me)
             join u in db.Users on m.InitiatorId equals u.Id
             // Version 7 ids are time-ordered, so this is newest request first without a
             // timestamp column. The id is unique, so pages cannot overlap either.
             orderby m.Id descending
-            select u,
+            select new Person { User = u, Note = m.Note },
             page, pageSize);
+
+        // Why they are asking, even without a note (ADR-0015): each asker's earliest active trip to
+        // where I live or to a city I am visiting too. One more query for the page, not one per card.
+        var today = Trip.Today;
+        var ids = cards.Items.Select(c => c.Id).ToList();
+        var trips = (await db.Trips
+                .Where(t => ids.Contains(t.UserId) && t.To >= today &&
+                            (db.Users.Any(u => u.Id == me && u.City.ToLower() == t.City.ToLower()) ||
+                             db.Trips.Any(o => o.UserId == me && o.To >= today && o.City.ToLower() == t.City.ToLower())))
+                .ToListAsync())
+            .GroupBy(t => t.UserId).ToDictionary(g => g.Key, g => g.MinBy(t => t.From)!);
+
+        return cards with
+        {
+            Items = cards.Items
+                .Select(c => trips.TryGetValue(c.Id, out var t) ? c with { Trip = new PublicTrip(t.City, t.From, t.To) } : c)
+                .ToList()
+        };
     }
 
     /// The same thing seen from the asker's side: people I asked to meet who have not said yes.
@@ -118,29 +160,44 @@ public class MatchesController(LocalBuddyDbContext db, ConversationService conve
             join u in db.Users on m.TargetId equals u.Id
             where u.BannedAt == null
             orderby m.Id descending
-            select u,
+            // My own note stays out: the list shows whom I asked, not what I wrote.
+            select new Person { User = u },
             page, pageSize);
     }
 
+    /// A member to show as a card, with the note they sent me when the list is my received requests.
+    sealed class Person
+    {
+        public required User User { get; init; }
+        public string? Note { get; init; }
+    }
+
     /// One page of people as the cards the feed shows, in the order the query gives them.
-    async Task<Page<ProfileCard>> CardsAsync(IQueryable<User> people, int page, int pageSize)
+    async Task<Page<ProfileCard>> CardsAsync(IQueryable<Person> people, int page, int pageSize)
     {
         var rows = await people
             .Skip(page * pageSize)
             .Take(pageSize + 1)
-            .Select(u => new
+            .Select(x => new
             {
-                User = u,
-                PhotoId = db.Photos.Where(p => p.UserId == u.Id && p.Type == PhotoType.Profile)
+                x.User,
+                x.Note,
+                PhotoId = db.Photos.Where(p => p.UserId == x.User.Id && p.Type == PhotoType.Profile)
                                    .Select(p => (Guid?)p.Id).FirstOrDefault(),
-                Rating = db.Reviews.Where(r => r.SubjectId == u.Id).Average(r => (double?)r.Rating)
+                Rating = db.Reviews.Where(r => r.SubjectId == x.User.Id).Average(r => (double?)r.Rating),
+                References = db.Reviews.Count(r => r.SubjectId == x.User.Id),
+                AsHost = db.Reviews.Count(r => r.SubjectId == x.User.Id && r.Context == ReferenceContext.WasHosted),
+                AsTraveller = db.Reviews.Count(r => r.SubjectId == x.User.Id && r.Context == ReferenceContext.Hosted)
             })
             .ToListAsync();
 
         var cards = rows.Select(r => new ProfileCard(
             PublicProfile.From(r.User),
             r.PhotoId is null ? null : PhotoDto.UrlFor(r.PhotoId.Value),
-            r.Rating)).ToList();
+            r.Rating)
+        {
+            Note = r.Note, References = r.References, ReferencesAsHost = r.AsHost, ReferencesAsTraveller = r.AsTraveller
+        }).ToList();
 
         return Page<ProfileCard>.From(cards, page, pageSize);
     }

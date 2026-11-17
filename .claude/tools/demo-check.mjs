@@ -76,6 +76,14 @@ const myMatches = seed.matches.filter((m) => m.a === seed.presenter || m.b === s
   .map((m) => idOf(m.a === seed.presenter ? m.b : m.a));
 const received = seed.requests.filter((r) => r.to === seed.presenter).map((r) => idOf(r.from));
 const sent = seed.requests.filter((r) => r.from === seed.presenter).map((r) => idOf(r.to));
+const noteFrom = Object.fromEntries(seed.requests.filter((r) => r.to === seed.presenter).map((r) => [idOf(r.from), r.note]));
+// Mirrors MatchesController.Requests: the asker's earliest active trip to the presenter's city or to a city she is visiting.
+const presenterPlaces = [presenter.city, ...presenter.trips.filter((t) => t.to >= 0).map((t) => t.city)];
+const expectedTrip = Object.fromEntries(seed.requests.filter((r) => r.to === seed.presenter).map((r) => {
+  const t = person[r.from].trips.filter((x) => x.to >= 0 && presenterPlaces.some((c) => same(c, x.city)))
+    .sort((a, b) => a.from - b.from)[0];
+  return [idOf(r.from), t ? `${t.city}|${utcDay(t.from)}|${utcDay(t.to)}` : 'none'];
+}));
 // The sauna host: a Helsinki resident who hosts, mentions sauna, and is waiting on the presenter.
 const saunaKey = seed.requests.find((r) => r.to === seed.presenter && same(person[r.from].city, HELSINKI)
   && hosts(person[r.from].role) && /sauna/i.test(`${person[r.from].whatWeWillDo} ${person[r.from].whyIHost}`))?.from;
@@ -91,6 +99,14 @@ async function startingState(label) {
     convs.map((c) => `${nameOf[c.otherUserId]}=${c.unreadCount}`).join(','));
   const inbox = await allPages('/users/me/requests');
   check(`${label}: requests received (${names(received)})`, sameSet(new Set(inbox.map((c) => c.id)), new Set(received)), names(inbox.map((c) => c.id)));
+  // ADR-0015: each received request carries the seed's note, and the asker's trip into the presenter's world.
+  const wrongNotes = inbox.filter((c) => !c.note || c.note !== noteFrom[c.id]);
+  check(`${label}: every request received carries the seed's note`, wrongNotes.length === 0, names(wrongNotes.map((c) => c.id)));
+  const tripOf = (c) => (c.trip ? `${c.trip.city}|${c.trip.from}|${c.trip.to}` : 'none');
+  const wrongTrips = inbox.filter((c) => tripOf(c) !== expectedTrip[c.id]);
+  check(`${label}: requests carry the asker's trip (${inbox.filter((c) => c.trip).map((c) => `${nameOf[c.id]}=${c.trip.city}`).join(', ')})`,
+    wrongTrips.length === 0 && inbox.some((c) => c.trip),
+    wrongTrips.map((c) => `${nameOf[c.id]}: ${tripOf(c)} vs ${expectedTrip[c.id]}`).join('; '));
   const outbox = await allPages('/users/me/requests/sent');
   check(`${label}: requests sent (${names(sent)})`, sameSet(new Set(outbox.map((c) => c.id)), new Set(sent)), names(outbox.map((c) => c.id)));
   return { trips, inbox };
@@ -128,6 +144,13 @@ try {
   const noPhoto = [...hel, ...fam].filter((c) => !c.photoUrl);
   if (noPhoto.length) warn('some Helsinki cards have no photoUrl (photo folder missing?)', names(new Set(noPhoto.map((c) => c.id))));
   else check('every Helsinki card has a photo', true);
+  // ADR-0017: Aino's profile counts the references the seed gives her.
+  const ainoRefs = (seed.references ?? []).filter((r) => r.to === 'aino');
+  const ainoAsHost = ainoRefs.filter((r) => r.context === 'wasHosted').length;
+  const aino = await api('GET', `/users/${idOf('aino')}`);
+  check(`aino's profile counts ${ainoRefs.length} references, ${ainoAsHost} as host`,
+    ainoRefs.length > 0 && aino.references === ainoRefs.length && aino.referencesAsHost === ainoAsHost,
+    `${aino.references} references, ${aino.referencesAsHost} as host`);
 
   // 4. Every seeded city: two resident hosts and at least one visitor.
   const feeds = { [HELSINKI]: hel };
@@ -136,6 +159,13 @@ try {
     const h = residents(cards, city).filter((c) => hosts(c.role));
     const v = cards.filter((c) => c.trip);
     check(`${city}: ${h.length} resident hosts, ${v.length} with a trip`, h.length >= 2 && v.length >= 1, names(cards.map((c) => c.id)));
+  }
+  // ADR-0016: the English name finds the same residents as the Italian one.
+  const firenze = seed.cities.find((c) => same(c, 'Firenze'));
+  if (firenze) {
+    const it = new Set(residents(feeds[firenze], firenze).map((c) => c.id));
+    const en = new Set(residents(await feed('Florence'), firenze).map((c) => c.id));
+    check(`"Florence" shows the residents of ${firenze} (${names(it)})`, it.size > 0 && sameSet(it, en), names(en));
   }
   // The feed takes no date (ADR-0013): a presenter trip on arbitrary dates leaves it unchanged.
   const other = seed.cities.find((c) => !same(c, HELSINKI) && !same(c, presenter.city));
@@ -150,6 +180,10 @@ try {
   // 5. Change the state the way a demo does.
   const yes = await api('POST', `/users/${saunaId}/interest`, null, [200, 201]);
   check(`saying yes to ${saunaKey} matches at once`, yes.matched === true && !!yes.conversationId, JSON.stringify(yes));
+  const opening = await allPages(`/conversations/${yes.conversationId}/messages`);
+  check(`the chat with ${saunaKey} opens with their note`,
+    opening.length === 1 && opening[0].senderId === saunaId && opening[0].content === noteFrom[saunaId],
+    `${opening.length} messages, first from ${nameOf[opening.at(-1)?.senderId] ?? 'nobody'}`);
   await api('POST', `/conversations/${yes.conversationId}/messages`, { content: 'See you after Slush? I would love that sauna.' }, [201]);
   check('presenter sends a message mentioning Slush', true);
   const waiting = new Set(received);

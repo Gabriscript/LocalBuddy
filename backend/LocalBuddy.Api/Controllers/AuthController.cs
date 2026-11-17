@@ -31,7 +31,7 @@ public class AuthController(
             UserName = req.Email,
             Email = req.Email,
             Name = req.Name,
-            City = req.City,
+            City = CityNames.Canonical(req.City),
             Role = req.Role
         };
 

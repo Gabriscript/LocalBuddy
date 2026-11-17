@@ -14,6 +14,8 @@ public enum ReportStatus { Open = 0, Reviewed = 1, Dismissed = 2 }
 // Null on the profile means "a bit of both", or not said: neither is a reason to hide someone.
 public enum ActivityStyle { Relaxed = 0, Adventurous = 1 }
 public enum Lifestyle { Nightlife = 0, Family = 1 }
+// How the two met, from the author's side (ADR-0017): I hosted them, they hosted me, we met.
+public enum ReferenceContext { Hosted = 0, WasHosted = 1, MetUp = 2 }
 
 /// The days a member is usually free, one bit per DayOfWeek (bit 0 Sunday), so a filter on
 /// several days is one bitwise AND in SQL. An indication, not a booking calendar.
@@ -60,6 +62,8 @@ public class Match
     public Guid TargetId { get; set; }
     public MatchStatus Status { get; set; }
     public DateTime? MatchedAt { get; set; }
+    // What the asker wrote with a pending request; shown only to the person asked (ADR-0015).
+    public string? Note { get; set; }
 }
 
 // ponytail: no MatchId FK — participants live here directly, since a paid unlock
@@ -111,6 +115,9 @@ public class Review
     public Guid AuthorId { get; set; }
     public Guid SubjectId { get; set; }
     public int Rating { get; set; } // 1-5
+    // A reference (ADR-0017): thumb up or down, and how they met. Null on rows written before it.
+    public bool? Recommend { get; set; }
+    public ReferenceContext? Context { get; set; }
     public string Comment { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

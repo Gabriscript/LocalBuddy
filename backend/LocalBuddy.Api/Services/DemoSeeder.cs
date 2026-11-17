@@ -168,7 +168,21 @@ public class DemoSeeder(
             Id = Guid.CreateVersion7(),
             InitiatorId = DemoSeed.IdOf(r.From),
             TargetId = DemoSeed.IdOf(r.To),
-            Status = MatchStatus.Pending
+            Status = MatchStatus.Pending,
+            Note = r.Note
+        }));
+
+        // The stored rating follows the thumb, as ReviewsController.Create does when only one comes.
+        db.Reviews.AddRange(seed.References.Select(r => new Review
+        {
+            Id = Guid.CreateVersion7(),
+            AuthorId = DemoSeed.IdOf(r.From),
+            SubjectId = DemoSeed.IdOf(r.To),
+            Rating = r.Recommend ? 5 : 1,
+            Recommend = r.Recommend,
+            Context = r.Context,
+            Comment = r.Text,
+            CreatedAt = now.AddDays(-r.DaysAgo)
         }));
     }
 

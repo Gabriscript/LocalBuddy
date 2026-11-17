@@ -656,6 +656,46 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InterestRequest"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InterestRequest"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InterestRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -2419,6 +2459,17 @@
         "type": "string",
         "format": "binary"
       },
+      "InterestRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "InterestResult": {
         "required": [
           "matched",
@@ -2694,7 +2745,6 @@
       "NewReview": {
         "required": [
           "subjectId",
-          "rating",
           "comment"
         ],
         "type": "object",
@@ -2703,16 +2753,33 @@
             "type": "string",
             "format": "uuid"
           },
+          "comment": {
+            "type": "string"
+          },
           "rating": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
+              "null",
               "integer",
               "string"
             ],
             "format": "int32"
           },
-          "comment": {
-            "type": "string"
+          "recommend": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "context": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReferenceContext"
+              }
+            ]
           }
         }
       },
@@ -3174,6 +3241,30 @@
             ],
             "format": "double"
           },
+          "references": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "referencesAsHost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "referencesAsTraveller": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
           "trip": {
             "oneOf": [
               {
@@ -3182,6 +3273,12 @@
               {
                 "$ref": "#/components/schemas/PublicTrip"
               }
+            ]
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
             ]
           },
           "id": {
@@ -3288,6 +3385,30 @@
               "string"
             ],
             "format": "double"
+          },
+          "references": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "referencesAsHost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "referencesAsTraveller": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           },
           "id": {
             "type": "string",
@@ -3477,6 +3598,14 @@
           }
         }
       },
+      "ReferenceContext": {
+        "enum": [
+          "hosted",
+          "wasHosted",
+          "metUp",
+          null
+        ]
+      },
       "RegisterRequest": {
         "required": [
           "email",
@@ -3569,7 +3698,11 @@
           "subjectId",
           "rating",
           "comment",
-          "createdAt"
+          "createdAt",
+          "recommend",
+          "context",
+          "authorName",
+          "authorPhotoUrl"
         ],
         "type": "object",
         "properties": {
@@ -3599,6 +3732,31 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "recommend": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "context": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReferenceContext"
+              }
+            ]
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorPhotoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

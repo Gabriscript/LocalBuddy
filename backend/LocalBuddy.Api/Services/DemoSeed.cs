@@ -12,7 +12,8 @@ public record DemoSeed(
     List<string> Cities,
     List<DemoPerson> People,
     List<DemoMatch> Matches,
-    List<DemoRequest> Requests)
+    List<DemoRequest> Requests,
+    List<DemoReference> References)
 {
     public const string Domain = "demo.localbuddy.test";
 
@@ -68,5 +69,8 @@ public record DemoMatch(string A, string B, List<DemoMessage> Messages);
 
 public record DemoMessage(string From, string Text, int MinutesAgo);
 
-/// An "ask to meet" still waiting for an answer from `to`.
-public record DemoRequest(string From, string To);
+/// An "ask to meet" still waiting for an answer from `to`, with the note `from` sent, if any (ADR-0015).
+public record DemoRequest(string From, string To, string? Note = null);
+
+/// A reference `from` wrote about `to` (ADR-0017), `context` from the author's side, `daysAgo` days old.
+public record DemoReference(string From, string To, bool Recommend, ReferenceContext Context, string Text, int DaysAgo);

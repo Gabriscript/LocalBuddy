@@ -14,6 +14,7 @@ public static class Limits
     public const int Comment = 1000;
     public const int Reason = 1000;
     public const int Message = 2000;
+    public const int Note = 500;       // the note sent with a request to meet (ADR-0015)
     public const int Url = 200;
     public const int ExternalId = 100; // Stripe identifiers
     public const int SubjectHash = 128;

@@ -117,7 +117,7 @@ public class ReachabilityTests
         await Chat(t, anna, fabio, bothWrote: true);
         await Block(t, fabio, anna);
 
-        Assert.Equal("blocked", Code(await new ReviewsController(t.Db).As(anna).Create(new NewReview(fabio, 1, "pessimo"))));
+        Assert.Equal("blocked", Code(await new ReviewsController(t.Db).As(anna).Create(new NewReview(fabio, "pessimo", 1))));
     }
 
     // ---- Reviews need a real exchange -----------------------------------------------------
@@ -129,7 +129,7 @@ public class ReachabilityTests
         var (anna, fabio) = (t.AddVerifiedUser("anna"), t.AddVerifiedUser("fabio"));
         await Payments(t, anna).Unlock(fabio);   // fabio never answers
 
-        Assert.Equal("no_exchange", Code(await new ReviewsController(t.Db).As(anna).Create(new NewReview(fabio, 1, "pessimo"))));
+        Assert.Equal("no_exchange", Code(await new ReviewsController(t.Db).As(anna).Create(new NewReview(fabio, "pessimo", 1))));
     }
 
     [Fact]
@@ -140,7 +140,7 @@ public class ReachabilityTests
         t.Db.Listings.Add(new Listing { Id = Guid.NewGuid(), UserId = host, OffersExperience = true });
         await Chat(t, guest, host, bothWrote: true);
 
-        Assert.IsType<CreatedResult>(await new ReviewsController(t.Db).As(guest).Create(new NewReview(host, 5, "splendido")));
+        Assert.IsType<CreatedResult>(await new ReviewsController(t.Db).As(guest).Create(new NewReview(host, "splendido", 5)));
         Assert.Equal(Pricing.HostReviewReward,
             await t.Db.Users.Where(u => u.Id == host).Select(u => u.CreditsBalance).SingleAsync());
     }

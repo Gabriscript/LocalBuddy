@@ -42,7 +42,7 @@ public class DemoResetTests
         string.Join(";", await db.Users.OrderBy(u => u.Id).Select(u => u.Id).ToListAsync()),
         await db.Trips.CountAsync(), await db.Matches.CountAsync(), await db.Conversations.CountAsync(),
         await db.Messages.CountAsync(), await db.Photos.CountAsync(), await db.Availabilities.CountAsync(),
-        await db.Listings.CountAsync());
+        await db.Listings.CountAsync(), await db.Reviews.CountAsync());
 
     [Fact]
     public async Task With_the_switch_off_the_route_does_not_exist()
@@ -174,6 +174,27 @@ public class DemoResetTests
         // Answering any of them is an instant match.
         foreach (var asker in waiting)
             Assert.IsType<CreatedResult>(await matches.Interest(asker));
+    }
+
+    /// ADR-0015: every request waiting for the presenter explains itself, and a yes keeps the reason.
+    [Fact]
+    public async Task The_presenters_requests_carry_the_seed_notes_and_a_yes_opens_with_one()
+    {
+        using var t = new TestDb();
+        using var identity = new TestIdentity(t.Db);
+        await Reset(t, identity);
+        var matches = new MatchesController(t.Db, new ConversationService(t.Db), TestPush.For(t.Db)).As(Presenter);
+
+        var cards = (await matches.Requests()).Value!.Items.ToDictionary(c => c.Id);
+        foreach (var r in Seed.Requests.Where(r => r.To == Seed.Presenter))
+            Assert.Equal(r.Note, cards[Id(r.From)].Note);
+        // Marta is in Helsinki the same days as the presenter: the card says so without the note.
+        Assert.Equal("Helsinki", cards[Id("marta")].Trip?.City);
+
+        var yes = Assert.IsType<CreatedResult>(await matches.Interest(Id("aino")));
+        var chat = Assert.IsType<InterestResult>(yes.Value).ConversationId!.Value;
+        var first = await t.Db.Messages.SingleAsync(m => m.ConversationId == chat);
+        Assert.Equal((Id("aino"), Seed.Requests.Single(r => r.From == "aino").Note), (first.SenderId, first.Content));
     }
 
     [Fact]
@@ -359,6 +380,68 @@ public class DemoSeedFileTests
         }
         Assert.All(Seed.Matches.SelectMany(m => m.Messages), x => Assert.InRange(x.Text.Length, 1, Limits.Message));
     }
+
+    /// ADR-0015: the investors' demo starts with requests that explain themselves. Held to the
+    /// limit and the trimming MatchesController.Interest applies, which the seeder skips.
+    [Fact]
+    public void Every_request_the_presenter_received_has_a_note_that_fits()
+    {
+        Assert.All(Seed.Requests.Where(r => r.To == Seed.Presenter), r => Assert.False(string.IsNullOrWhiteSpace(r.Note), r.From));
+        Assert.All(Seed.Requests.Where(r => r.Note is not null),
+            r => Assert.True(r.Note!.Length <= Limits.Note && r.Note == r.Note.Trim(), $"{r.From}: note too long or padded."));
+    }
+
+    /// ADR-0017: references between members of the cast, held to what ReviewsController and the
+    /// unique index allow, and to roles that make sense of how the two met.
+    [Fact]
+    public void Every_reference_fits_the_rules_and_the_roles()
+    {
+        var people = Seed.People.ToDictionary(p => p.Key);
+        Assert.NotEmpty(Seed.References);
+        foreach (var r in Seed.References)
+        {
+            var label = $"{r.From} -> {r.To}";
+            Assert.True(people.ContainsKey(r.From) && people.ContainsKey(r.To), $"{label}: not in the cast.");
+            Assert.NotEqual(r.From, r.To);
+            Assert.True(Enum.IsDefined(r.Context), label);
+            Assert.InRange(r.DaysAgo, 20, 400);
+            Assert.False(string.IsNullOrWhiteSpace(r.Text), label);
+            Assert.True(r.Text.Length <= Limits.Comment && r.Text == r.Text.Trim(), $"{label}: text too long or padded.");
+            // "I hosted them" needs a host; "they hosted me" needs the subject to be one.
+            if (r.Context == ReferenceContext.Hosted) Assert.NotEqual("guest", people[r.From].Role);
+            if (r.Context == ReferenceContext.WasHosted) Assert.NotEqual("guest", people[r.To].Role);
+        }
+        var pairs = Seed.References.Select(r => (r.From, r.To)).ToList();
+        Assert.Equal(pairs.Count, pairs.Distinct().Count());
+    }
+
+    /// Negatives exist, so the positive ones are believable: exactly one, away from the presenter's two cities.
+    [Fact]
+    public void Exactly_one_reference_is_a_thumb_down_outside_Helsinki_and_Milano()
+    {
+        var people = Seed.People.ToDictionary(p => p.Key);
+        var down = Assert.Single(Seed.References, r => !r.Recommend);
+        Assert.DoesNotContain(people[down.From].City, new[] { "Helsinki", "Milano" });
+        Assert.DoesNotContain(people[down.To].City, new[] { "Helsinki", "Milano" });
+    }
+
+    [Fact]
+    public void The_featured_members_have_the_planned_number_of_references()
+    {
+        int Of(string key) => Seed.References.Count(r => r.To == key);
+        Assert.Equal((6, 4, 3, 2, 2), (Of("aino"), Of("mikko"), Of("laura"), Of("antti"), Of(Seed.Presenter)));
+
+        var featured = new[] { "aino", "mikko", "laura", "antti", Seed.Presenter };
+        foreach (var host in Seed.People.Where(p => p.Role != "guest" && !featured.Contains(p.Key)))
+            Assert.InRange(Of(host.Key), 1, 3);
+
+        var travellers = Seed.People.Where(p => p.Role == "guest" && Of(p.Key) > 0).ToList();
+        Assert.InRange(travellers.Count, 4, 6);
+        Assert.All(travellers, p => Assert.InRange(Of(p.Key), 1, 2));
+        // A traveller's references come from the hosts who showed them round.
+        var guests = travellers.Select(p => p.Key).ToHashSet();
+        Assert.All(Seed.References.Where(r => guests.Contains(r.To)), r => Assert.Equal(ReferenceContext.Hosted, r.Context));
+    }
 }
 
 /// What the presenter sees in each seeded city right after a reset.
@@ -405,6 +488,30 @@ public class DemoDiscoveryTests
 
         var families = (await Search(t, "Helsinki", Lifestyle.Family)).Select(c => c.Id).ToList();
         Assert.Superset(new[] { "laura", "antti", "marta", "pablo" }.Select(DemoSeed.IdOf).ToHashSet(), families.ToHashSet());
+    }
+
+    /// ADR-0017: after a reset the cards and the profile show the seed's references.
+    [Fact]
+    public async Task The_cards_and_aino_s_profile_carry_the_seeds_references()
+    {
+        using var t = await Seeded();
+        int Of(string key, ReferenceContext? context = null) =>
+            Seed.References.Count(r => r.To == key && (context is null || r.Context == context));
+
+        var cards = await Search(t, "Helsinki");
+        Assert.All(cards, c =>
+        {
+            var key = Seed.People.Single(p => DemoSeed.IdOf(p.Key) == c.Id).Key;
+            Assert.Equal((Of(key), Of(key, ReferenceContext.WasHosted), Of(key, ReferenceContext.Hosted)),
+                         (c.References, c.ReferencesAsHost, c.ReferencesAsTraveller));
+        });
+        Assert.Contains(cards, c => c.References > 0);
+
+        var aino = (await new UsersController(t.Db, null!, null!).As(Seed.PresenterId).GetById(DemoSeed.IdOf("aino"))).Value!;
+        Assert.Equal((6, Of("aino", ReferenceContext.WasHosted)), (aino.References, aino.ReferencesAsHost));
+        var listed = (await new ReviewsController(t.Db).As(Seed.PresenterId).ForUser(DemoSeed.IdOf("aino"))).Value!.Items;
+        Assert.Equal(6, listed.Count);
+        Assert.All(listed, r => Assert.NotNull(r.Context));
     }
 }
 

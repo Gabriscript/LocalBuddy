@@ -26,9 +26,14 @@ public record MessageDto(Guid Id, Guid ConversationId, Guid SenderId, string Con
 public record ConversationSummary(
     Guid Id, Guid OtherUserId, bool UnlockedByPayment, DateTime CreatedAt, string? LastMessage, int UnreadCount);
 
-public record ReviewDto(Guid Id, Guid AuthorId, Guid SubjectId, int Rating, string Comment, DateTime CreatedAt)
+/// A reference (ADR-0017). The list on a profile names its authors, so they travel with it.
+public record ReviewDto(
+    Guid Id, Guid AuthorId, Guid SubjectId, int Rating, string Comment, DateTime CreatedAt,
+    bool? Recommend, ReferenceContext? Context, string AuthorName, string? AuthorPhotoUrl)
 {
-    public static ReviewDto From(Review r) => new(r.Id, r.AuthorId, r.SubjectId, r.Rating, r.Comment, r.CreatedAt);
+    public static ReviewDto From(Review r, string authorName, Guid? authorPhotoId) =>
+        new(r.Id, r.AuthorId, r.SubjectId, r.Rating, r.Comment, r.CreatedAt, r.Recommend, r.Context,
+            authorName, authorPhotoId is null ? null : PhotoDto.UrlFor(authorPhotoId.Value));
 }
 
 public record ReportDto(

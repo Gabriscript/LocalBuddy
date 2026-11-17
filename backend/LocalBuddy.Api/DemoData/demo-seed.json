@@ -41,7 +41,7 @@
       "key": "chiara",
       "name": "Chiara",
       "city": "Milano",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Live music in a basement club in Porta Venezia, a late cotoletta, then the Darsena at midnight when it finally goes quiet. I have a small guest room in Città Studi if you need a bed for a night or two.",
       "whyIHost": "I mix sound for concerts and spend half the year on the road with bands. People have put me up in every city I can think of, so my spare room is the least I can give back.",
       "languages": "Italian, English, Portuguese",
@@ -144,7 +144,7 @@
       "key": "laura",
       "name": "Laura",
       "city": "Helsinki",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "A Saturday morning at our boys' football club (they are 8 and 10), then pancakes at home and a Lego session that always runs longer than planned. Antti looks after the sauna, I look after the coffee.",
       "whyIHost": "We moved back to Helsinki from Rotterdam when the boys were small and missed having friends from everywhere. Hosting other families gives them that again, and gives us an excuse to explore our own city.",
       "languages": "Finnish, English, Dutch",
@@ -162,7 +162,7 @@
       "key": "antti",
       "name": "Antti",
       "city": "Helsinki",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Our family sauna on a Sunday evening, the outdoor ice rink if it is cold enough, and the big library downtown where kids can build and play for free. Laura says I talk too much about football, and our two boys, 8 and 10, agree with her.",
       "whyIHost": "I coach the under-10 team our older son plays in, and I like meeting parents from other countries on the touchline. The kids never need a common language, only a ball.",
       "languages": "Finnish, Swedish, English",
@@ -268,7 +268,7 @@
       "key": "lorenzo",
       "name": "Lorenzo",
       "city": "Firenze",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Sunset from Piazzale Michelangelo, then down the steps to Santo Spirito, where half the city sits on the church steps with a drink. I study restoration, so if you like I show you the Oltrarno workshops where they still gild frames and bind books by hand.",
       "whyIHost": "Florence can feel like a museum with a queue. I grew up here and I like showing people the part that is still a neighbourhood, with football in the piazza and grandmothers on the benches.",
       "languages": "Italian, English, Spanish",
@@ -303,7 +303,7 @@
       "key": "samuel",
       "name": "Samuel",
       "city": "Roma",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Pigneto on a Friday night, when the street fills up and nobody is in a hurry, then a supplì on the way home. On Sunday morning we take bikes along the Via Appia Antica, past tombs two thousand years old, and stop for a picnic under the pines.",
       "whyIHost": "I grew up as the one who showed Rome to the cousins visiting from abroad, and somewhere along the way it became my favourite thing to do.",
       "languages": "Italian, English, French",
@@ -321,7 +321,7 @@
       "key": "elsa",
       "name": "Elsa",
       "city": "Stockholm",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Fika in Gamla stan, coffee and a cardamom bun in a cellar café, then a walk along the water to Södermalm for the view back over the old town. If the lakes freeze hard enough, I lend you skates and we go out on the ice like everyone else.",
       "whyIHost": "I moved here from a small town up north to study and fell for the city in my first dark season. Showing it to newcomers reminds me why.",
       "languages": "Swedish, English, German",
@@ -355,7 +355,7 @@
       "key": "aminata",
       "name": "Aminata",
       "city": "Paris",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "A picnic by the Canal Saint-Martin, then up through Belleville, where I live, to the top of the park for the view over the rooftops. On Sunday I take you to the market on my street, the loudest in Paris, and we cook whatever we found.",
       "whyIHost": "I am a nurse and I work nights, so my free days fall at odd times and I spend them walking. Paris is kinder than its reputation once somebody shows you where to sit down.",
       "languages": "French, English, Wolof",
@@ -389,7 +389,7 @@
       "key": "grace",
       "name": "Grace",
       "city": "London",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Brixton Village for food from half the world, then a pub quiz where my team has never once won. On a clear day we walk up through Greenwich Park and look down the river at the whole city, from the old naval college to the towers.",
       "whyIHost": "I was born in south London and I get defensive when visitors only see the museums. The city is best from the top deck of a bus, on the way to somebody's kitchen.",
       "languages": "English, French",
@@ -424,7 +424,7 @@
       "key": "jonas",
       "name": "Jonas",
       "city": "Berlin",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "The Tempelhof field, the old airport where we walk or cycle down the runway, then the Grunewald forest if you want trees instead of concrete. Evenings, a beer from the Späti on the canal bank and wherever the night goes from there.",
       "whyIHost": "I grew up in a village in Brandenburg and came to Berlin at nineteen with one bag. Friends showed me how to live here; now I do the same for others.",
       "languages": "German, English, Polish",
@@ -459,7 +459,7 @@
       "key": "pilar",
       "name": "Pilar",
       "city": "Madrid",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "El Rastro on a Sunday morning, then a vermouth in La Latina, standing at the bar like a real madrileña. In the afternoon a rowing boat on the lake in the Retiro, and dinner late, because that is how we do it here.",
       "whyIHost": "For years I rented my spare room to students and I missed every one of them when they left. Hosting travellers keeps the house full of languages.",
       "languages": "Spanish, English, Portuguese",
@@ -494,7 +494,7 @@
       "key": "tomas",
       "name": "Tomáš",
       "city": "Prague",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "Charles Bridge at dawn, before the crowds, with a camera if you like photography. Then up to Vyšehrad for the view over the river, lunch in a beer hall, and home through Žižkov under the TV tower with its strange sculpted babies.",
       "whyIHost": "I photograph my city for a living and I still see something new every morning. Taking somebody along makes me look twice.",
       "languages": "Czech, English, Slovak",
@@ -528,7 +528,7 @@
       "key": "mette",
       "name": "Mette",
       "city": "Copenhagen",
-      "role": "entrambi",
+      "role": "host",
       "whatWeWillDo": "We cycle everywhere, so you get a bike for the day: along the canals of Christianshavn, then a cold dip in the harbour with the swimmers who go in all year. After, warm drinks and a long dinner by candlelight, which is what we mean by hygge.",
       "whyIHost": "I grew up on Funen and came to Copenhagen for university, then stayed for love. Our children are teenagers and embarrassed by everything, so visitors are my best audience now.",
       "languages": "Danish, English, Swedish",
@@ -667,10 +667,95 @@
     }
   ],
   "requests": [
-    { "from": "chiara", "to": "anna" },
-    { "from": "lucia", "to": "anna" },
-    { "from": "marta", "to": "anna" },
-    { "from": "aino", "to": "anna" },
-    { "from": "anna", "to": "mikko" }
+    { "from": "chiara", "to": "anna", "note": "Hi Anna! I'm Chiara, I mix sound for bands and I'm in Milano until you leave for Helsinki. If you fancy a night of live music in a basement club before you fly north, I know exactly where." },
+    { "from": "lucia", "to": "anna", "note": "Hola Anna, I'm Lucía, in Milano for ten days, and cooking is my thing. Could I borrow your kitchen for an evening? I make a very good gazpacho and I'd love to learn your risotto." },
+    { "from": "marta", "to": "anna", "note": "Hi Anna! We are a family from Valencia and we will be in Helsinki the same days as you, with two boys, 7 and 9, who live for Lego and football. Fancy a coffee while they build something?" },
+    { "from": "aino", "to": "anna", "note": "Hi Anna, I saw you are coming to Helsinki for Slush. I'd love to take you to the public sauna by the sea one evening: wood-fired heat, then straight into the water. No experience needed." },
+    { "from": "anna", "to": "mikko", "note": "Hi Mikko! I'm in Helsinki for Slush and I'd love a local to show me the real city: the market hall, the island fortress, and a hockey game if there is one." }
+  ],
+  "references": [
+    { "from": "colin", "to": "aino", "recommend": true, "context": "wasHosted", "daysAgo": 64, "text": "I swim the Heath ponds all winter and still yelped on Aino's ladder into the sea. She timed every round in the steam, made sure I found the steps in the dark, and the salmon soup after was the best thing I ate in Helsinki." },
+    { "from": "chiara", "to": "aino", "recommend": true, "context": "wasHosted", "daysAgo": 133, "text": "I had one free evening between two concerts in Helsinki and Aino gave it to the sauna on the shore. After a week of sound checks, sitting in the steam and listening to the sea was exactly what my ears needed." },
+    { "from": "yasmin", "to": "aino", "recommend": true, "context": "wasHosted", "daysAgo": 210, "text": "I came to Helsinki to look at housing and Aino drove me round the new neighbourhoods by the water before we ended at the sauna. She knew who lived where and why, which no plan could have told me." },
+    { "from": "ben", "to": "aino", "recommend": true, "context": "wasHosted", "daysAgo": 362, "text": "I was in Helsinki for a conference and had never been in a sauna, let alone the sea in the dark. Aino talked me through it with a lot of patience and no teasing, and I went back in three times." },
+    { "from": "mette", "to": "aino", "recommend": true, "context": "wasHosted", "daysAgo": 290, "text": "We swim in the harbour at home, so Aino took it as a challenge to find water colder than ours. She managed it. Our two teenagers, who are embarrassed by everything, asked when we could go again." },
+    { "from": "laura", "to": "aino", "recommend": true, "context": "metUp", "daysAgo": 48, "text": "Aino and I met at a sauna evening on the shore, and since then she has taken half our visiting friends there. Calm, kind, and the only person I know who can get a Dutch cousin into the sea in the dark." },
+
+    { "from": "jun", "to": "mikko", "recommend": true, "context": "wasHosted", "daysAgo": 175, "text": "Mikko walked me through the old market hall stall by stall and knew which smoked fish to order and which to skip. We finished under the lights on the Esplanadi at four in the afternoon, and I wrote half an article on the train the next day." },
+    { "from": "ingrid", "to": "mikko", "recommend": true, "context": "wasHosted", "daysAgo": 320, "text": "I came to Helsinki in the dark season expecting gloom, and Mikko spent a whole afternoon proving me wrong: the island fortress at dusk, then a candle in every window on the way back." },
+    { "from": "tomas", "to": "mikko", "recommend": true, "context": "wasHosted", "daysAgo": 96, "text": "I wanted the low northern light for photographs and Mikko knew exactly where it would fall and when. He waited in the cold without one complaint while I took far too many pictures of the fortress walls." },
+    { "from": "antti", "to": "mikko", "recommend": true, "context": "metUp", "daysAgo": 58, "text": "Mikko and I sit together at the hockey whenever there is a home game. He explains the rules to every visitor within earshot, and he is right about the dark season, which I do not say often." },
+
+    { "from": "mette", "to": "laura", "recommend": true, "context": "wasHosted", "daysAgo": 288, "text": "Our teenagers thought they were too old for Lego until Laura's boys showed them what they had built. Saturday at the football club, pancakes after, and the warmest welcome of our whole trip." },
+    { "from": "aino", "to": "laura", "recommend": true, "context": "metUp", "daysAgo": 52, "text": "Laura brings her whole family to the shore sauna, and her boys are braver in the cold water than most adults I take. She is generous with her time and her coffee, and she remembers everyone's name." },
+    { "from": "miguel", "to": "laura", "recommend": true, "context": "wasHosted", "daysAgo": 140, "text": "I came to Helsinki for a match and Laura invited me to her sons' Saturday training first. Twenty boys, one ball, no common language needed, and pancakes after: the best morning of my trip." },
+
+    { "from": "jonas", "to": "antti", "recommend": true, "context": "wasHosted", "daysAgo": 230, "text": "Antti took me skating on the outdoor rink and then to the big library, where I watched kids build things for an hour. He talks about football exactly as much as his family warns you, and I enjoyed every minute." },
+    { "from": "mikko", "to": "antti", "recommend": true, "context": "metUp", "daysAgo": 58, "text": "Antti is the coach every parent on the touchline wants: loud for the right reasons and patient with everyone. We met at the hockey and he has been teaching me the rules of youth football ever since." },
+
+    { "from": "keiko", "to": "anna", "recommend": true, "context": "wasHosted", "daysAgo": 380, "text": "Anna showed me an aperitivo on the Navigli the way locals do it, then walked me through the old courtyards of Isola and cooked risotto at hers. My Italian was terrible and she never once made me feel it." },
+    { "from": "ingrid", "to": "anna", "recommend": true, "context": "hosted", "daysAgo": 150, "text": "Anna was in Berlin for work and still found an evening for Mauerpark and cake at my kitchen table. Curious, warm and on time, and the week after she sent me a photo of the Navigli to say thank you." },
+
+    { "from": "oliver", "to": "davide", "recommend": true, "context": "wasHosted", "daysAgo": 85, "text": "Davide knows every tram line in Milano by heart and has a story for each one. The Monumentale was his idea and the highlight of my week; I would never have gone on my own." },
+
+    { "from": "jonas", "to": "chiara", "recommend": true, "context": "hosted", "daysAgo": 260, "text": "Chiara came through Berlin on tour with a band and had one free evening, so we walked the canal and ended at a Späti. Easy company and full of stories from the road." },
+    { "from": "ben", "to": "chiara", "recommend": true, "context": "wasHosted", "daysAgo": 345, "text": "Chiara took me to a basement club in Porta Venezia where the band was better than anything I see at home. A late cotoletta after, and a walk along the Darsena once it went quiet." },
+
+    { "from": "lucia", "to": "graziella", "recommend": true, "context": "wasHosted", "daysAgo": 310, "text": "Graziella took me to the Sant'Ambrogio market at seven and then let me help with the ribollita in her kitchen. We spoke Spanish and Italian at each other all morning and understood everything that mattered." },
+    { "from": "jana", "to": "graziella", "recommend": true, "context": "wasHosted", "daysAgo": 200, "text": "Graziella cooked for me as if I were one of her grandchildren, then sent me up to Fiesole on the bus with very precise instructions. The view of the Duomo from up there was worth every bend." },
+
+    { "from": "bernard", "to": "lorenzo", "recommend": true, "context": "wasHosted", "daysAgo": 120, "text": "Lorenzo took me round the Oltrarno workshops and introduced me to a binder who still sews by hand, which made an old binder very happy. Then the steps of Santo Spirito at sunset, with half of Florence." },
+
+    { "from": "marta", "to": "rosanna", "recommend": true, "context": "wasHosted", "daysAgo": 240, "text": "We came to Roma with our boys and Rosanna had them choosing artichokes at the Testaccio market within ten minutes. Lunch at her long table went on until four, and they still talk about the keyhole on the Aventine." },
+    { "from": "samuel", "to": "rosanna", "recommend": true, "context": "metUp", "daysAgo": 70, "text": "Rosanna and I met when one of my guests wandered into her courtyard by mistake and stayed for lunch. Her cacio e pepe is the real thing, and so is her welcome." },
+
+    { "from": "keiko", "to": "samuel", "recommend": true, "context": "wasHosted", "daysAgo": 375, "text": "Samuel rode the Via Appia Antica with me at my slow pace and never once looked at his watch. The picnic under the pines was perfect, and so was the supplì on the way home." },
+
+    { "from": "ravi", "to": "elsa", "recommend": true, "context": "wasHosted", "daysAgo": 300, "text": "Elsa lent me skates and took me out on a frozen lake, holding my sleeve for the first ten minutes. Fika in a cellar café in Gamla stan after; I finally understood why she loves the dark season." },
+    { "from": "grace", "to": "elsa", "recommend": true, "context": "wasHosted", "daysAgo": 155, "text": "Elsa walked me from Gamla stan along the water to Södermalm, and the view back was everything she promised. Her cardamom bun was spot on too." },
+
+    { "from": "mikko", "to": "lars", "recommend": true, "context": "wasHosted", "daysAgo": 270, "text": "Lars took me out into the archipelago on a commuter boat and we spoke Finnish the whole way, which surprised everybody on board. He has a story for every island, and his meatballs are as good as he says." },
+    { "from": "tom", "to": "lars", "recommend": true, "context": "wasHosted", "daysAgo": 185, "text": "Lars walked me round an island so quiet I could hear the water on the rocks. Then the Vasa museum, where he explained every mast, and meatballs at his, with his wife laughing at his stories." },
+
+    { "from": "jun", "to": "aminata", "recommend": true, "context": "wasHosted", "daysAgo": 160, "text": "Aminata took me to the market on her street, the loudest in Paris as promised, and we cooked what we found in her kitchen. Some of the best food of my month in Europe, and I eat for a living." },
+    { "from": "zara", "to": "aminata", "recommend": true, "context": "wasHosted", "daysAgo": 110, "text": "Aminata showed me Belleville on foot and the view from the top of the park, and none of it cost a thing. She did it on her day off after a night shift, which I only found out later." },
+
+    { "from": "julien", "to": "bernard", "recommend": true, "context": "wasHosted", "daysAgo": 225, "text": "Bernard knows which bookstalls on the Seine still keep the good old editions, and he showed me how a book is sewn by hand. I left Paris with two old books and a lot to think about." },
+    { "from": "lorenzo", "to": "bernard", "recommend": true, "context": "wasHosted", "daysAgo": 330, "text": "As a restoration student I learned more in one afternoon with Bernard than in a month of lectures. A slow lap of the Luxembourg after, watching the chess players, and he knew half of them." },
+
+    { "from": "zara", "to": "grace", "recommend": true, "context": "wasHosted", "daysAgo": 195, "text": "Grace took me to Brixton Village for food from everywhere and then to her pub quiz. We lost, as she warned, but I have never laughed so much on a Tuesday." },
+    { "from": "aminata", "to": "grace", "recommend": true, "context": "wasHosted", "daysAgo": 250, "text": "Grace met me off the train and we spent the day on the top deck of buses, ending in Greenwich Park with the whole river below us. She is fiercely proud of south London, and now so am I." },
+
+    { "from": "tom", "to": "colin", "recommend": true, "context": "wasHosted", "daysAgo": 215, "text": "Colin walked me across Hampstead Heath to Parliament Hill and named every building on the skyline. A roast by the fire after; I did not swim in the ponds, and he forgave me." },
+
+    { "from": "chiara", "to": "jonas", "recommend": true, "context": "wasHosted", "daysAgo": 260, "text": "I had one free night in Berlin between shows and Jonas walked me along the canal with a beer from the Späti. Relaxed, funny, and he knows every corner of his side of town." },
+    { "from": "davide", "to": "jonas", "recommend": true, "context": "wasHosted", "daysAgo": 205, "text": "Jonas cycled down the Tempelhof runway with me, slowly, because I am retired. Then the Grunewald, where I saw more trees in one day than in a year in Milano." },
+
+    { "from": "yasmin", "to": "ingrid", "recommend": true, "context": "wasHosted", "daysAgo": 280, "text": "Ingrid showed me where the Wall ran past her street and how the blocks around it changed after. For an architect that walk was worth a whole study trip, and the cake at her kitchen table was a bonus." },
+    { "from": "oliver", "to": "ingrid", "recommend": true, "context": "wasHosted", "daysAgo": 100, "text": "I taught the fall of the Wall from a textbook for thirty years. Hearing Ingrid tell it at her own kitchen table, then walking the line past her street, was something else entirely." },
+
+    { "from": "lucia", "to": "pilar", "recommend": true, "context": "wasHosted", "daysAgo": 340, "text": "Pilar took me to El Rastro and then for a vermouth standing at the bar in La Latina, like a real madrileña. Dinner at eleven, as promised; she has the energy of three people." },
+    { "from": "tomas", "to": "pilar", "recommend": true, "context": "wasHosted", "daysAgo": 125, "text": "Pilar rowed us across the lake in the Retiro so I could photograph the park from the water. Her house is full of languages, and so is her dinner table." },
+
+    { "from": "lorenzo", "to": "miguel", "recommend": true, "context": "wasHosted", "daysAgo": 170, "text": "Miguel watched a match with me and his friends and made me pick a side within five minutes. Churros with chocolate afterwards, and a long lunch in Malasaña the next day." },
+
+    { "from": "colin", "to": "tomas", "recommend": true, "context": "wasHosted", "daysAgo": 145, "text": "Tomáš had me on Charles Bridge at dawn with nobody else on it, then up to Vyšehrad for the river. He photographs Prague for a living and still stops to look; it is contagious." },
+
+    { "from": "bernard", "to": "jana", "recommend": true, "context": "wasHosted", "daysAgo": 235, "text": "Jana took us to the farmers market on the embankment and then to chamber music in an old church, which delighted my wife, who sings in a choir. Her svíčková alone is reason enough to visit Prague." },
+    { "from": "ingrid", "to": "jana", "recommend": true, "context": "wasHosted", "daysAgo": 315, "text": "Jana and I talked in German all the way up to the castle on the slow tram. Sunday lunch at her table, music in the evening: she sees Prague with fresh eyes and makes you do the same." },
+
+    { "from": "laura", "to": "mette", "recommend": true, "context": "wasHosted", "daysAgo": 262, "text": "Mette found bikes for all four of us and led us along the canals of Christianshavn without losing anyone. Our boys jumped into the harbour after her and talked about it for weeks." },
+    { "from": "aino", "to": "mette", "recommend": true, "context": "wasHosted", "daysAgo": 190, "text": "Mette took me to the harbour swimmers and I felt right at home in the cold water. A long dinner by candlelight after: she taught me what hygge means, and I taught her what a Finn means by löyly." },
+
+    { "from": "samuel", "to": "ravi", "recommend": true, "context": "wasHosted", "daysAgo": 220, "text": "Ravi walked me through Nørrebro, from Superkilen to the benches of the Assistens cemetery, with a story for every object in the park. His smørrebrød would make his Danish neighbour proud." },
+
+    { "from": "bernard", "to": "julien", "recommend": true, "context": "hosted", "daysAgo": 225, "text": "Julien came to the bookstalls with a list and left with better books than the ones on it. Curious, polite and always on time; he argued politics with my friends and won twice." },
+    { "from": "colin", "to": "tom", "recommend": true, "context": "hosted", "daysAgo": 215, "text": "Tom kept pace with me across the whole Heath and asked better questions about London than most Londoners. A pleasure to walk with, and he sent a postcard from Manchester." },
+    { "from": "lars", "to": "tom", "recommend": true, "context": "hosted", "daysAgo": 185, "text": "Tom listened to every one of my archipelago stories, which my wife says is a rare gift. He was on time for the morning boat and helped with the dishes after dinner." },
+    { "from": "samuel", "to": "keiko", "recommend": true, "context": "hosted", "daysAgo": 375, "text": "Keiko is slower on the climbs than she says and even faster at lunch. A cheerful, careful cyclist and a joy to show Rome to." },
+    { "from": "aminata", "to": "jun", "recommend": true, "context": "hosted", "daysAgo": 160, "text": "Jun asked the stallholders more questions in one morning than I have in ten years, and wrote everything down. He cooked a Korean dish with what we found and left my kitchen cleaner than before." },
+    { "from": "ravi", "to": "jun", "recommend": true, "context": "hosted", "daysAgo": 150, "text": "Jun arrived with a list of smørrebrød places and left with a better one from my neighbour. Thoughtful, punctual and very good company over a long lunch." },
+    { "from": "grace", "to": "zara", "recommend": true, "context": "hosted", "daysAgo": 195, "text": "Zara was up for everything, from the quiz to the long walk through Greenwich, and wanted to know where students really eat, so I showed her. A lovely guest, and she wrote to say she got home safe." },
+    { "from": "jonas", "to": "ben", "recommend": false, "context": "hosted", "daysAgo": 120, "text": "Ben and I had a good first evening by the canal and agreed to cycle Tempelhof on the Saturday. He never came and never wrote, and I waited an hour at the gate. Maybe something happened, but a message would have been enough." }
   ]
 }

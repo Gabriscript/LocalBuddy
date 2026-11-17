@@ -37,6 +37,10 @@ public record ProfileDetail : PublicProfile
     public List<AvailabilityDto> Availability { get; init; }
     public ListingDto? Listing { get; init; }
     public double? Rating { get; init; }
+    /// ADR-0017: all references, those from people this member hosted, and from people who hosted them.
+    public int References { get; init; }
+    public int ReferencesAsHost { get; init; }
+    public int ReferencesAsTraveller { get; init; }
 }
 
 /// What other members see of a trip: where and when, never its id.
@@ -50,6 +54,13 @@ public record ProfileCard : PublicProfile
 
     public string? PhotoUrl { get; init; }
     public double? Rating { get; init; }
+    /// As on ProfileDetail (ADR-0017); left at 0 on the blocks list, which carries no rating either.
+    public int References { get; init; }
+    public int ReferencesAsHost { get; init; }
+    public int ReferencesAsTraveller { get; init; }
     /// The member's earliest active trip to the city searched for; null for residents and without a city.
+    /// On my received requests: the asker's earliest active trip to my city or to a city I am visiting.
     public PublicTrip? Trip { get; init; }
+    /// What the member wrote when asking me to meet; set on my received requests only (ADR-0015).
+    public string? Note { get; init; }
 }

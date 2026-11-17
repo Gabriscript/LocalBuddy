@@ -91,6 +91,13 @@ members are untouched. From a laptop,
 [`backend/scripts/seed-demo.sh`](../../backend/scripts/seed-demo.sh) does the same
 (`API=https://demo-api.EXAMPLE.TLD/api/v1 DEMO_PASSWORD=... bash backend/scripts/seed-demo.sh`).
 
+The seeded accounts are already verified. Anyone who registers on this server is not: they wait
+for a moderator (ADR-0011), so show the demo from the seeded accounts, or approve the new account
+with the `curl` shown in that ADR.
+
+This release adds one migration (`AddMatchNote`, the optional note of a request, ADR-0015). The
+`migrate` container applies it by itself on the next `up -d --build`; nothing to run by hand.
+
 **Release order**: deploy the API before installing a new APK. An older server omits the reset
 flag and the app simply hides the row; a new APK against an old server never shows it.
 
