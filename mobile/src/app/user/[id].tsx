@@ -26,6 +26,10 @@ import { radius, space, type, useColors } from '@/theme';
 /// unlock link in reach.
 const FIRST_REFERENCES = 3;
 
+/// The paid "skip the wait" is hidden while the pilot is free (owner, 2026-11-17): testers read it
+/// as a contradiction of "Nobody pays anybody". The sheet and the API stay; flip this to offer it.
+const PAID_UNLOCK: boolean = false;
+
 /// The expanded profile, and the only place the paid unlock appears: keeping it off the
 /// discovery card is what stops an accidental charge mid-scroll (GUIDELINES §11.2).
 export default function Profile() {
@@ -272,7 +276,7 @@ export default function Profile() {
             {/* Deliberately away from the free actions and visually quieter: paying is a
                 separate decision, not a third button of equal weight. Not offered to someone who
                 already asked me: there is no wait to skip. */}
-            {askedMe || own ? null : (
+            {!PAID_UNLOCK || askedMe || own ? null : (
               <Button
                 title={s.profile.unlock}
                 variant="quiet"
