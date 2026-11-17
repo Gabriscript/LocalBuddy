@@ -1,6 +1,7 @@
 using LocalBuddy.Api.Controllers;
 using LocalBuddy.Api.Dtos;
 using LocalBuddy.Api.Models;
+using LocalBuddy.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -67,10 +68,10 @@ public class FreeTodayTests
         var anna = t.AddUser("anna");
 
         Assert.IsType<NoContentResult>(await Users(t, anna).SetFreeToday(new FreeToday(DateTime.UtcNow.AddHours(5))));
-        Assert.NotNull((await Users(t, anna).Me()).Value!.FreeUntil);
+        Assert.NotNull((await Users(t, anna).Me(new DemoOptions())).Value!.FreeUntil);
 
         Assert.IsType<NoContentResult>(await Users(t, anna).ClearFreeToday());
-        Assert.Null((await Users(t, anna).Me()).Value!.FreeUntil);
+        Assert.Null((await Users(t, anna).Me(new DemoOptions())).Value!.FreeUntil);
     }
 
     [Fact]
@@ -81,7 +82,7 @@ public class FreeTodayTests
         FreeFor(t, anna, TimeSpan.FromHours(-1));
 
         Assert.False((await Feed(t, me)).Value!.Items.Single().FreeToday);
-        Assert.Null((await Users(t, anna).Me()).Value!.FreeUntil);
+        Assert.Null((await Users(t, anna).Me(new DemoOptions())).Value!.FreeUntil);
     }
 
     [Fact]

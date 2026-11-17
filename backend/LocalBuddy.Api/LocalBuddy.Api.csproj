@@ -14,4 +14,9 @@
     <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The demo cast (ADR-0014), read by DemoSeed from next to the binaries. -->
+    <Content Update="DemoData\demo-seed.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

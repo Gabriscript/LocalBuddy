@@ -20,6 +20,7 @@ code; each one notes its original date.
 | [0010](0010-demo-environment.md) | A Demo environment for a hosted showcase | proposed | 2026-10-27 |
 | [0011](0011-pilot-on-demo-with-manual-identity-approval.md) | The pilot runs on Demo, with identities approved by hand | proposed | 2026-11-12 |
 | [0012](0012-push-through-expo-best-effort.md) | Push notifications through Expo, best effort | accepted | 2026-11-12 |
+| [0014](0014-demo-data-reset.md) | Demo data seeded by the API, reset from the app | proposed | 2026-11-16 |
 
 ## Adding one
 

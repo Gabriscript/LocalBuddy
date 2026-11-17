@@ -65,24 +65,34 @@ Run on the server, as a user that can use Docker. Steps 1 to 3 once; step 4 on e
    If `api` exits at once, its log says why: a missing, short or development `JWT_KEY`, a bad
    `DEMO_SUBNET`, or the database. These are on purpose (fail fast, ADR-0010).
 
-## Seeding the nine demo people
+## Demo cast and reset
 
-[`backend/scripts/seed-demo.sh`](../../backend/scripts/seed-demo.sh) runs **from your own machine**
-(it needs `demo-photos/`, which is not in git). It talks to the API over HTTPS and writes the
-credits with `docker exec` into the Postgres container; `DOCKER_HOST=ssh://...` sends that one
-command to the server's Docker instead of the local one.
+The API seeds the demo cast itself and the presenter resets it from the phone
+([ADR-0014](../../docs/adr/0014-demo-data-reset.md)). Off by default.
 
-```bash
-# On your machine, from the repository root:
-API=https://demo-api.EXAMPLE.TLD/api/v1 \
-PG=localbuddy-demo-postgres-1 \
-DOCKER_HOST=ssh://<user>@<server> \
-bash backend/scripts/seed-demo.sh
-```
+1. Copy the portraits to the server once (they are not in git or in the image; without them the
+   profiles are seeded without photos):
 
-The auth endpoints allow 10 calls a minute per address, so the script pauses on 429 and takes a
-few minutes. Re-running it replaces the nine accounts and touches nothing else. Every account is
-`<name>@demo.localbuddy.test`, password `DemoPass123!` (public: it is in the script).
+   ```bash
+   # On your machine, from the repository root:
+   ssh <user>@<host> 'mkdir -p ~/LocalBuddy/deploy/demo/demo-photos'
+   scp demo-photos/pexels/*.jpg <user>@<host>:~/LocalBuddy/deploy/demo/demo-photos/
+   ```
+
+2. In `.env` set `DEMO_RESET_ENABLED=true`, `DEMO_PASSWORD` (at least 12 characters, never
+   `DemoPass123!`: the API refuses to start with it) and `DEMO_PHOTOS_DIR` if the folder is not
+   `./demo-photos`.
+
+3. `docker compose up -d --build`. The first boot with no presenter account seeds the cast.
+
+The presenter (`anna@demo.localbuddy.test`, with `DEMO_PASSWORD`) resets from the app's **Me** tab,
+"Reset demo data". The reset deletes and recreates only `@demo.localbuddy.test` accounts; pilot
+members are untouched. From a laptop,
+[`backend/scripts/seed-demo.sh`](../../backend/scripts/seed-demo.sh) does the same
+(`API=https://demo-api.EXAMPLE.TLD/api/v1 DEMO_PASSWORD=... bash backend/scripts/seed-demo.sh`).
+
+**Release order**: deploy the API before installing a new APK. An older server omits the reset
+flag and the app simply hides the row; a new APK against an old server never shows it.
 
 ## Phone
 

@@ -58,7 +58,7 @@ public class ManualVerificationTests
         var user = (await t.Db.Users.FindAsync(anna))!;
         Assert.False(user.IdentityVerified);
         Assert.Null(user.IdentitySubjectHash);
-        Assert.True((await Users(t, anna, new ManualIdentityVerifier()).Me()).Value!.IdentityVerificationPending);
+        Assert.True((await Users(t, anna, new ManualIdentityVerifier()).Me(new DemoOptions())).Value!.IdentityVerificationPending);
         Assert.NotNull(await Gate(t, anna)); // still cannot reach anybody
 
         var queue = (await Moderation(t, t.AddUser("mod")).PendingVerifications()).Value!;
@@ -93,7 +93,7 @@ public class ManualVerificationTests
         Assert.True(user.AgeVerified);
         Assert.Null(await Gate(t, anna));
         Assert.Empty((await Moderation(t, mod).PendingVerifications()).Value!.Items);
-        Assert.False((await Users(t, anna, new ManualIdentityVerifier()).Me()).Value!.IdentityVerificationPending);
+        Assert.False((await Users(t, anna, new ManualIdentityVerifier()).Me(new DemoOptions())).Value!.IdentityVerificationPending);
         // Asking again after approval reports the approval, not a new wait.
         Assert.Equal(new VerificationResult(true, true, false), await Ask(t, anna, new ManualIdentityVerifier()));
     }

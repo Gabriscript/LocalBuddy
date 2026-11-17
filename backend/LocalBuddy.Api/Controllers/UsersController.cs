@@ -18,7 +18,7 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
     [HttpGet("me")]
     [ProducesResponseType<MyProfile>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<MyProfile>> Me()
+    public async Task<ActionResult<MyProfile>> Me([FromServices] DemoOptions demo)
     {
         var user = await WithProfile().FirstOrDefaultAsync(u => u.Id == User.Id());
         if (user is null) return NotFound();
@@ -33,7 +33,8 @@ public class UsersController(LocalBuddyDbContext db, IIdentityVerifier verifier,
             user.Availabilities.Select(AvailabilityDto.From).ToList(),
             ListingDto.From(user.Listing),
             user.IdentityVerificationRequestedAt is not null && !user.IdentityVerified,
-            user.FreeUntil > DateTime.UtcNow ? user.FreeUntil : null);
+            user.FreeUntil > DateTime.UtcNow ? user.FreeUntil : null,
+            demo.ResetEnabled && user.Id == DemoSeed.Current.PresenterId);
     }
 
     /// Public profile — what PublicProfile exposes and nothing more (GUIDELINES §3).

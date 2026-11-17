@@ -14,9 +14,10 @@ namespace LocalBuddy.Api.Controllers;
 [Produces("application/json")]
 public class TripsController(LocalBuddyDbContext db) : ControllerBase
 {
-    const int MaxDays = 30;
-    const int MaxDaysAhead = 365;
-    const int MaxActive = 5;
+    // Public for the demo seed tests, which hold the cast to the same limits (ADR-0014).
+    public const int MaxDays = 30;
+    public const int MaxDaysAhead = 365;
+    public const int MaxActive = 5;
 
     [HttpPost]
     [ProducesResponseType<TripDto>(StatusCodes.Status201Created)]

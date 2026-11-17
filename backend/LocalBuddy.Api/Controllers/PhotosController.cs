@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
 namespace LocalBuddy.Api.Controllers;
@@ -23,21 +21,9 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
     const long MaxBytes = 10 * 1024 * 1024;
     const int MaxPhotosPerUser = 12;
 
-    /// A compressed file says nothing about its decoded size: a 200 KB PNG can decode to 183 MB.
-    /// The header is read first and anything past this is refused before a pixel is allocated.
-    const long MaxPixels = 50_000_000;
-
-    /// Longest side of what is stored. Plenty for a phone screen, a fraction of the disk and data.
-    const int MaxSide = 2048;
-
     /// Longest side of the copies Content can serve instead of the original.
     const int MediumSide = 1080;
     const int ThumbSide = 256;
-
-    /// Only what a phone or a browser hands over. Every other decoder ImageSharp ships is attack
-    /// surface this endpoint has no use for, and the TIFF one has a known denial of service.
-    static readonly Configuration Formats =
-        new(new JpegConfigurationModule(), new PngConfigurationModule(), new WebpConfigurationModule());
 
     /// Photos are not static files: every read passes through here so the host choice about
     /// anonymous visitors is actually enforced, instead of being bypassed by a bare URL.
@@ -72,7 +58,7 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
         // original when Discover gets real traffic.
         await using (content)
         {
-            using var image = await Image.LoadAsync(Formats, content, HttpContext.RequestAborted);
+            using var image = await Image.LoadAsync(PhotoProcessing.Formats, content, HttpContext.RequestAborted);
             var side = size == PhotoSize.Thumb ? ThumbSide : MediumSide;
             // Never enlarged: Max would stretch a small photo up to the box.
             if (Math.Max(image.Width, image.Height) > side)
@@ -109,49 +95,13 @@ public class PhotosController(LocalBuddyDbContext db, IPhotoStorage storage) : C
                     "Home photos are only for hosts offering overnight stays.");
         }
 
-        Image image;
-        try
+        var (normalised, refusal) = await PhotoProcessing.NormaliseAsync(file.OpenReadStream);
+        if (refusal == "image_too_large")
+            return this.Invalid("image_too_large", "That image has too many pixels. Photos from a phone camera are fine.");
+        if (normalised is null) return NotAnImage();
+
+        await using (var jpeg = normalised)
         {
-            IImageInfo? info;
-            await using (var header = file.OpenReadStream())
-                info = await Image.IdentifyAsync(Formats, header);
-            if (info is null) return NotAnImage();
-            if ((long)info.Width * info.Height > MaxPixels)
-                return this.Invalid("image_too_large", "That image has too many pixels. Photos from a phone camera are fine.");
-
-            // Decoding is the real validation — a renamed .exe never gets this far.
-            await using var incoming = file.OpenReadStream();
-            image = await Image.LoadAsync(Formats, incoming);
-        }
-        catch (ImageFormatException) // unknown formats and corrupt data of a known format alike
-        {
-            return NotAnImage();
-        }
-
-        using (image)
-        {
-            var oversized = Math.Max(image.Width, image.Height) > MaxSide;
-            image.Mutate(x =>
-            {
-                // Shrink before turning: a rotation copies every pixel, and at full size that copy
-                // doubled the memory of an upload. The box is square, so the result is the same.
-                if (oversized) x.Resize(new ResizeOptions { Size = new Size(MaxSide, MaxSide), Mode = ResizeMode.Max });
-
-                // Phones store portrait shots sideways plus an EXIF rotation flag. The flag is
-                // about to be stripped, so the rotation has to reach the pixels before that.
-                x.AutoOrient();
-            });
-
-            // GUIDELINES §9: strip EXIF before publishing — it carries the GPS coordinates
-            // of where the shot was taken, i.e. the home address of the host.
-            image.Metadata.ExifProfile = null;
-            image.Metadata.XmpProfile = null;
-            image.Metadata.IptcProfile = null;
-
-            using var jpeg = new MemoryStream();
-            await image.SaveAsync(jpeg, new JpegEncoder());
-            jpeg.Position = 0;
-
             var photo = new Photo
             {
                 Id = Guid.CreateVersion7(),

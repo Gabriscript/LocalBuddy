@@ -53,11 +53,16 @@ services:
       # gateway, Caddy in a container joined to it from an address inside it. Never set
       # ASPNETCORE_FORWARDEDHEADERS_ENABLED: it would believe the headers from anyone.
       KnownNetworks__0: ${DEMO_SUBNET:-10.250.250.0/24}
+      Demo__ResetEnabled: ${DEMO_RESET_ENABLED:-false}
+      Demo__AccountPassword: ${DEMO_PASSWORD:-}
+      Demo__PhotosPath: /app/demo-photos
     ports:
       # Loopback only: the internet reaches the API through Caddy, never directly.
       - "127.0.0.1:${API_PORT:-8080}:8080"
     volumes:
       - photos:/app/wwwroot/uploads
+      # Demo portraits are not in git or in the image; a missing folder seeds profiles without photos.
+      - ${DEMO_PHOTOS_DIR:-./demo-photos}:/app/demo-photos:ro
     depends_on:
       migrate:
         condition: service_completed_successfully

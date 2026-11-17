@@ -27,6 +27,11 @@ var jwt = (builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>(
            ?? throw new InvalidOperationException($"Missing '{JwtOptions.Section}' configuration section."))
     .Validated(developmentKeyAllowed: builder.Environment.IsDevelopment());
 
+// The same for the demo switch (ADR-0014): an enabled server with a weak password does not boot.
+var demo = (builder.Configuration.GetSection(DemoOptions.Section).Get<DemoOptions>() ?? new DemoOptions())
+    .Validated(publishedPasswordAllowed: builder.Environment.IsDevelopment());
+if (demo.PhotosPath != "") demo.PhotosPath = Path.Combine(builder.Environment.ContentRootPath, demo.PhotosPath);
+
 // Enums travel by name, not by position: "evening" means the same thing to every app version,
 // while 2 only meant evening as long as nobody reordered the members.
 builder.Services.AddControllers()
@@ -133,6 +138,8 @@ builder.Services.AddRateLimiter(o =>
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddScoped<PushNotifier>();
 builder.Services.AddSingleton<IPhotoStorage, LocalDiskPhotoStorage>();
+builder.Services.AddSingleton(demo);
+builder.Services.AddScoped<DemoSeeder>();
 
 // The fakes are Development and Demo only. Outside them nothing is registered and the app refuses
 // to start, rather than quietly accepting fake payments and approving every identity check.
@@ -203,6 +210,24 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
         scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>(),
         scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Moderators"));
+}
+
+// An enabled server with no presenter yet seeds the cast once. Like the moderators above, a
+// failure is logged and the app starts anyway; with the switch off the database is not touched.
+if (demo.ResetEnabled)
+{
+    using var scope = app.Services.CreateScope();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<LocalBuddyDbContext>();
+        if (!await db.Users.AnyAsync(u => u.Id == DemoSeed.Current.PresenterId))
+            await scope.ServiceProvider.GetRequiredService<DemoSeeder>().ResetAsync(Trip.Today, DateTime.UtcNow);
+    }
+    catch (Exception ex)
+    {
+        scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Demo")
+            .LogWarning(ex, "The demo cast could not be seeded at boot.");
+    }
 }
 
 app.Run();

@@ -51,7 +51,9 @@ public record MyProfile(
     bool HasCar, bool Smokes, bool HasPets, bool ProfileVisibleToAnonymous,
     List<DayOfWeek> UsualDays, ActivityStyle? ActivityStyle, Lifestyle? Lifestyle,
     List<PhotoDto> Photos, List<AvailabilityDto> Availability, ListingDto? Listing,
-    bool IdentityVerificationPending, DateTime? FreeUntil);
+    bool IdentityVerificationPending, DateTime? FreeUntil,
+    // The app shows "Reset demo data" on this alone (ADR-0014).
+    bool CanResetDemo);
 
 /// Result of an authentication attempt.
 public record AuthResult(string Token, Guid UserId);

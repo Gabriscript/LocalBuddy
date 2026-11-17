@@ -393,6 +393,41 @@
         }
       }
     },
+    "/api/v1/demo/reset": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/discovery": {
       "get": {
         "tags": [
@@ -2518,7 +2553,8 @@
           "availability",
           "listing",
           "identityVerificationPending",
-          "freeUntil"
+          "freeUntil",
+          "canResetDemo"
         ],
         "type": "object",
         "properties": {
@@ -2633,6 +2669,9 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "canResetDemo": {
+            "type": "boolean"
           }
         }
       },
@@ -3687,6 +3726,9 @@
     },
     {
       "name": "Conversations"
+    },
+    {
+      "name": "Demo"
     },
     {
       "name": "Discovery"

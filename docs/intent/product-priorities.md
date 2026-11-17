@@ -66,7 +66,8 @@ Real meetings between people who found each other through trip dates or "free to
 - **Car owners can offer a lift**: a suggestion, not a rule. It is shown as a tip and as a hint
   next to the "has a car" field. There is no new data field: lifts must stay free (GUIDELINES §2).
 - **Photos**: Pexels images show a trip or a situation (a party, a pub, a city, a plane), never a
-  member profile.
+  member profile. One exception since 2026-11-16: the invented demo cast (ADR-0014), adults only,
+  files kept out of git.
 
 ## Out of scope (for now)
 
