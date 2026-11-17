@@ -192,6 +192,7 @@ export const en = {
     /// What the app says once the request has left, and what happens next.
     asked: (name: string) => `You asked ${name} to meet`,
     askedBody: (name: string) => `When ${name} says yes, the chat opens.`,
+    askedWaiting: 'Asked · waiting for an answer',
     unlock: 'Skip the wait and unlock the chat',
   },
 
@@ -241,6 +242,11 @@ export const en = {
     blocked: 'Blocked members',
     trips: 'My trips',
     signOut: 'Sign out',
+    resetDemo: 'Reset demo data',
+    resetDemoTitle: 'Reset the demo?',
+    resetDemoBody: 'Chats, requests, trips and the demo profiles go back to how the demo starts. Nothing else is touched.',
+    resetDemoConfirm: 'Reset',
+    resetDemoDone: 'The demo is back to the start',
     language: 'Language',
     languageRow: (value: string) => `Language: ${value}`,
   },

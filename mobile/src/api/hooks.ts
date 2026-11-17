@@ -250,6 +250,22 @@ export function useDecide() {
   return { interest, pass, undoPass };
 }
 
+/// Puts the demo back to its seeded state (ADR-0014). Everything the member sees may have
+/// changed, so every query goes. The server also drops this account's push tokens: register
+/// again without `ask`, which would skip the PUT because this device still counts as registered.
+export function useResetDemo() {
+  const client = useQueryClient();
+  const { language } = useLanguage();
+  const channelName = useStrings().push.channel;
+  return useMutation({
+    mutationFn: async () => unwrap(await api.POST('/api/v1/demo/reset')),
+    onSuccess: () => {
+      client.invalidateQueries();
+      void registerPush(language, channelName);
+    },
+  });
+}
+
 // ---- Onboarding writes ------------------------------------------------------------------
 // Each one refreshes `me` on success, so every screen that shows the member's own profile
 // picks the change up without being told about it.

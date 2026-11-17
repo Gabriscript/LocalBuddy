@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useFreeToday, useMe } from '@/api/hooks';
+import { useFreeToday, useMe, useResetDemo } from '@/api/hooks';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -16,6 +16,7 @@ import { TabHeader } from '@/components/TabHeader';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage, useStrings } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { endOfToday } from '@/lib/dates';
+import { useNotice } from '@/lib/notice';
 import { radius, space, type, useColors } from '@/theme';
 
 export default function Me() {
@@ -28,6 +29,14 @@ export default function Me() {
   const s = useStrings();
   const { preference, phone, setPreference } = useLanguage();
   const [choosingLanguage, setChoosingLanguage] = useState(false);
+  const resetDemo = useResetDemo();
+  const notice = useNotice();
+  const [resetting, setResetting] = useState(false);
+  // A failure from the last attempt is not news the next time the sheet opens.
+  const closeReset = () => {
+    setResetting(false);
+    resetDemo.reset();
+  };
   const phoneOption = s.language.phone(LANGUAGE_NAMES[phone]);
 
   return (
@@ -37,7 +46,7 @@ export default function Me() {
         <ScrollView contentContainerStyle={[styles.body, { paddingBottom: clearance }]}>
           <View style={styles.identity}>
             <Avatar
-              path={data?.photos?.[0]?.url}
+              path={(data?.photos?.find((p) => p.type === 'profile') ?? data?.photos?.[0])?.url}
               size={88}
               photoSize="medium"
               style={{ backgroundColor: c.surfaceMuted }}
@@ -108,6 +117,13 @@ export default function Me() {
             />
           </View>
 
+          {/* Only a demo server says yes; an older server leaves the field out, which hides it. */}
+          {data?.canResetDemo === true ? (
+            <View style={[styles.rows, { backgroundColor: c.surface, borderColor: c.border }]}>
+              <Row icon="refresh-outline" label={s.me.resetDemo} onPress={() => setResetting(true)} last />
+            </View>
+          ) : null}
+
           {/* Sign out sits apart from the rest: it is not one more settings row. */}
           <View style={[styles.separated, { borderTopColor: c.border }]}>
             <Button title={s.me.signOut} variant="quiet" onPress={signOut} />
@@ -136,6 +152,47 @@ export default function Me() {
               />
             ))}
           </View>
+        </Sheet>
+      ) : null}
+
+      {resetting ? (
+        <Sheet
+          title={s.me.resetDemoTitle}
+          // Held open while the request runs, so its outcome still has somewhere to show.
+          onClose={resetDemo.isPending ? () => {} : closeReset}
+          footer={
+            <>
+              <View style={styles.grow}>
+                <Button
+                  title={s.safety.cancel}
+                  variant="quiet"
+                  disabled={resetDemo.isPending}
+                  onPress={closeReset}
+                />
+              </View>
+              <View style={styles.grow}>
+                <Button
+                  title={s.me.resetDemoConfirm}
+                  loading={resetDemo.isPending}
+                  disabled={resetDemo.isPending}
+                  onPress={() =>
+                    resetDemo.mutate(undefined, {
+                      onSuccess: () => {
+                        closeReset();
+                        notice({ title: s.me.resetDemoDone });
+                      },
+                    })
+                  }
+                />
+              </View>
+            </>
+          }>
+          <Text style={[type.body, { color: c.textMuted }]}>{s.me.resetDemoBody}</Text>
+          {resetDemo.error ? (
+            <Text accessibilityRole="alert" style={[type.body, { color: c.danger }]}>
+              {errorMessage(resetDemo.error, s)}
+            </Text>
+          ) : null}
         </Sheet>
       ) : null}
     </View>
@@ -202,4 +259,5 @@ const styles = StyleSheet.create({
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   separated: { paddingTop: space.lg, borderTopWidth: StyleSheet.hairlineWidth },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  grow: { flex: 1 },
 });

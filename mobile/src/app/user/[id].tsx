@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useDecide, useProfile, useReviews } from '@/api/hooks';
+import { useDecide, useProfile, useReviews, useSentRequests } from '@/api/hooks';
 import { DAYS, LIFE_ICON, roleName, STYLE_ICON, TIMES_OF_DAY } from '@/api/labels';
 import { ActionError } from '@/components/ActionError';
 import { AuthedImage } from '@/components/AuthedImage';
@@ -34,6 +34,9 @@ export default function Profile() {
   const { data, isPending, error, refetch } = useProfile(id);
   const { interest, pass, undoPass } = useDecide();
   const busy = interest.isPending || pass.isPending;
+  // Already asked and still waiting: the server answers a second ask with 409, and a pass then
+  // changes nothing. shortcut: only the loaded pages of the list count, enough for a demo-sized one.
+  const asked = useSentRequests().items.some((card) => card.id === id);
   const notice = useNotice();
   const [safety, setSafety] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
@@ -233,21 +236,27 @@ export default function Profile() {
           <ActionError error={interest.error ?? pass.error} />
 
           <View style={styles.barRow}>
-            <IconButton
-              name="close"
-              label={s.profileCard.passOn(data?.name ?? '')}
-              tint={c.textMuted}
-              disabled={busy}
-              onPress={passOn}
-            />
-            <View style={styles.barItem}>
-              <Button
-                title={s.profile.ask}
-                icon="chatbubble-ellipses-outline"
-                loading={interest.isPending}
+            {asked ? null : (
+              <IconButton
+                name="close"
+                label={s.profileCard.passOn(data?.name ?? '')}
+                tint={c.textMuted}
                 disabled={busy}
-                onPress={ask}
+                onPress={passOn}
               />
+            )}
+            <View style={styles.barItem}>
+              {asked ? (
+                <Button title={s.profile.askedWaiting} icon="time-outline" disabled onPress={() => {}} />
+              ) : (
+                <Button
+                  title={s.profile.ask}
+                  icon="chatbubble-ellipses-outline"
+                  loading={interest.isPending}
+                  disabled={busy}
+                  onPress={ask}
+                />
+              )}
             </View>
           </View>
         </View>
